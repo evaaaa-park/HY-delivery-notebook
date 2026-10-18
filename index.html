@@ -1,0 +1,1540 @@
+<title>헬리오 배달수첩</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: phone-first app shell. Sticky header, one scrolling view, fixed bottom tabs, bottom sheets for edits. Wide screens center a 1080px column. */
+:root{
+  --bg:#F1F3F7; --surface:#FFFFFF; --sunk:#E7EBF2; --ink:#121823; --muted:#596377; --line:#D9DFE8;
+  --accent:#2F54EB; --accent-ink:#FFFFFF; --accent-soft:#E4EAFF;
+  --ok:#1C8248; --ok-soft:#DFF2E6; --warn:#9E5E00; --warn-soft:#FFEFD2; --bad:#C2362C; --bad-soft:#FCE5E2;
+  --plate:#EBEFF5; --plate-ink:#1B2433;
+  --shadow:0 1px 2px rgba(18,24,35,.06),0 6px 18px rgba(18,24,35,.07);
+  --f-display:"Do Hyeon","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:12px; --nav-h:62px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E121A; --surface:#161B25; --sunk:#1D2330; --ink:#E7EBF3; --muted:#97A1B4; --line:#2A3241;
+  --accent:#819BFF; --accent-ink:#0A0F1F; --accent-soft:#1E2847;
+  --ok:#52C483; --ok-soft:#143021; --warn:#F2B24C; --warn-soft:#33260E; --bad:#FF7D71; --bad-soft:#3A1917;
+  --plate:#222A38; --plate-ink:#E2E8F2; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E121A; --surface:#161B25; --sunk:#1D2330; --ink:#E7EBF3; --muted:#97A1B4; --line:#2A3241;
+  --accent:#819BFF; --accent-ink:#0A0F1F; --accent-soft:#1E2847;
+  --ok:#52C483; --ok-soft:#143021; --warn:#F2B24C; --warn-soft:#33260E; --bad:#FF7D71; --bad-soft:#3A1917;
+  --plate:#222A38; --plate-ink:#E2E8F2; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+body.noscroll{overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{text-wrap:balance;margin:0}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:10px;height:60px}
+.brand{font-family:var(--f-display);font-size:23px;letter-spacing:.01em;line-height:1}
+.brand small{display:block;font-family:var(--f-body);font-size:12px;color:var(--muted);letter-spacing:0;margin-top:4px}
+.top .sp{flex:1}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:4px 9px;border:1px solid var(--line);border-radius:99px;background:var(--surface);white-space:nowrap}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.sync.db i{background:var(--ok)} .sync.saving i{background:var(--warn)} .sync.local i{background:var(--warn)}
+.iconbtn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.iconbtn svg{width:20px;height:20px}
+
+main{padding-block:16px calc(var(--nav-h) + 96px + env(safe-area-inset-bottom,0px))}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav .wrap{display:grid;grid-template-columns:repeat(4,1fr);height:var(--nav-h)}
+.nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;color:var(--muted);position:relative}
+.nav button svg{width:22px;height:22px}
+.nav button[aria-current="page"]{color:var(--accent);font-weight:600}
+.nav .dot{position:absolute;top:8px;left:calc(50% + 8px);min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font-size:10.5px;line-height:17px;font-weight:700}
+.fab{position:fixed;z-index:24;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(var(--nav-h) + 14px + env(safe-area-inset-bottom,0px));height:52px;padding:0 20px 0 16px;border-radius:26px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
+.fab svg{width:22px;height:22px}
+.fab[hidden]{display:none}
+
+/* common */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.sec{display:grid;gap:12px;margin-bottom:22px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.sec-h h2{font-family:var(--f-display);font-size:21px;font-weight:400}
+.eyebrow{font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;white-space:nowrap}
+.btn.sm{min-height:32px;padding:0 10px;font-size:13px;border-radius:8px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn svg{width:16px;height:16px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:13.5px;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip b{font-weight:600;margin-left:4px;font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--sunk);color:var(--muted);white-space:nowrap;line-height:1.5}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.badge.acc{background:var(--accent-soft);color:var(--accent)}
+.badge.t-adhoc{background:var(--accent-soft);color:var(--accent)}
+.badge.t-sample{background:var(--warn-soft);color:var(--warn)}
+.badge.t-fredit{background:color-mix(in srgb,#8A4FD8 16%,var(--surface));color:color-mix(in srgb,#8A4FD8 80%,var(--ink))}
+.plate{display:inline-flex;align-items:center;font-family:var(--f-mono);font-weight:600;font-size:13px;background:var(--plate);color:var(--plate-ink);border:1px solid var(--line);border-radius:5px;padding:1px 6px;letter-spacing:.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.plate i{font-style:normal;color:var(--muted);margin:0 2px}
+.pdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:hsl(var(--h,210) 60% 50%);flex:none}
+.empty{padding:28px 18px;text-align:center;color:var(--muted);display:grid;gap:10px;justify-items:center}
+.empty h3{color:var(--ink);font-size:16px}
+input[type=text],input[type=search],input[type=date],input[type=number],input[type=tel],select,textarea{width:100%;min-height:42px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+textarea{min-height:76px;resize:vertical}
+.lbl{font-size:13px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px}
+.field{display:grid;gap:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.seg{display:flex;background:var(--sunk);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:8px;padding:7px 8px;font-size:13.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);flex:none}
+.stepper button{width:32px;height:30px;border:0;background:none;font-size:18px;line-height:1;color:var(--ink)}
+.stepper b{min-width:24px;text-align:center;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.daypick{display:flex;gap:4px}
+.daypick button{width:32px;height:30px;border-radius:7px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;color:var(--muted)}
+.daypick button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* home */
+.hello{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+.hello h1{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1.1}
+.alerts{display:grid;gap:8px}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--warn)}
+.alert.info{border-left-color:var(--accent)}
+.alert.bad{border-left-color:var(--bad)}
+.alert.ok{border-left-color:var(--ok)}
+.alert .t{flex:1;min-width:0}
+.alert .t b{font-weight:600}
+.alert .t small{display:block;color:var(--muted);font-size:12.5px}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kpi{padding:14px;display:grid;gap:6px;align-content:start}
+.kpi .big{font-family:var(--f-display);font-size:34px;line-height:1}
+.kpi .big small{font-size:17px;color:var(--muted);margin-left:2px}
+.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .3s}
+.recent{display:grid}
+.recent .it{display:flex;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.recent .it:first-child{border-top:0}
+.recent .it .t{flex:1;min-width:0}
+.recent .it .t div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* customers */
+.ctool{display:grid;gap:10px;margin-bottom:12px}
+.ctool .srch{display:flex;gap:8px}
+.ctool .srch input{flex:1;min-width:0}
+.clist{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:760px){.clist{grid-template-columns:1fr 1fr}}
+@media (min-width:1060px){.clist{grid-template-columns:1fr 1fr 1fr}}
+.ccard{display:flex;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;min-width:0}
+.ccard.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ccard .pick{display:grid;place-items:start center;padding:14px 4px 0 12px;cursor:pointer}
+.ccard .pick input{width:20px;height:20px;accent-color:var(--accent)}
+.cbody{flex:1;min-width:0;padding:11px 12px 11px 8px;display:grid;gap:7px}
+.chead{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cname{border:0;background:none;padding:0;font-weight:700;font-size:16px;text-align:left}
+.cname:hover{text-decoration:underline}
+.cloc{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:13.5px}
+.ritems{display:grid;gap:5px}
+.ritem{display:flex;align-items:center;gap:7px;font-size:14px}
+.ritem .pn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ritem .dd{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+.ritem.zero .pn{color:var(--muted);text-decoration:line-through}
+.cmeta{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.cnote{font-size:13px;color:var(--muted);background:var(--sunk);border-radius:7px;padding:5px 8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.ccard.paused{background:color-mix(in srgb,var(--warn-soft) 45%,var(--surface))}
+.ccard.inactive{opacity:.55}
+.bulkbar{position:fixed;left:0;right:0;z-index:26;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg)}
+.bulkbar .wrap{display:flex;align-items:center;gap:10px;padding-block:9px}
+.bulkbar .n{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bulkbar .acts{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+.bulkbar .acts::-webkit-scrollbar{display:none}
+.bulkbar button{flex:none;border:1px solid color-mix(in srgb,var(--bg) 30%,transparent);background:transparent;color:var(--bg);border-radius:8px;padding:6px 11px;font-size:13.5px;font-weight:600;white-space:nowrap}
+.bulkbar button.x{border:0;padding:6px 8px}
+
+/* order sheet (T-2) */
+.ohead{display:grid;gap:10px;margin-bottom:12px}
+.datenav{display:flex;align-items:center;gap:8px}
+.datenav .d{flex:1;text-align:center;font-family:var(--f-display);font-size:24px;line-height:1.1}
+.datenav .d small{display:block;font-family:var(--f-body);font-size:12.5px;color:var(--muted);margin-top:3px}
+.tblwrap{overflow-x:auto}
+table.ot{width:100%;border-collapse:collapse;font-size:14px}
+.ot th{font-size:12px;color:var(--muted);font-weight:600;text-align:right;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ot th:first-child{text-align:left}
+.ot td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle}
+.ot td:first-child{text-align:left}
+.ot tr.prow{cursor:pointer}
+.ot tr.prow:hover td{background:var(--sunk)}
+.ot .pname{display:flex;gap:7px;align-items:center;min-width:0}
+.ot .pname small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3}
+.ot .buy{font-family:var(--f-display);font-size:22px;color:var(--accent);line-height:1}
+.ot .buy.zero{color:var(--muted)}
+.ot input{width:62px;min-height:34px;text-align:right;padding:4px 8px;font-variant-numeric:tabular-nums}
+.ot tr.detail td{background:var(--sunk);text-align:left;padding:8px 12px}
+.ot tfoot td{font-weight:700;border-bottom:0}
+.diff{font-size:12px;font-weight:700;margin-left:4px}
+.diff.up{color:var(--bad)} .diff.dn{color:var(--ok)}
+.brk{display:grid;gap:4px;font-size:13px}
+.brk div{display:flex;gap:8px;align-items:center}
+.brk div span:nth-child(2){flex:1;min-width:0}
+
+/* route */
+.rhead{position:sticky;top:calc(env(safe-area-inset-top,0px) + 61px);z-index:15;background:var(--bg);padding-block:4px 10px;display:grid;gap:10px;margin-bottom:6px}
+.prog{display:flex;align-items:center;gap:10px;font-size:13.5px}
+.prog .bar{flex:1}
+.rlist{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.rrow{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 8px 9px 4px;margin-top:8px;touch-action:pan-y;position:relative}
+.rrow.newb{margin-top:26px}
+.rrow.newb::before{content:attr(data-b);position:absolute;left:4px;top:-21px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.rrow.next{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.rrow.done{background:transparent}
+.rrow.done .rinfo{opacity:.5}
+.rrow.done .rname{text-decoration:line-through}
+.rrow.dragging{box-shadow:var(--shadow);border-color:var(--accent);z-index:5;opacity:.96}
+.handle{width:30px;align-self:stretch;border:0;background:none;color:var(--muted);touch-action:none;cursor:grab;display:grid;place-items:center;flex:none}
+.handle svg{width:16px;height:16px}
+.seq{min-width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--sunk);font-family:var(--f-mono);font-weight:600;font-size:13px;flex:none}
+.rinfo{flex:1;min-width:0;display:grid;gap:4px}
+.rtop{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rname{font-weight:700}
+.rits{display:flex;gap:5px;flex-wrap:wrap}
+.it-chip{display:inline-flex;align-items:center;gap:5px;font-size:13px;padding:2px 8px 2px 6px;border-radius:6px;background:var(--sunk);white-space:nowrap}
+.it-chip b{font-family:var(--f-mono);font-weight:600}
+.it-chip.adhoc{background:var(--accent-soft)} .it-chip.sample{background:var(--warn-soft)} .it-chip.fredit{background:color-mix(in srgb,#8A4FD8 16%,var(--surface))}
+.rflags{display:flex;gap:5px;flex-wrap:wrap}
+.rnote{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.check{width:46px;height:46px;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none;color:transparent}
+.check svg{width:22px;height:22px}
+.check[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.mapsec{display:grid;gap:8px;margin-bottom:16px}
+.mapsec h3{font-size:13px;color:var(--muted);letter-spacing:.04em}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:6px}
+.tile{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 4px;display:grid;gap:2px;justify-items:center;min-height:58px}
+.tile .bn{font-family:var(--f-mono);font-weight:600;font-size:14px}
+.tile .cnt{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tile.none{opacity:.45;background:transparent}
+.tile.pend{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.tile.pend .cnt{color:var(--accent);font-weight:600}
+.tile.full{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}
+.tile.full .cnt{color:var(--ok);font-weight:600}
+.tile[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}
+.fplan{padding:12px;display:grid;gap:12px}
+.ents{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.ent h4{margin:0 0 6px;font-size:12.5px;color:var(--muted)}
+.floors{display:grid;gap:4px}
+.fl{display:grid;grid-template-columns:34px repeat(var(--cols),minmax(0,1fr));gap:4px;align-items:stretch}
+.fl .fn{font-family:var(--f-mono);font-size:12px;color:var(--muted);display:grid;place-items:center}
+.cell{border:1px dashed var(--line);border-radius:7px;min-height:40px;font-size:12px;padding:3px 5px;display:grid;align-content:center;text-align:left;background:transparent;min-width:0}
+.cell.has{border-style:solid;background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.cell.has.done{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}
+.cell .u{font-family:var(--f-mono);font-weight:600}
+.cell .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gap{font-size:11px;color:var(--muted);text-align:center}
+
+/* settings */
+.slist{display:grid}
+.slist .it{display:flex;gap:8px;align-items:center;padding:8px 10px;border-top:1px solid var(--line)}
+.slist .it:first-child{border-top:0}
+.slist .it .t{flex:1;min-width:0}
+.prodedit{display:grid;grid-template-columns:1.3fr .8fr 1.5fr auto;gap:6px;align-items:center;padding:8px 10px;border-top:1px solid var(--line)}
+.prodedit:first-child{border-top:0}
+.prodedit input{min-height:36px;font-size:13.5px}
+@media (max-width:560px){.prodedit{grid-template-columns:1fr 1fr}.prodedit .on{grid-column:1/-1}}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-top:1px solid var(--line)}
+.chk:first-child{border-top:0}
+.chk input{width:19px;height:19px;margin-top:2px;accent-color:var(--accent)}
+.chk small{display:block;color:var(--muted);font-size:12.5px}
+
+/* sheet */
+#sheet{position:fixed;inset:0;z-index:40}
+.backdrop{position:absolute;inset:0;background:rgba(8,12,20,.45)}
+.panel{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow-y:auto;background:var(--bg);border-radius:18px 18px 0 0;padding:6px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:14px;align-content:start;overscroll-behavior:contain}
+@media (min-width:700px){.panel{left:50%;right:auto;width:600px;transform:translateX(-50%);bottom:24px;border-radius:18px;max-height:calc(100% - 48px)}}
+.panel::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 0}
+.sh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sh h2{font-family:var(--f-display);font-weight:400;font-size:22px}
+.sact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom,0px));background:var(--bg);padding-block:10px;margin-bottom:-10px}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.warnbox{font-size:13.5px;padding:10px 12px;border-radius:9px;background:var(--warn-soft);color:var(--warn)}
+.infobox{font-size:13.5px;padding:10px 12px;border-radius:9px;background:var(--accent-soft);color:var(--accent)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
+.pcell{display:flex;align-items:center;gap:7px;padding:6px 6px 6px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);min-width:0}
+.pcell.on{border-color:var(--accent);background:var(--accent-soft)}
+.pcell span.n{flex:1;min-width:0;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.results{display:grid;gap:4px;max-height:220px;overflow-y:auto}
+.res{display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);text-align:left;width:100%}
+.res .t{flex:1;min-width:0}
+.picked{display:flex;flex-wrap:wrap;gap:6px}
+.picked .chip{display:inline-flex;gap:6px;align-items:center;background:var(--accent-soft);border-color:transparent;color:var(--accent);font-weight:600}
+.picked .chip button{border:0;background:none;padding:0;color:inherit;font-size:16px;line-height:1}
+.regedit{display:grid;gap:8px}
+.regrow{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.regrow .r2{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;grid-column:1/-1}
+.aires{display:grid;gap:6px}
+.aires label{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.aires input[type=checkbox]{width:18px;height:18px;margin-top:2px;accent-color:var(--accent)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + 80px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.toast button{border:0;background:none;color:var(--accent);font-weight:700;filter:brightness(1.4)}
+.banner{font-size:13px;padding:9px 12px;border-radius:9px;background:var(--warn-soft);color:var(--warn);margin-bottom:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="brand">헬리오 배달수첩<small id="hdate"></small></div>
+  <div class="sp"></div>
+  <span class="sync" id="sync"><i></i><span>불러오는 중</span></span>
+  <button class="iconbtn" data-act="tab" data-tab="settings" aria-label="설정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</div></header>
+
+<main><div class="wrap" id="view"></div></main>
+
+<button class="fab" id="fab" data-act="newOrder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>주문</button>
+<div id="bulk"></div>
+
+<nav class="nav" aria-label="화면"><div class="wrap">
+  <button data-act="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>오늘</button>
+  <button data-act="tab" data-tab="customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/></svg>고객</button>
+  <button data-act="tab" data-tab="order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>발주<span class="dot" id="orderDot" hidden></span></button>
+  <button data-act="tab" data-tab="route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8"/></svg>배달</button>
+</div></nav>
+
+<div id="sheet" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+'use strict';
+/* ================= utilities ================= */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = (p = '') => p + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+const clone = o => JSON.parse(JSON.stringify(o));
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseD = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = parseD(s); d.setDate(d.getDate() + n); return ymd(d); };
+const dow = s => parseD(s).getDay();
+const DL = ['일', '월', '화', '수', '목', '금', '토'];
+const fmt = s => { if (!s) return ''; const d = parseD(s); return `${d.getMonth() + 1}/${d.getDate()}(${DL[d.getDay()]})`; };
+const fmtShort = s => { if (!s) return ''; const d = parseD(s); return `${d.getMonth() + 1}/${d.getDate()}`; };
+const TODAY = () => ymd(new Date());
+const MONTH = () => TODAY().slice(0, 7);
+const daysBetween = (a, b) => Math.round((parseD(b) - parseD(a)) / 86400000);
+const ICON = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  grip: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.4"/><circle cx="11" cy="3" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="13" r="1.4"/><circle cx="11" cy="13" r="1.4"/></svg>',
+  left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 5-7 7 7 7"/></svg>',
+  right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+};
+
+/* ================= defaults (app config, not records) ================= */
+const DEFAULT_PRODUCTS = [
+  { id: 'yakult', name: '야쿠르트 라이트', short: '야쿠르트', orderName: '야쿠르트 라이트', hue: 205 },
+  { id: 'will_lf', name: '윌 저지방', short: '윌저', orderName: '윌 저지방', hue: 150 },
+  { id: 'will_org', name: '윌 오리지널', short: '윌', orderName: '윌 오리지널', hue: 120 },
+  { id: 'will_bal', name: '윌 당밸런스', short: '윌당', orderName: '윌 당밸런스', hue: 90 },
+  { id: 'helico', name: '헬리코박터 프로젝트 윌', short: '헬리코', orderName: '헬리코박터 프로젝트 윌', hue: 175 },
+  { id: 'kupers', name: '쿠퍼스', short: '쿠퍼스', orderName: '쿠퍼스', hue: 20 },
+  { id: 'mpro3', name: 'MPRO3', short: '엠프로', orderName: 'MPRO3', hue: 260 },
+  { id: 'mech', name: '메치니코프', short: '메치', orderName: '메치니코프', hue: 330 },
+  { id: 'haru', name: '하루야채 오리지널', short: '하루', orderName: '하루야채 오리지널', hue: 55 },
+  { id: 'haru_kg', name: '하루야채키즈 포도', short: '키즈포도', orderName: '하루야채 유기농 포도비트', hue: 290 },
+  { id: 'haru_ko', name: '하루야채키즈 오렌지', short: '키즈오렌지', orderName: '하루야채 유기농 오렌지당근', hue: 35 },
+];
+const r4 = []; for (let b = 401; b <= 421; b++) if (b !== 415) r4.push(String(b));
+const DEFAULT_ROUTE = ['415', '주민센터', ...r4, '경로당', '204', '213', '2보안실', '상가B'];
+const DEFAULT_CONFIG = {
+  products: DEFAULT_PRODUCTS, routeOrder: DEFAULT_ROUTE, leadDays: 2, leadMode: 'business',
+  deliveryDays: [1, 2, 3, 4, 5], holidays: [], floorDir: 'desc',
+  purchase: { regular: true, adhoc: true, sample: false, fredit: false },
+  stock: {}, baseSeq: null, v: 1,
+};
+const TYPES = ['regular', 'adhoc', 'sample', 'fredit'];
+const TYPE_NAME = { regular: '정기', adhoc: '추가', sample: '샘플', fredit: 'Fredit' };
+const PAY = { card: '카드자동이체', account: '계좌자동이체', cash: '현금' };
+const LOC_TYPES = { apt: '아파트 세대', office: '관리·미화실', security: '보안실', store: '상가', community: '주민센터·경로당' };
+
+/* ================= state ================= */
+let S = { customers: [], orders: [], config: clone(DEFAULT_CONFIG), days: {} };
+const UI = {
+  tab: 'home', custQ: '', custF: 'all', selected: new Set(),
+  routeDate: null, routeMode: 'list', hideDone: false, mapB: null,
+  orderDate: null, openP: null,
+};
+const LS_KEY = 'helio-delivery-v1';
+const LS_UI = 'helio-delivery-ui';
+const DOCS = ['customers', 'orders', 'config', 'days'];
+const store = { db: null, mode: 'loading', refs: {}, dirty: {}, timers: {}, writing: {}, again: {}, last: {}, loaded: {}, localHad: {} };
+let sampleFn = null, sampleImages = false, downloadsNs = null;
+
+function normCust(c) {
+  c = c || {};
+  return {
+    id: c.id || uid('c_'), name: c.name || '', contractNo: c.contractNo || '', phone: c.phone || '',
+    loc: { type: c.loc?.type || 'apt', building: String(c.loc?.building ?? ''), unit: String(c.loc?.unit ?? ''), label: c.loc?.label || '' },
+    course: c.course ?? null, slot: c.slot || '',
+    regular: (c.regular || []).filter(r => r && r.productId).map(r => ({ productId: r.productId, qty: Math.max(0, +r.qty || 0), days: (r.days && r.days.length ? r.days : [1, 2, 3, 4, 5]).map(Number) })),
+    payment: c.payment || 'card', member: !!c.member, bill: c.bill || 'mobile', ice: !!c.ice, bag: !!c.bag,
+    notes: c.notes || '', pauses: (c.pauses || []).filter(p => p && p.from && p.to).map(p => ({ id: p.id || uid('p_'), from: p.from, to: p.to, reason: p.reason || '', ack: !!p.ack })),
+    paidMonth: c.paidMonth || '', tags: Array.isArray(c.tags) ? c.tags : [], active: c.active !== false, createdAt: c.createdAt || Date.now(),
+  };
+}
+function normOrder(o) {
+  return {
+    id: o.id || uid('o_'), type: TYPES.includes(o.type) && o.type !== 'regular' ? o.type : 'adhoc',
+    customerId: o.customerId || null, name: o.name || '', loc: o.loc ? { type: o.loc.type || 'apt', building: String(o.loc.building ?? ''), unit: String(o.loc.unit ?? ''), label: o.loc.label || '' } : null,
+    date: o.date, items: (o.items || []).filter(i => i && i.productId && +i.qty > 0).map(i => ({ productId: i.productId, qty: +i.qty })),
+    note: o.note || '', status: o.status === 'cancelled' ? 'cancelled' : 'open', createdAt: o.createdAt || Date.now(), tags: Array.isArray(o.tags) ? o.tags : [],
+  };
+}
+function normConfig(b) {
+  b = b || {};
+  const c = { ...clone(DEFAULT_CONFIG), ...b };
+  c.purchase = { ...DEFAULT_CONFIG.purchase, ...(b.purchase || {}) };
+  c.stock = b.stock && typeof b.stock === 'object' ? { ...b.stock } : {};
+  if (!Array.isArray(c.products) || !c.products.length) c.products = clone(DEFAULT_PRODUCTS);
+  if (!Array.isArray(c.routeOrder) || !c.routeOrder.length) c.routeOrder = clone(DEFAULT_ROUTE);
+  if (!Array.isArray(c.deliveryDays)) c.deliveryDays = [1, 2, 3, 4, 5];
+  if (!Array.isArray(c.holidays)) c.holidays = [];
+  return c;
+}
+const custById = id => S.customers.find(c => c.id === id);
+const prodById = id => S.config.products.find(p => p.id === id);
+const pName = id => prodById(id)?.name || id;
+const pShort = id => prodById(id)?.short || prodById(id)?.name || id;
+const pHue = id => prodById(id)?.hue ?? 210;
+
+/* ================= persistence ================= */
+function bodyOf(n) { if (n === 'customers') return { list: S.customers }; if (n === 'orders') return { list: S.orders }; if (n === 'days') return { map: S.days }; return S.config; }
+function applyBody(n, b) {
+  if (n === 'customers') S.customers = (b.list || []).map(normCust);
+  else if (n === 'orders') S.orders = (b.list || []).map(normOrder);
+  else if (n === 'days') S.days = b.map || {};
+  else S.config = normConfig(b);
+}
+function stable(v) { return JSON.stringify(v, (k, x) => (x && typeof x === 'object' && !Array.isArray(x)) ? Object.keys(x).sort().reduce((o, kk) => (o[kk] = x[kk], o), {}) : x); }
+function cacheLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { } }
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(LS_KEY); if (!raw) return;
+    const o = JSON.parse(raw);
+    if (o.customers) { S.customers = o.customers.map(normCust); store.localHad.customers = S.customers.length > 0; }
+    if (o.orders) { S.orders = o.orders.map(normOrder); store.localHad.orders = S.orders.length > 0; }
+    if (o.config) { S.config = normConfig(o.config); store.localHad.config = true; }
+    if (o.days) { S.days = o.days; store.localHad.days = Object.keys(o.days).length > 0; }
+  } catch (e) { }
+  try { const u = JSON.parse(localStorage.getItem(LS_UI) || '{}'); if (u.tab) UI.tab = u.tab; if (u.routeMode) UI.routeMode = u.routeMode; UI.hideDone = !!u.hideDone; } catch (e) { }
+}
+function saveUI() { try { localStorage.setItem(LS_UI, JSON.stringify({ tab: UI.tab, routeMode: UI.routeMode, hideDone: UI.hideDone })); } catch (e) { } }
+function save(...names) {
+  prune();
+  cacheLocal();
+  if (!store.db) return;
+  for (const n of names) {
+    store.dirty[n] = true; clearTimeout(store.timers[n]);
+    store.timers[n] = setTimeout(() => flush(n), 450);
+  }
+  renderSync();
+}
+async function flush(n) {
+  if (store.writing[n]) { store.again[n] = true; return; }
+  store.writing[n] = true; renderSync();
+  let retry = false;
+  try {
+    const body = JSON.parse(JSON.stringify(bodyOf(n)));
+    store.last[n] = stable(body);
+    await store.refs[n].set(body);
+  } catch (e) {
+    const code = e && e.code;
+    if (code === 'unavailable' && !store.retried) { store.retried = true; retry = true; }
+    else if (code === 'quota_exceeded') toast('저장 공간이 가득 찼어요. 설정 > 데이터에서 지난 기록을 정리해 주세요.');
+    else if (code === 'invalid_argument') { toast('저장 권한이 없어요. 이 기기에만 보관할게요.'); store.db = null; store.mode = 'local'; }
+    else if (code === 'revoked') { store.db = null; store.mode = 'local'; }
+    else toast('서버 저장이 잠시 안 됐어요. 이 기기에는 보관돼 있어요.');
+  } finally {
+    store.writing[n] = false;
+    if (retry) setTimeout(() => { store.retried = false; flush(n); }, 1200 + Math.random() * 1200);
+    else if (store.again[n]) { store.again[n] = false; flush(n); }
+    else store.dirty[n] = false;
+    renderSync();
+  }
+}
+async function initRuntime() {
+  if (!window.claude || typeof window.claude.use !== 'function') { store.mode = 'local'; renderSync(); return; }
+  const [db, user, smp, dl] = await Promise.all([
+    window.claude.use('db').catch(() => null), window.claude.use('user').catch(() => null),
+    window.claude.use('sample').catch(() => null), window.claude.use('downloads').catch(() => null),
+  ]);
+  downloadsNs = dl; sampleFn = smp;
+  if (smp && smp.limits) { try { const l = await smp.limits(); sampleImages = !!l.images; } catch (e) { sampleImages = false; } }
+  let owner = true; try { if (user && typeof user.isOwner === 'function') owner = (await user.isOwner()) !== false; } catch (e) { }
+  if (!db || !owner) { store.mode = owner ? 'local' : 'guest'; renderSync(); render(); return; }
+  store.db = db; store.mode = 'db';
+  for (const n of DOCS) {
+    const ref = db.doc('hy/' + n); store.refs[n] = ref;
+    ref.onSnapshot(snap => {
+      if (store.dirty[n] || store.writing[n]) return;
+      if (!snap.exists) {
+        if (snap.metadata && snap.metadata.fromCache) return;
+        if (!store.loaded[n]) { store.loaded[n] = true; if (store.localHad[n]) save(n); }
+        renderSync(); return;
+      }
+      store.loaded[n] = true;
+      const body = snap.data(); const key = stable(body);
+      if (key === store.last[n]) return;
+      store.last[n] = key; applyBody(n, clone(body)); cacheLocal(); scheduleRender();
+    }, err => { if (err && (err.code === 'revoked' || err.code === 'invalid_argument')) { store.db = null; store.mode = 'local'; renderSync(); } });
+  }
+  renderSync(); render();
+}
+function prune() {
+  const cut = addDays(TODAY(), -60);
+  S.orders = S.orders.filter(o => o.date >= cut);
+  for (const d of Object.keys(S.days)) if (d < cut) delete S.days[d];
+  for (const c of S.customers) c.pauses = c.pauses.filter(p => p.to >= cut);
+}
+function renderSync() {
+  const el = $('#sync'); if (!el) return;
+  const saving = Object.values(store.dirty).some(Boolean) || Object.values(store.writing).some(Boolean);
+  let cls = 'local', txt = '이 기기에 저장';
+  if (store.mode === 'loading') { cls = ''; txt = '불러오는 중'; }
+  else if (store.db) { cls = saving ? 'saving' : 'db'; txt = saving ? '저장 중' : '동기화됨'; }
+  else if (store.mode === 'guest') { txt = '보기 전용'; }
+  el.className = 'sync ' + cls; el.lastElementChild.textContent = txt;
+}
+let renderQueued = false;
+function scheduleRender() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
+
+/* ================= calendar logic ================= */
+const isHoliday = d => S.config.holidays.some(h => h.date === d);
+const holidayName = d => S.config.holidays.find(h => h.date === d)?.name || '휴무';
+const isWorkday = d => { const w = dow(d); return w >= 1 && w <= 5 && !isHoliday(d); };
+const isDeliveryDay = d => S.config.deliveryDays.includes(dow(d)) && !isHoliday(d);
+function nextDeliveryDay(d) { let x = d; for (let i = 0; i < 40; i++) { x = addDays(x, 1); if (isDeliveryDay(x)) return x; } return addDays(d, 1); }
+function prevDeliveryDay(d) { let x = d; for (let i = 0; i < 40; i++) { x = addDays(x, -1); if (isDeliveryDay(x)) return x; } return addDays(d, -1); }
+function orderingDay(today) { if (S.config.leadMode === 'calendar') return today; let x = today; for (let i = 0; i < 20 && !isWorkday(x); i++) x = addDays(x, 1); return x; }
+function targetFrom(day) {
+  const L = Math.max(0, +S.config.leadDays || 0); let x = day;
+  if (S.config.leadMode === 'calendar') x = addDays(day, L);
+  else { let n = 0; for (let i = 0; i < 60 && n < L; i++) { x = addDays(x, 1); if (isWorkday(x)) n++; } }
+  return isDeliveryDay(x) ? x : nextDeliveryDay(x);
+}
+function orderTarget() { return targetFrom(orderingDay(TODAY())); }
+function orderDayFor(t) {
+  const L = Math.max(0, +S.config.leadDays || 0);
+  if (S.config.leadMode === 'calendar') return addDays(t, -L);
+  let x = t, n = 0; for (let i = 0; i < 60 && n < L; i++) { x = addDays(x, -1); if (isWorkday(x)) n++; } return x;
+}
+const pauseOn = (c, d) => c.pauses.find(p => p.from <= d && d <= p.to);
+function routeDefaultDate() { const t = TODAY(); return isDeliveryDay(t) ? t : nextDeliveryDay(t); }
+
+/* ================= location & route ================= */
+function parseUnit(u) {
+  u = String(u || '').trim(); let m;
+  if ((m = u.match(/^(\d{3,4})$/))) { const n = +m[1]; return { floor: Math.floor(n / 100), line: n % 100 }; }
+  if ((m = u.match(/^B\s?(\d+)/i)) || (m = u.match(/지하\s?(\d+)/))) return { floor: -(+m[1]), line: 0 };
+  if ((m = u.match(/^(\d+)\s*층/))) return { floor: +m[1], line: 0 };
+  return { floor: null, line: 0 };
+}
+const isNumB = b => /^\d+$/.test(String(b || ''));
+const bldName = b => isNumB(b) ? b + '동' : ({ '상가B': '상가 B동', '2보안실': '상가 2보안실', '주민센터': '가락1동 주민센터', '경로당': '4단지 경로당' }[b] || b || '위치 없음');
+function locText(loc) {
+  if (!loc) return '';
+  if (loc.label) return loc.label;
+  if (isNumB(loc.building)) return `${loc.building}동 ${loc.unit}${isNumB(loc.unit) ? '호' : ''}`.trim();
+  return [bldName(loc.building), loc.unit].filter(Boolean).join(' ');
+}
+const plate = loc => `<span class="plate">${esc(loc?.building || '—')}${loc?.unit ? `<i>-</i>${esc(loc.unit)}` : ''}</span>`;
+function seriesOf(b) { b = String(b || ''); if (/^\d{3}$/.test(b)) return b[0] + '단지'; return '상가·기타'; }
+function autoKey(loc) {
+  const order = S.config.routeOrder; const b = loc?.building || '';
+  let r = order.indexOf(b); if (r < 0) r = order.length + (parseInt(b) || 999);
+  const { floor, line } = parseUnit(loc?.unit);
+  const ent = line ? Math.ceil(line / 2) : 0;
+  let f = 0; if (floor != null) f = floor < 0 ? -10000 + floor : (S.config.floorDir === 'desc' ? -floor : floor);
+  return [r, ent, f, line, String(loc?.unit || '')];
+}
+function cmpKey(a, b) { for (let i = 0; i < a.length; i++) { if (a[i] < b[i]) return -1; if (a[i] > b[i]) return 1; } return 0; }
+const sortAuto = list => list.map(x => ({ x, k: autoKey(x.loc) })).sort((a, b) => cmpKey(a.k, b.k)).map(o => o.x);
+function mergeSeq(ref, seq) {
+  if (!seq || !seq.length) return ref.slice();
+  const byKey = new Map(ref.map((x, i) => [x.key, { x, i }]));
+  const res = []; const used = new Set();
+  for (const k of seq) { const e = byKey.get(k); if (e && !used.has(k)) { res.push(e); used.add(k); } }
+  ref.forEach((x, i) => {
+    if (used.has(x.key)) return;
+    let pos = 0; for (let j = 0; j < res.length; j++) if (res[j].i < i) pos = j + 1;
+    res.splice(pos, 0, { x, i });
+  });
+  return res.map(e => e.x);
+}
+function ensureRouteOrder() {
+  const order = S.config.routeOrder; let changed = false;
+  const blds = new Set();
+  S.customers.forEach(c => c.loc.building && blds.add(c.loc.building));
+  S.orders.forEach(o => o.loc?.building && blds.add(o.loc.building));
+  for (const b of blds) {
+    if (order.includes(b)) continue; changed = true;
+    let pos = -1;
+    if (/^\d{3}$/.test(b)) {
+      const same = order.map((x, i) => [x, i]).filter(([x]) => /^\d{3}$/.test(x) && x[0] === b[0]);
+      if (same.length) { const sm = same.filter(([x]) => +x < +b); pos = sm.length ? sm[sm.length - 1][1] + 1 : same[0][1] + 1; }
+    }
+    if (pos < 0) { const l = order.indexOf('상가B'); pos = l >= 0 ? l : order.length; }
+    order.splice(pos, 0, b);
+  }
+  return changed;
+}
+
+/* ================= stops, demand ================= */
+function stopsFor(date) {
+  const map = new Map(); const w = dow(date);
+  const regularDay = S.config.deliveryDays.includes(w) && !isHoliday(date);
+  if (regularDay) for (const c of S.customers) {
+    if (!c.active || pauseOn(c, date)) continue;
+    const items = c.regular.filter(r => r.qty > 0 && r.days.includes(w));
+    if (items.length) map.set(c.id, { key: c.id, cust: c, items: items.map(r => ({ pid: r.productId, qty: r.qty, type: 'regular' })), orders: [] });
+  }
+  for (const o of S.orders) {
+    if (o.date !== date || o.status === 'cancelled') continue;
+    const c = o.customerId ? custById(o.customerId) : null;
+    const key = c ? c.id : 'o:' + o.id;
+    let st = map.get(key);
+    if (!st) { st = { key, cust: c, items: [], orders: [] }; map.set(key, st); }
+    st.orders.push(o);
+    o.items.forEach(it => st.items.push({ pid: it.productId, qty: it.qty, type: o.type }));
+  }
+  return [...map.values()].map(st => ({ ...st, loc: st.cust ? st.cust.loc : (st.orders[0]?.loc || { building: '', unit: '' }), name: st.cust ? st.cust.name : (st.orders[0]?.name || '이름 없음') }));
+}
+function orderedStops(date) {
+  let ref = sortAuto(stopsFor(date));
+  if (S.config.baseSeq) ref = mergeSeq(ref, S.config.baseSeq);
+  const day = S.days[date]; if (day?.seq) ref = mergeSeq(ref, day.seq);
+  return ref;
+}
+function demand(date) {
+  const res = {};
+  for (const st of stopsFor(date)) for (const it of st.items) {
+    const r = res[it.pid] || (res[it.pid] = { regular: 0, adhoc: 0, sample: 0, fredit: 0, rows: [] });
+    r[it.type] += it.qty; r.rows.push({ name: st.name, loc: st.loc, qty: it.qty, type: it.type });
+  }
+  return res;
+}
+function sheetFor(date) {
+  const d = demand(date), P = S.config.purchase;
+  const rows = S.config.products.map(p => {
+    const r = d[p.id] || { regular: 0, adhoc: 0, sample: 0, fredit: 0, rows: [] };
+    const need = TYPES.reduce((s, t) => s + (P[t] ? r[t] : 0), 0);
+    const stock = Math.max(0, +(S.config.stock[p.id] || 0));
+    return { p, r, need, stock, buy: Math.max(0, need - stock), excl: TYPES.reduce((s, t) => s + (!P[t] ? r[t] : 0), 0) };
+  });
+  // products that appear in orders but are no longer in the catalog
+  for (const pid of Object.keys(d)) if (!prodById(pid)) { const r = d[pid]; const need = TYPES.reduce((s, t) => s + (P[t] ? r[t] : 0), 0); rows.push({ p: { id: pid, name: pid, short: pid, orderName: pid, hue: 0 }, r, need, stock: 0, buy: need, excl: 0 }); }
+  return rows;
+}
+function confirmDiff(date, rows) {
+  const conf = S.days[date]?.confirmed; if (!conf) return null;
+  const out = []; const seen = new Set();
+  for (const r of rows) { seen.add(r.p.id); const c = +conf[r.p.id] || 0; if (r.buy !== c) out.push({ id: r.p.id, name: r.p.name, d: r.buy - c }); }
+  for (const pid of Object.keys(conf)) if (!seen.has(pid) && +conf[pid]) out.push({ id: pid, name: pName(pid), d: -conf[pid] });
+  return out;
+}
+
+/* ================= alerts ================= */
+function buildAlerts() {
+  const t = TODAY(); const out = [];
+  for (const c of S.customers) {
+    if (!c.active) continue;
+    for (const p of c.pauses) {
+      if (p.ack) continue;
+      const resume = nextDeliveryDay(p.to);
+      const dd = daysBetween(t, resume);
+      if (dd >= -2 && dd <= 3) out.push({ kind: 'ok', html: `<b>${esc(c.name)}</b> 배달 재개 ${fmt(resume)}`, sub: `${fmtShort(p.from)}–${fmtShort(p.to)} 중지 끝 · 동선과 발주표에 자동으로 다시 들어가요`, act: `<button class="btn sm" data-act="ackPause" data-id="${c.id}" data-p="${p.id}">확인</button>` });
+      const ds = daysBetween(t, p.from);
+      if (ds >= 0 && ds <= 2) out.push({ kind: 'info', html: `<b>${esc(c.name)}</b> ${fmt(p.from)}부터 배달 중지`, sub: `${fmtShort(p.from)}–${fmtShort(p.to)}${p.reason ? ' · ' + esc(p.reason) : ''}` });
+    }
+  }
+  const tgt = orderTarget();
+  for (let d = t; d <= tgt; d = addDays(d, 1)) {
+    const diff = confirmDiff(d, sheetFor(d));
+    if (diff && diff.length) {
+      const txt = diff.map(x => `${esc(x.name)} ${x.d > 0 ? '+' : ''}${x.d}`).join(', ');
+      out.push({ kind: 'bad', html: `<b>${fmt(d)} 발주 확정 후 바뀜</b>`, sub: txt + (d < tgt ? ' · 이미 발주한 날짜라 재고나 지점 추가 요청이 필요해요' : ''), act: `<button class="btn sm" data-act="gotoOrder" data-date="${d}">보기</button>` });
+    }
+  }
+  const dd = routeDefaultDate();
+  for (const d of [dd, nextDeliveryDay(dd)]) {
+    const n = S.orders.filter(o => o.date === d && o.type === 'sample' && o.status === 'open');
+    if (n.length) out.push({ kind: 'info', html: `<b>지점에서 샘플 받아오기</b> ${fmt(d)} 배달분 ${n.length}건`, sub: n.map(o => o.items.map(i => `${pShort(i.productId)}×${i.qty}`).join(' ')).join(' / ') });
+  }
+  for (const d of [dd]) if (isHoliday(d)) out.push({ kind: 'info', html: `<b>${fmt(d)} ${esc(holidayName(d))}</b>`, sub: '정기 배달 없음' });
+  const unpaid = S.customers.filter(c => c.active && c.payment === 'cash' && c.paidMonth !== MONTH());
+  if (unpaid.length) out.push({ kind: 'warn', html: `<b>현금 수금 남은 고객 ${unpaid.length}명</b>`, sub: unpaid.slice(0, 6).map(c => esc(c.name)).join(', ') + (unpaid.length > 6 ? ' 외' : ''), act: `<button class="btn sm" data-act="filterCash">보기</button>` });
+  return out;
+}
+
+/* ================= render: shell ================= */
+function render() {
+  $('#hdate').textContent = (() => { const d = new Date(); return `${d.getMonth() + 1}월 ${d.getDate()}일 ${DL[d.getDay()]}요일`; })();
+  $$('.nav [data-tab]').forEach(b => b.setAttribute('aria-current', b.dataset.tab === UI.tab ? 'page' : 'false'));
+  const v = $('#view');
+  if (UI.tab === 'home') v.innerHTML = renderHome();
+  else if (UI.tab === 'customers') { v.innerHTML = renderCustomers(); renderCustList(); }
+  else if (UI.tab === 'order') v.innerHTML = renderOrder();
+  else if (UI.tab === 'route') v.innerHTML = renderRoute();
+  else if (UI.tab === 'settings') v.innerHTML = renderSettings();
+  $('#fab').hidden = UI.tab === 'settings' || (UI.tab === 'customers' && UI.selected.size > 0);
+  renderBulk();
+  const tgt = orderTarget(); const diffs = [TODAY(), tgt].map(d => confirmDiff(d, sheetFor(d))).filter(x => x && x.length).length;
+  const dot = $('#orderDot'); dot.hidden = !diffs; dot.textContent = diffs;
+  renderSync();
+}
+function storageBanner() {
+  if (store.mode === 'guest') return `<div class="banner">이 수첩의 고객 정보는 소유자에게만 보여요. 여기서 입력하는 내용은 이 기기에만 저장돼요.</div>`;
+  if (store.mode === 'local') return `<div class="banner">지금은 이 브라우저에만 저장돼요. claude.ai에서 로그인한 상태로 열면 휴대폰과 컴퓨터가 같은 데이터를 써요.</div>`;
+  return '';
+}
+
+/* ================= render: home ================= */
+function renderHome() {
+  const t = TODAY(); const dd = routeDefaultDate();
+  const stops = orderedStops(dd); const done = stops.filter(s => S.days[dd]?.done?.[s.key]).length;
+  const items = stops.reduce((s, st) => s + st.items.reduce((a, i) => a + i.qty, 0), 0);
+  const od = orderingDay(t); const tgt = targetFrom(od); const rows = sheetFor(tgt);
+  const buy = rows.reduce((s, r) => s + r.buy, 0); const kinds = rows.filter(r => r.buy > 0).length;
+  const alerts = buildAlerts();
+  const recent = S.orders.slice().sort((a, b) => b.createdAt - a.createdAt).slice(0, 6);
+  if (!S.customers.length && !S.orders.length) {
+    return storageBanner() + `<div class="hello"><h1>배달 준비</h1></div>
+    <div class="card empty"><h3>아직 고객이 없어요</h3><p>정기 고객을 한 명씩 추가하거나, hy 고객관리 앱 화면을 캡처해서 한 번에 가져올 수 있어요. 고객이 생기면 동선과 발주표가 자동으로 만들어져요.</p>
+    <div class="row" style="justify-content:center"><button class="btn pri" data-act="newCust">고객 추가</button><button class="btn" data-act="aiImport" data-mode="customers">화면 캡처로 가져오기</button></div></div>`;
+  }
+  return storageBanner() + `
+  <div class="hello"><div><div class="eyebrow">${dd === t ? '오늘 배달' : '다음 배달'}</div><h1>${fmt(dd)}</h1></div>
+  <button class="btn pri" data-act="tab" data-tab="route">배달 시작</button></div>
+  <div class="sec">
+    <div class="kpis">
+      <div class="card kpi"><span class="eyebrow">배달지</span><span class="big num">${done}<small>/ ${stops.length}</small></span><div class="bar"><i style="width:${stops.length ? done / stops.length * 100 : 0}%"></i></div><span class="muted" style="font-size:13px">제품 ${items}개</span></div>
+      <button class="card kpi" style="text-align:left" data-act="tab" data-tab="order"><span class="eyebrow">${od === t ? '오늘 발주' : '다음 발주 ' + fmtShort(od)}</span><span class="big num">${buy}<small>개</small></span><span class="muted" style="font-size:13px">${fmt(tgt)} 배달분 · ${kinds}종</span></button>
+    </div>
+  </div>
+  ${alerts.length ? `<div class="sec"><div class="sec-h"><h2>알림</h2><span class="muted num" style="font-size:13px">${alerts.length}건</span></div><div class="alerts">${alerts.map(a => `<div class="alert ${a.kind}"><div class="t">${a.html}<small>${a.sub || ''}</small></div>${a.act || ''}</div>`).join('')}</div></div>` : ''}
+  <div class="sec"><div class="sec-h"><h2>최근 들어온 주문</h2><button class="btn sm" data-act="newOrder">+ 주문</button></div>
+    ${recent.length ? `<div class="card recent">${recent.map(o => {
+      const c = o.customerId ? custById(o.customerId) : null; const nm = c ? c.name : o.name; const loc = c ? c.loc : o.loc;
+      return `<div class="it"><span class="badge t-${o.type}">${TYPE_NAME[o.type]}</span><div class="t"><div><b>${esc(nm || '이름 없음')}</b> <span class="muted">${esc(locText(loc))}</span></div><div class="muted" style="font-size:13px">${fmt(o.date)} · ${o.items.map(i => `${esc(pShort(i.productId))}×${i.qty}`).join(' ')}${o.status === 'cancelled' ? ' · 취소됨' : ''}</div></div>
+      ${o.status === 'cancelled' ? `<button class="btn sm" data-act="restoreOrder" data-id="${o.id}">되살리기</button>` : `<button class="btn sm ghost" data-act="cancelOrder" data-id="${o.id}">취소</button>`}</div>`;
+    }).join('')}</div>` : `<div class="card empty"><p>추가주문, 샘플, Fredit 주문을 넣으면 여기와 동선, 발주표에 바로 들어가요.</p></div>`}
+  </div>`;
+}
+
+/* ================= render: customers (bulk) ================= */
+function custFilters() {
+  const t = routeDefaultDate();
+  const has = new Set(stopsFor(t).map(s => s.key));
+  const defs = [['all', '전체', () => true]];
+  const sers = [...new Set(S.customers.map(c => seriesOf(c.loc.building)))].sort((a, b) => a === '상가·기타' ? 1 : b === '상가·기타' ? -1 : b.localeCompare(a));
+  sers.forEach(s => defs.push(['s:' + s, s, c => seriesOf(c.loc.building) === s]));
+  defs.push(['next', fmtShort(t) + ' 배달', c => has.has(c.id)]);
+  defs.push(['paused', '중지·예정', c => c.pauses.some(p => p.to >= TODAY())]);
+  defs.push(['cash', '현금 미수', c => c.payment === 'cash' && c.paidMonth !== MONTH()]);
+  if (S.customers.some(c => c.tags.includes('예시'))) defs.push(['ex', '예시', c => c.tags.includes('예시')]);
+  return defs;
+}
+function filteredCustomers() {
+  const defs = custFilters(); const f = (defs.find(d => d[0] === UI.custF) || defs[0])[2];
+  const q = UI.custQ.trim().replace(/\s+/g, '').toLowerCase();
+  let list = S.customers.filter(f);
+  if (q) list = list.filter(c => (c.name + c.loc.building + '-' + c.loc.unit + c.loc.building + c.loc.unit + locText(c.loc) + c.phone + c.contractNo + c.notes).replace(/\s+/g, '').toLowerCase().includes(q));
+  const ref = mergeSeq(sortAuto(list.map(c => ({ key: c.id, loc: c.loc, c }))), S.config.baseSeq || []);
+  return ref.map(x => x.c);
+}
+function renderCustomers() {
+  const defs = custFilters();
+  return storageBanner() + `<div class="ctool">
+    <div class="sec-h"><h2 style="font-family:var(--f-display);font-weight:400;font-size:24px">고객 <span class="muted num" style="font-size:16px">${S.customers.length}명</span></h2>
+    <div class="row"><button class="btn sm" data-act="aiImport" data-mode="customers">가져오기</button><button class="btn sm pri" data-act="newCust">+ 고객</button></div></div>
+    <div class="srch"><input type="search" id="custq" placeholder="이름, 동-호(411-304), 메모 검색" value="${esc(UI.custQ)}" data-inp="custq" autocomplete="off"></div>
+    <div class="chips" role="group" aria-label="필터">${defs.map(d => `<button class="chip" aria-pressed="${UI.custF === d[0]}" data-act="custF" data-f="${esc(d[0])}">${esc(d[1])}<b>${S.customers.filter(d[2]).length}</b></button>`).join('')}</div>
+    <div class="row" style="justify-content:space-between"><label class="row" style="gap:8px;font-size:14px;cursor:pointer"><input type="checkbox" id="selAll" data-chg="selAll" style="width:18px;height:18px;accent-color:var(--accent)"> 보이는 고객 모두 선택</label><span class="muted" style="font-size:12.5px">수량은 카드에서 바로 ± 조정</span></div>
+  </div><div class="clist" id="custlist"></div>`;
+}
+function daysText(days) { const s = [...days].sort(); if (s.join() === '1,2,3,4,5') return '월–금'; if (s.join() === '1,3,5') return '월수금'; if (s.join() === '2,4') return '화목'; return s.map(d => DL[d]).join(''); }
+function custCard(c) {
+  const t = TODAY(); const sel = UI.selected.has(c.id);
+  const pNow = pauseOn(c, t); const pNext = c.pauses.filter(p => p.from > t).sort((a, b) => a.from.localeCompare(b.from))[0];
+  const pause = pNow || pNext;
+  const badges = [];
+  if (pause) badges.push(`<span class="badge warn">${pNow ? '중지 중' : '중지 예정'} ${fmtShort(pause.from)}–${fmtShort(pause.to)}</span>`);
+  if (!c.active) badges.push(`<span class="badge">해지</span>`);
+  if (c.tags.includes('예시')) badges.push(`<span class="badge">예시</span>`);
+  const upcoming = S.orders.filter(o => o.customerId === c.id && o.status === 'open' && o.date >= t);
+  if (upcoming.length) badges.push(`<span class="badge acc">주문 ${upcoming.length}건</span>`);
+  const pay = c.payment === 'cash' ? `<button class="badge ${c.paidMonth === MONTH() ? 'ok' : 'bad'}" style="border:0" data-act="togglePaid" data-id="${c.id}">현금 · ${c.paidMonth === MONTH() ? '이번 달 수금 완료' : '이번 달 미수'}</button>` : `<span class="badge">${PAY[c.payment]}</span>`;
+  return `<article class="ccard ${sel ? 'sel' : ''} ${pNow ? 'paused' : ''} ${c.active ? '' : 'inactive'}">
+    <label class="pick" aria-label="${esc(c.name)} 선택"><input type="checkbox" data-chg="pick" data-id="${c.id}" ${sel ? 'checked' : ''}></label>
+    <div class="cbody">
+      <div class="chead"><button class="cname" data-act="editCust" data-id="${c.id}">${esc(c.name || '이름 없음')}</button>${badges.join('')}</div>
+      <div class="cloc">${plate(c.loc)}<span class="muted">${esc(c.loc.label || (c.loc.type !== 'apt' ? LOC_TYPES[c.loc.type] : ''))}</span>${c.course != null && c.course !== '' ? `<span class="muted">코스 ${esc(c.course)}</span>` : ''}</div>
+      ${c.regular.length ? `<div class="ritems">${c.regular.map((r, i) => `<div class="ritem ${r.qty ? '' : 'zero'}"><span class="pdot" style="--h:${pHue(r.productId)}"></span><span class="pn">${esc(pName(r.productId))}</span><span class="dd">${daysText(r.days)}</span><span class="stepper"><button data-act="qty" data-id="${c.id}" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b>${r.qty}</b><button data-act="qty" data-id="${c.id}" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span></div>`).join('')}</div>` : `<div class="muted" style="font-size:13px">정기 품목 없음</div>`}
+      <div class="cmeta">${pay}${c.ice ? '<span class="badge">아이스팩</span>' : ''}${c.bag ? '<span class="badge">전달주머니</span>' : ''}${c.bill === 'paper' ? '<span class="badge">종이 청구서</span>' : ''}${c.member ? '<span class="badge">회원</span>' : ''}</div>
+      ${c.notes ? `<div class="cnote">${esc(c.notes)}</div>` : ''}
+    </div></article>`;
+}
+function renderCustList() {
+  const el = $('#custlist'); if (!el) return;
+  const list = filteredCustomers();
+  el.innerHTML = list.length ? list.map(custCard).join('') : `<div class="card empty" style="grid-column:1/-1"><h3>${S.customers.length ? '조건에 맞는 고객이 없어요' : '아직 고객이 없어요'}</h3><p>${S.customers.length ? '검색어나 필터를 바꿔 보세요.' : '“+ 고객”으로 추가하거나 hy 앱 화면 캡처를 가져오세요.'}</p></div>`;
+  const all = $('#selAll'); if (all) { const vis = list.map(c => c.id); all.checked = vis.length > 0 && vis.every(id => UI.selected.has(id)); all.indeterminate = !all.checked && vis.some(id => UI.selected.has(id)); }
+}
+function renderBulk() {
+  const el = $('#bulk');
+  if (UI.tab !== 'customers' || !UI.selected.size) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="bulkbar"><div class="wrap"><span class="n">${UI.selected.size}명</span><div class="acts">
+    <button data-act="bulk" data-k="pause">배달 중지</button><button data-act="bulk" data-k="resume">중지 해제</button><button data-act="bulk" data-k="qty">수량 변경</button><button data-act="bulk" data-k="order">주문 추가</button><button data-act="bulk" data-k="note">메모</button><button data-act="bulk" data-k="pay">수금</button><button data-act="bulk" data-k="delete">삭제</button></div>
+    <button class="x" data-act="clearSel" aria-label="선택 해제">✕</button></div></div>`;
+}
+
+/* ================= render: order sheet (T-2) ================= */
+function renderOrder() {
+  const t = TODAY(); const od = orderingDay(t); const tgt = targetFrom(od);
+  const date = UI.orderDate || tgt;
+  const rows = sheetFor(date); const P = S.config.purchase;
+  const show = rows.filter(r => r.need || r.excl || r.stock);
+  const odFor = orderDayFor(date);
+  const diff = confirmDiff(date, rows);
+  const conf = S.days[date]?.confirmed;
+  let status;
+  if (date === tgt) status = od === t ? `<span class="badge acc">오늘 발주할 날짜</span>` : `<span class="badge acc">다음 발주일 ${fmt(od)}</span>`;
+  else if (odFor < t) status = `<span class="badge warn">발주일 ${fmt(odFor)} 지남</span>`;
+  else status = `<span class="badge">발주일 ${fmt(odFor)}</span>`;
+  const resumes = S.customers.filter(c => c.active && c.pauses.some(p => nextDeliveryDay(p.to) === date) && !pauseOn(c, date));
+  const samples = S.orders.filter(o => o.date === date && o.type === 'sample' && o.status === 'open');
+  const fredit = S.orders.filter(o => o.date === date && o.type === 'fredit' && o.status === 'open');
+  const totalBuy = show.reduce((s, r) => s + r.buy, 0);
+  const typesIn = TYPES.filter(x => P[x]).map(x => TYPE_NAME[x]).join('·');
+  return storageBanner() + `<div class="ohead">
+    <div class="datenav"><button class="iconbtn" data-act="orderDate" data-d="-1" aria-label="이전 배달일">${ICON.left}</button>
+      <div class="d">${fmt(date)} 배달분<small>${status}</small></div>
+      <button class="iconbtn" data-act="orderDate" data-d="1" aria-label="다음 배달일">${ICON.right}</button></div>
+    ${date !== tgt ? `<div class="row" style="justify-content:center"><button class="btn sm" data-act="orderDate" data-d="0">발주할 날짜(${fmt(tgt)})로</button></div>` : ''}
+    ${isHoliday(date) ? `<div class="warnbox">${esc(holidayName(date))}: 정기 배달이 없는 날이에요. 이 날짜로 들어온 주문만 보여요.</div>` : ''}
+    ${diff && diff.length ? `<div class="warnbox"><b>확정 후 바뀐 수량</b><br>${diff.map(x => `${esc(x.name)} ${x.d > 0 ? '+' : ''}${x.d}`).join(' · ')}${odFor < t ? '<br>이미 발주한 날짜예요. 남는 재고로 채우거나 지점에 추가 요청하세요.' : ''}</div>` : ''}
+    ${resumes.length ? `<div class="infobox">중지 끝나고 다시 들어온 고객: ${resumes.map(c => esc(c.name)).join(', ')}</div>` : ''}
+  </div>
+  ${show.length ? `<div class="card tblwrap"><table class="ot">
+    <thead><tr><th>제품 (출고신청 이름)</th><th>필요</th><th>재고</th><th>발주</th></tr></thead>
+    <tbody>${show.map(r => {
+      const open = UI.openP === r.p.id;
+      const c = conf ? (+conf[r.p.id] || 0) : null; const d = c == null ? 0 : r.buy - c;
+      const parts = TYPES.filter(x => r.r[x]).map(x => `${TYPE_NAME[x]} ${r.r[x]}${P[x] ? '' : '(제외)'}`).join(' · ');
+      return `<tr class="prow" data-act="toggleP" data-id="${esc(r.p.id)}"><td><div class="pname"><span class="pdot" style="--h:${r.p.hue ?? 210}"></span><div><b>${esc(r.p.orderName || r.p.name)}</b>${r.p.orderName && r.p.orderName !== r.p.name ? `<small>배달표: ${esc(r.p.name)}</small>` : ''}<small>${parts || '주문 없음'}</small></div></div></td>
+      <td>${r.need}</td><td><input type="number" inputmode="numeric" min="0" value="${r.stock}" data-chg="stock" data-id="${esc(r.p.id)}" aria-label="${esc(r.p.name)} 재고"></td>
+      <td><span class="buy ${r.buy ? '' : 'zero'}" data-buy="${esc(r.p.id)}">${r.buy}</span>${d ? `<span class="diff ${d > 0 ? 'up' : 'dn'}">${d > 0 ? '+' : ''}${d}</span>` : ''}</td></tr>
+      ${open ? `<tr class="detail"><td colspan="4"><div class="brk">${r.r.rows.map(x => `<div><span class="badge t-${x.type}">${TYPE_NAME[x.type]}</span><span>${esc(x.name)} <span class="muted">${esc(locText(x.loc))}</span></span><b class="num">${x.qty}</b></div>`).join('') || '<div class="muted">주문 없음</div>'}</div></td></tr>` : ''}`;
+    }).join('')}</tbody>
+    <tfoot><tr><td>합계 <span class="muted" style="font-weight:400;font-size:12.5px">(${typesIn} 포함)</span></td><td>${show.reduce((s, r) => s + r.need, 0)}</td><td id="totStock">${show.reduce((s, r) => s + r.stock, 0)}</td><td><span class="buy" id="totBuy">${totalBuy}</span></td></tr></tfoot>
+  </table></div>
+  <div class="row" style="margin-top:12px;justify-content:flex-end">
+    <button class="btn" data-act="stockZero">재고 0으로</button>
+    <button class="btn" data-act="copyOrder" data-date="${date}">${ICON.copy}발주 목록 복사</button>
+    <button class="btn pri" data-act="confirmOrder" data-date="${date}">${conf ? '다시 확정' : '발주 확정'}</button>
+  </div>
+  ${conf ? `<p class="hint" style="text-align:right;margin-top:6px">확정: ${new Date(S.days[date].confirmedAt || 0).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · 그 뒤로 바뀐 수량은 빨간 +로 표시돼요</p>` : ''}`
+    : `<div class="card empty"><h3>${fmt(date)}에 배달할 제품이 없어요</h3><p>정기 고객이 없거나 모두 중지된 날이에요.</p></div>`}
+  ${samples.length || fredit.length ? `<div class="sec" style="margin-top:22px"><div class="sec-h"><h2>발주에서 뺀 주문</h2></div>
+    ${samples.length ? `<div class="card" style="padding:12px"><div class="row" style="justify-content:space-between"><b>샘플 · 지점에서 받아오기</b><span class="badge t-sample">${samples.length}건</span></div><div class="brk" style="margin-top:8px">${samples.map(o => orderLine(o)).join('')}</div></div>` : ''}
+    ${fredit.length ? `<div class="card" style="padding:12px"><div class="row" style="justify-content:space-between"><b>Fredit · 자동 발주</b><span class="badge t-fredit">${fredit.length}건</span></div><div class="brk" style="margin-top:8px">${fredit.map(o => orderLine(o)).join('')}</div></div>` : ''}
+    <p class="hint">설정 &gt; 발주에 포함할 주문에서 바꿀 수 있어요.</p></div>` : ''}`;
+}
+function orderLine(o) { const c = o.customerId ? custById(o.customerId) : null; return `<div><span>${o.items.map(i => `${esc(pShort(i.productId))}×${i.qty}`).join(' ')}</span><span>${esc(c ? c.name : o.name)} <span class="muted">${esc(locText(c ? c.loc : o.loc))}</span></span></div>`; }
+
+/* ================= render: route ================= */
+function renderRoute() {
+  const date = UI.routeDate || routeDefaultDate();
+  const stops = orderedStops(date); const doneMap = S.days[date]?.done || {};
+  const done = stops.filter(s => doneMap[s.key]).length;
+  const items = stops.reduce((s, st) => s + st.items.reduce((a, i) => a + i.qty, 0), 0);
+  const custom = !!S.days[date]?.seq;
+  const head = `<div class="rhead">
+    <div class="datenav"><button class="iconbtn" data-act="routeDate" data-d="-1" aria-label="이전 배달일">${ICON.left}</button>
+      <div class="d">${fmt(date)}<small>${date === TODAY() ? '오늘' : (daysBetween(TODAY(), date) > 0 ? daysBetween(TODAY(), date) + '일 뒤' : '지난 날')} · 배달지 ${stops.length}곳 · 제품 ${items}개</small></div>
+      <button class="iconbtn" data-act="routeDate" data-d="1" aria-label="다음 배달일">${ICON.right}</button></div>
+    <div class="prog"><div class="bar"><i style="width:${stops.length ? done / stops.length * 100 : 0}%"></i></div><b class="num">${done}/${stops.length}</b></div>
+    <div class="row" style="justify-content:space-between">
+      <div class="seg" style="flex:none"><button aria-pressed="${UI.routeMode === 'list'}" data-act="routeMode" data-m="list">목록</button><button aria-pressed="${UI.routeMode === 'map'}" data-act="routeMode" data-m="map">단지 지도</button></div>
+      ${UI.routeMode === 'list' ? `<div class="row"><button class="btn sm" data-act="hideDone" aria-pressed="${UI.hideDone}">${UI.hideDone ? '완료 보이기' : '완료 숨기기'}</button><button class="btn sm" data-act="routeMore" data-date="${date}">순서${custom ? ' (수정됨)' : ''}</button></div>` : ''}
+    </div></div>`;
+  if (!stops.length) return storageBanner() + head + `<div class="card empty"><h3>${isHoliday(date) ? esc(holidayName(date)) : '배달이 없는 날이에요'}</h3><p>${isHoliday(date) ? '정기 배달은 쉬고, 이 날짜로 넣은 주문만 보여요.' : '이 날짜에 배달할 고객이나 주문이 없어요.'}</p></div>`;
+  if (UI.routeMode === 'map') return storageBanner() + head + renderMap(date, stops, doneMap);
+  const nextKey = stops.find(s => !doneMap[s.key])?.key;
+  let prevB = null;
+  const rows = stops.map((st, i) => {
+    const isDone = !!doneMap[st.key];
+    const b = st.loc.building; const newb = b !== prevB; prevB = b;
+    if (UI.hideDone && isDone) return '';
+    const flags = [];
+    const c = st.cust;
+    if (c?.ice) flags.push('<span class="badge">아이스팩</span>');
+    if (c?.bag) flags.push('<span class="badge">주머니</span>');
+    if (c?.payment === 'cash' && c.paidMonth !== MONTH()) flags.push('<span class="badge bad">현금 미수</span>');
+    st.orders.forEach(o => flags.push(`<span class="badge t-${o.type}">${TYPE_NAME[o.type]}${o.type === 'sample' ? ' · 지점 수령' : ''}</span>`));
+    const notes = [c?.notes, ...st.orders.map(o => o.note)].filter(Boolean).join(' / ');
+    const agg = {}; st.items.forEach(it => { const k = it.pid + '|' + it.type; agg[k] = (agg[k] || 0) + it.qty; });
+    const chips = Object.entries(agg).map(([k, q]) => { const [pid, ty] = k.split('|'); return `<span class="it-chip ${ty === 'regular' ? '' : ty}"><span class="pdot" style="--h:${pHue(pid)}"></span>${esc(pShort(pid))}<b>×${q}</b></span>`; }).join('');
+    return `<li class="rrow ${isDone ? 'done' : ''} ${st.key === nextKey ? 'next' : ''} ${newb ? 'newb' : ''}" data-key="${esc(st.key)}" data-b="${esc(bldName(b))}">
+      <button class="handle" aria-label="끌어서 순서 바꾸기">${ICON.grip}</button>
+      <button class="seq" data-act="moveTo" data-key="${esc(st.key)}" data-date="${date}" aria-label="${i + 1}번, 순서 옮기기">${i + 1}</button>
+      <div class="rinfo"><div class="rtop">${plate(st.loc)}<span class="rname">${esc(st.name)}</span>${st.loc.label ? `<span class="muted" style="font-size:12.5px">${esc(st.loc.label)}</span>` : ''}</div>
+        <div class="rits">${chips}</div>${flags.length ? `<div class="rflags">${flags.join('')}</div>` : ''}${notes ? `<div class="rnote">${esc(notes)}</div>` : ''}</div>
+      <button class="check" data-act="toggleDone" data-key="${esc(st.key)}" data-date="${date}" aria-pressed="${isDone}" aria-label="${esc(st.name)} 배달 완료">${ICON.check}</button></li>`;
+  }).join('');
+  return storageBanner() + head + `<ol class="rlist" id="rlist" data-date="${date}">${rows}</ol>
+  <p class="hint" style="margin-top:14px">왼쪽 점 손잡이를 끌거나 번호를 눌러 순서를 옮겨요. 바꾼 순서는 이 날짜에만 적용되고, “순서”에서 기본 동선으로 저장할 수 있어요.</p>`;
+}
+function renderMap(date, stops, doneMap) {
+  const byB = {}; stops.forEach(s => { (byB[s.loc.building] = byB[s.loc.building] || []).push(s); });
+  const order = S.config.routeOrder.slice(); Object.keys(byB).forEach(b => { if (!order.includes(b)) order.push(b); });
+  const groups = {}; order.forEach(b => { const g = seriesOf(b); (groups[g] = groups[g] || []).push(b); });
+  const gnames = Object.keys(groups).sort((a, b) => (a === '상가·기타') - (b === '상가·기타'));
+  const sel = UI.mapB && byB[UI.mapB] ? UI.mapB : null;
+  let html = gnames.map(g => `<div class="mapsec"><h3>${esc(g)} <span class="num">${groups[g].reduce((s, b) => s + (byB[b]?.length || 0), 0)}곳</span></h3><div class="tiles">${groups[g].map(b => {
+    const l = byB[b] || []; const dn = l.filter(s => doneMap[s.key]).length;
+    const cls = !l.length ? 'none' : dn === l.length ? 'full' : 'pend';
+    return `<button class="tile ${cls}" data-act="mapB" data-b="${esc(b)}" aria-pressed="${sel === b}" ${l.length ? '' : 'tabindex="-1"'}><span class="bn">${esc(b)}</span><span class="cnt">${l.length ? `${dn}/${l.length}` : '—'}</span></button>`;
+  }).join('')}</div></div>`).join('');
+  if (sel) html += renderFloorplan(sel, byB[sel], doneMap, date);
+  else html += `<p class="hint">파란 칸을 누르면 그 동의 층·라인 배치가 보여요. 칸 안에서 바로 완료 체크할 수 있어요.</p>`;
+  return html;
+}
+function renderFloorplan(b, list, doneMap, date) {
+  const numeric = [], other = [];
+  list.forEach(s => { const u = parseUnit(s.loc.unit); if (u.floor != null && u.floor > 0 && u.line) numeric.push({ s, ...u }); else other.push(s); });
+  const ents = {}; numeric.forEach(x => { const e = Math.ceil(x.line / 2); (ents[e] = ents[e] || []).push(x); });
+  const entHtml = Object.keys(ents).sort((a, b2) => a - b2).map(e => {
+    const xs = ents[e]; const lines = [e * 2 - 1, e * 2];
+    const floors = [...new Set(xs.map(x => x.floor))].sort((a, b2) => S.config.floorDir === 'desc' ? b2 - a : a - b2);
+    let prev = null; let rows = '';
+    floors.forEach(f => {
+      if (prev != null && Math.abs(prev - f) > 1) rows += `<div class="gap">⋮ ${Math.abs(prev - f) - 1}개 층</div>`;
+      prev = f;
+      rows += `<div class="fl" style="--cols:${lines.length}"><span class="fn">${f}F</span>${lines.map(l => {
+        const x = xs.find(y => y.floor === f && y.line === l);
+        if (!x) return `<span class="cell"></span>`;
+        const dn = !!doneMap[x.s.key];
+        return `<button class="cell has ${dn ? 'done' : ''}" data-act="toggleDone" data-key="${esc(x.s.key)}" data-date="${date}" aria-pressed="${dn}"><span class="u">${esc(x.s.loc.unit)}${dn ? ' ✓' : ''}</span><span class="nm">${esc(x.s.name)}</span></button>`;
+      }).join('')}</div>`;
+    });
+    return `<div class="ent"><h4>${lines.map(l => l + '호').join('·')} 라인 출입구</h4><div class="floors">${rows}</div></div>`;
+  }).join('');
+  const oth = other.length ? `<div class="ent"><h4>지하·기타</h4><div class="floors">${other.map(s => { const dn = !!doneMap[s.key]; return `<button class="cell has ${dn ? 'done' : ''}" data-act="toggleDone" data-key="${esc(s.key)}" data-date="${date}" aria-pressed="${dn}"><span class="u">${esc(s.loc.unit || '—')}${dn ? ' ✓' : ''}</span><span class="nm">${esc(s.name)} ${esc(s.loc.label || '')}</span></button>`; }).join('')}</div></div>` : '';
+  return `<div class="card fplan"><div class="sec-h"><h2>${esc(bldName(b))}</h2><span class="muted num">${list.filter(s => doneMap[s.key]).length}/${list.length} 완료</span></div><div class="ents">${oth}${entHtml}</div></div>`;
+}
+
+/* ================= render: settings ================= */
+function renderSettings() {
+  const C = S.config;
+  return storageBanner() + `<div class="sec-h" style="margin-bottom:14px"><h2 style="font-family:var(--f-display);font-weight:400;font-size:24px">설정</h2><button class="btn sm" data-act="tab" data-tab="home">닫기</button></div>
+  <div class="sec"><div class="sec-h"><h2>발주 기준</h2></div><div class="card" style="padding:12px;display:grid;gap:12px">
+    <div class="grid2"><div class="field"><label class="lbl" for="leadDays">며칠 전에 발주</label><input type="number" id="leadDays" min="0" max="7" value="${C.leadDays}" data-chg="leadDays"></div>
+    <div class="field"><span class="lbl">세는 방법</span><div class="seg"><button aria-pressed="${C.leadMode === 'business'}" data-act="leadMode" data-m="business">평일만</button><button aria-pressed="${C.leadMode === 'calendar'}" data-act="leadMode" data-m="calendar">달력 날짜</button></div></div></div>
+    <p class="hint">지금 설정: ${C.leadMode === 'business' ? `평일 기준 ${C.leadDays}일 전. 금요일에 화요일분, 월요일에 수요일분을 발주해요.` : `달력 기준 ${C.leadDays}일 전. 수요일에 금요일분을 발주해요.`} 오늘 기준 발주 날짜: ${fmt(orderTarget())}</p>
+    <div class="field"><span class="lbl">배달 요일</span><div class="daypick">${[1, 2, 3, 4, 5, 6].map(d => `<button aria-pressed="${C.deliveryDays.includes(d)}" data-act="delivDay" data-d="${d}">${DL[d]}</button>`).join('')}</div></div>
+    <div class="field"><span class="lbl">같은 동 안에서</span><div class="seg"><button aria-pressed="${C.floorDir === 'desc'}" data-act="floorDir" data-m="desc">위층부터 내려오기</button><button aria-pressed="${C.floorDir === 'asc'}" data-act="floorDir" data-m="asc">아래층부터</button></div></div>
+  </div></div>
+  <div class="sec"><div class="sec-h"><h2>발주에 포함할 주문</h2></div><div class="card">
+    ${[['regular', '정기 배달', '정기(애음) 계약 수량'], ['adhoc', '추가주문', '정기 외 한 번만 배달하는 주문'], ['sample', '샘플', '끄면 발주에서 빠지고 “지점에서 받아오기” 목록에만 떠요'], ['fredit', 'Fredit 온라인 주문', '끄면 자동 발주로 보고 동선에만 넣어요']].map(([k, n, d]) => `<label class="chk"><input type="checkbox" data-chg="purchase" data-k="${k}" ${C.purchase[k] ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label>`).join('')}
+  </div></div>
+  <div class="sec"><div class="sec-h"><h2>휴무일</h2></div><div class="card">
+    <div class="slist">${C.holidays.slice().sort((a, b) => a.date.localeCompare(b.date)).map(h => `<div class="it"><div class="t"><b>${fmt(h.date)}</b> ${esc(h.name)}</div><button class="btn sm ghost" data-act="delHoliday" data-date="${h.date}">삭제</button></div>`).join('') || '<div class="it muted">등록된 휴무일이 없어요. 공휴일을 넣으면 그날은 모든 정기 배달이 빠져요.</div>'}</div>
+    <div style="padding:10px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr auto;gap:8px"><input type="date" id="hDate" aria-label="날짜"><input type="text" id="hName" placeholder="이름 (예: 한글날)" aria-label="이름"><button class="btn" data-act="addHoliday">추가</button></div>
+  </div></div>
+  <div class="sec"><div class="sec-h"><h2>기본 동선 순서</h2><span class="muted" style="font-size:12.5px">위에서부터 돌아요</span></div><div class="card">
+    <div class="slist">${C.routeOrder.map((b, i) => `<div class="it"><span class="seq" style="display:grid;place-items:center">${i + 1}</span><div class="t"><b>${esc(bldName(b))}</b>${isNumB(b) ? '' : ` <span class="muted" style="font-size:12px">${esc(b)}</span>`}</div><button class="btn sm ghost" data-act="rMove" data-i="${i}" data-d="-1" aria-label="위로" ${i ? '' : 'disabled'}>▲</button><button class="btn sm ghost" data-act="rMove" data-i="${i}" data-d="1" aria-label="아래로" ${i < C.routeOrder.length - 1 ? '' : 'disabled'}>▼</button><button class="btn sm ghost" data-act="rDel" data-i="${i}" aria-label="삭제">✕</button></div>`).join('')}</div>
+    <div style="padding:10px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:8px"><input type="text" id="rNew" placeholder="동 번호나 장소 (예: 206, 상가A)" aria-label="추가할 동"><button class="btn" data-act="rAdd">추가</button></div>
+  </div><p class="hint">고객 위치의 “동” 값과 같은 이름으로 맞춰요. 목록에 없는 동은 가까운 번호 옆에 자동으로 들어가요. 매일 순서는 배달 화면에서 끌어서 바꿀 수 있어요.${C.baseSeq ? ` <button class="btn sm" data-act="clearBase">저장한 기본 동선 지우기</button>` : ''}</p></div>
+  <div class="sec"><div class="sec-h"><h2>제품</h2><span class="muted" style="font-size:12.5px">배달표 이름 · 줄임말 · 출고신청 이름</span></div><div class="card">
+    ${C.products.map((p, i) => `<div class="prodedit"><input type="text" value="${esc(p.name)}" data-chg="prod" data-i="${i}" data-f="name" aria-label="배달표 이름"><input type="text" value="${esc(p.short)}" data-chg="prod" data-i="${i}" data-f="short" aria-label="줄임말"><input class="on" type="text" value="${esc(p.orderName)}" data-chg="prod" data-i="${i}" data-f="orderName" aria-label="출고신청 이름"><button class="btn sm ghost" data-act="delProd" data-i="${i}" aria-label="${esc(p.name)} 삭제">✕</button></div>`).join('')}
+    <div style="padding:10px;border-top:1px solid var(--line)"><button class="btn" data-act="addProd">+ 제품 추가</button></div>
+  </div></div>
+  <div class="sec"><div class="sec-h"><h2>데이터</h2></div><div class="card" style="padding:12px;display:grid;gap:10px">
+    <p class="hint">${store.db ? '로그인한 claude.ai 계정에 저장돼요. 이 수첩을 공유해도 고객 정보는 소유자에게만 보여요.' : '이 브라우저에 저장돼요.'} 고객 ${S.customers.length}명 · 주문 ${S.orders.length}건 (60일 지난 기록은 자동 정리)</p>
+    <div class="row">${downloadsNs ? '<button class="btn" data-act="backup">백업 파일 저장</button>' : ''}<label class="btn" style="cursor:pointer">백업 불러오기<input type="file" accept=".json,application/json" data-chg="restore" hidden></label>
+    ${S.customers.some(c => c.tags.includes('예시')) || S.orders.some(o => o.tags.includes('예시')) ? '<button class="btn danger" data-act="clearExamples">예시 데이터 지우기</button>' : ''}</div>
+  </div></div>`;
+}
+
+/* ================= sheet / toast helpers ================= */
+let sheetClose = null;
+function openSheet(html, onClose) {
+  const root = $('#sheet');
+  root.innerHTML = `<div class="backdrop" data-act="closeSheet"></div><div class="panel" role="dialog" aria-modal="true">${html}</div>`;
+  root.hidden = false; document.body.classList.add('noscroll'); sheetClose = onClose || null;
+  const f = root.querySelector('[autofocus]'); if (f && matchMedia('(min-width:700px)').matches) f.focus();
+}
+function closeSheet() { const root = $('#sheet'); root.hidden = true; root.innerHTML = ''; document.body.classList.remove('noscroll'); const cb = sheetClose; sheetClose = null; if (cb) cb(); }
+const sheetHead = t => `<div class="sh"><h2>${t}</h2><button class="btn sm ghost" data-act="closeSheet">닫기</button></div>`;
+let toastTimer = null, toastUndo = null;
+function toast(msg, undo) {
+  const el = $('#toast'); toastUndo = undo || null;
+  el.innerHTML = `<span>${esc(msg)}</span>${undo ? '<button data-act="undo">되돌리기</button>' : ''}`;
+  el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; toastUndo = null; }, undo ? 6000 : 3200);
+}
+function confirmSheet(title, body, yesLabel, onYes, danger = true) {
+  openSheet(`${sheetHead(esc(title))}<p style="margin:0">${body}</p><div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn ${danger ? 'danger' : 'pri'}" id="cfYes">${esc(yesLabel)}</button></div>`);
+  $('#cfYes').onclick = () => { closeSheet(); onYes(); };
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); toast('복사했어요. 출고 신청 앱에 붙여 넣으세요.'); }
+  catch (e) {
+    openSheet(`${sheetHead('발주 목록')}<p class="hint">자동 복사가 막혀 있어요. 아래 글을 길게 눌러 복사하세요.</p><textarea id="cpy" style="min-height:220px">${esc(text)}</textarea>`);
+    const ta = $('#cpy'); ta.focus(); ta.select();
+  }
+}
+
+/* ================= order ingestion sheet ================= */
+let F = null;
+function defaultOrderDate() { return nextDeliveryDay(TODAY()); }
+function openOrderSheet(opts = {}) {
+  F = { type: opts.type || 'adhoc', ids: opts.customerIds ? [...opts.customerIds] : [], useNew: false, nl: { name: '', building: '', unit: '', label: '' }, date: opts.date || defaultOrderDate(), items: {}, note: '', q: '' };
+  openSheet(`<div id="of" style="display:grid;gap:14px"></div>`, () => { F = null; });
+  renderOF();
+}
+function ofImpact() {
+  const qty = Object.values(F.items).reduce((s, q) => s + q, 0);
+  const n = F.ids.length + (F.useNew ? 1 : 0);
+  if (!qty || !n) return '';
+  const counted = S.config.purchase[F.type]; const tgt = orderTarget(); const od = orderDayFor(F.date);
+  let msg = `${fmt(F.date)} 동선에 ${n}곳 추가`;
+  if (!counted) msg += F.type === 'sample' ? ` · 발주표 대신 “지점에서 받아오기”에 떠요` : ` · 자동 발주라 발주표에는 안 들어가요`;
+  else if (F.date === tgt) msg += ` · 오늘 발주표에 +${qty * n}개 바로 반영`;
+  else if (F.date > tgt) msg += ` · ${fmt(od)} 발주표에 +${qty * n}개 들어가요`;
+  const late = counted && F.date < tgt && F.date >= TODAY();
+  const past = F.date < TODAY();
+  return `<div class="${late || past ? 'warnbox' : 'infobox'}">${msg}${late ? `<br><b>발주일(${fmt(od)})이 지난 날짜예요.</b> 재고로 채우거나 지점에 추가 요청이 필요해요.` : ''}${past ? '<br>지난 날짜예요.' : ''}${!isDeliveryDay(F.date) ? '<br>배달 요일이 아니거나 휴무일이에요.' : ''}</div>`;
+}
+function renderOF() {
+  const el = $('#of'); if (!el || !F) return;
+  const hint = { adhoc: '정기 외에 한 번만 배달하는 주문이에요.', sample: '지점에서 받아와서 배달하는 샘플이에요.', fredit: 'Fredit(프레딧) 온라인 몰 주문이에요.' }[F.type];
+  const quick = []; let d = TODAY(); for (let i = 0; i < 5; i++) { d = nextDeliveryDay(d); quick.push(d); }
+  el.innerHTML = `${sheetHead('주문 추가')}
+  <div class="seg">${['adhoc', 'sample', 'fredit'].map(t => `<button aria-pressed="${F.type === t}" data-act="ofType" data-t="${t}">${t === 'adhoc' ? '추가주문' : TYPE_NAME[t]}</button>`).join('')}</div>
+  <p class="hint">${hint} ${S.config.purchase[F.type] ? '발주표에 포함돼요.' : '발주표에서는 빠져요.'}</p>
+  ${sampleFn ? `<button class="btn" data-act="aiImport" data-mode="orders">메시지·사진으로 주문 채우기 (Claude)</button>` : ''}
+  <div class="field"><span class="lbl">받는 곳</span>
+    ${F.ids.length ? `<div class="picked" style="margin-bottom:8px">${F.ids.map(id => { const c = custById(id); return c ? `<span class="chip">${esc(c.name)} ${esc(c.loc.building)}-${esc(c.loc.unit)}<button data-act="ofUnpick" data-id="${id}" aria-label="빼기">×</button></span>` : ''; }).join('')}</div>` : ''}
+    <input type="search" id="ofq" placeholder="이름 또는 동-호 검색 (예: 411-304)" value="${esc(F.q)}" data-inp="ofq" autocomplete="off">
+    <div class="results" id="ofres" style="margin-top:6px"></div>
+    <button class="btn sm ghost" style="justify-self:start;margin-top:6px" data-act="ofNew">${F.useNew ? '− 새 배달지 닫기' : '+ 고객 목록에 없는 배달지'}</button>
+    ${F.useNew ? `<div class="grid2" style="margin-top:6px"><input type="text" placeholder="이름" value="${esc(F.nl.name)}" data-inp="ofnl" data-f="name" aria-label="이름"><input type="text" placeholder="동 (예: 411, 상가B)" value="${esc(F.nl.building)}" data-inp="ofnl" data-f="building" aria-label="동"><input type="text" placeholder="호 (예: 304, B3)" value="${esc(F.nl.unit)}" data-inp="ofnl" data-f="unit" aria-label="호"><input type="text" placeholder="장소 설명 (선택)" value="${esc(F.nl.label)}" data-inp="ofnl" data-f="label" aria-label="장소 설명"></div>` : ''}
+  </div>
+  <div class="field"><label class="lbl" for="ofdate">배달일</label><input type="date" id="ofdate" value="${F.date}" data-chg="ofdate">
+    <div class="chips" style="margin-top:6px">${quick.map(q => `<button class="chip" aria-pressed="${F.date === q}" data-act="ofDate" data-date="${q}">${fmt(q)}</button>`).join('')}</div></div>
+  <div class="field"><span class="lbl">제품 · 수량</span><div class="pgrid">${S.config.products.map(p => { const q = F.items[p.id] || 0; return `<div class="pcell ${q ? 'on' : ''}"><span class="pdot" style="--h:${p.hue ?? 210}"></span><span class="n">${esc(p.name)}</span><span class="stepper"><button data-act="ofQty" data-id="${p.id}" data-d="-1" aria-label="${esc(p.name)} 줄이기">−</button><b>${q}</b><button data-act="ofQty" data-id="${p.id}" data-d="1" aria-label="${esc(p.name)} 늘리기">+</button></span></div>`; }).join('')}</div></div>
+  <div class="field"><label class="lbl" for="ofnote">메모</label><textarea id="ofnote" placeholder="예: 경비실에 맡기기, 오전 중" data-inp="ofnote">${esc(F.note)}</textarea></div>
+  <div id="ofimp">${ofImpact()}</div>
+  <div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="ofSave">저장</button></div>`;
+  renderOFRes();
+}
+function renderOFRes() {
+  const el = $('#ofres'); if (!el || !F) return;
+  const q = F.q.replace(/\s+/g, '').toLowerCase();
+  if (!q) { el.innerHTML = ''; return; }
+  const hits = S.customers.filter(c => !F.ids.includes(c.id) && (c.name + c.loc.building + '-' + c.loc.unit + c.loc.building + c.loc.unit + locText(c.loc)).replace(/\s+/g, '').toLowerCase().includes(q)).slice(0, 8);
+  el.innerHTML = hits.length ? hits.map(c => `<button class="res" data-act="ofPick" data-id="${c.id}">${plate(c.loc)}<span class="t"><b>${esc(c.name)}</b> <span class="muted">${esc(c.loc.label)}</span></span><span class="muted">선택</span></button>`).join('') : `<div class="hint">맞는 고객이 없어요. 아래 “고객 목록에 없는 배달지”로 넣을 수 있어요.</div>`;
+}
+function saveOF() {
+  const items = Object.entries(F.items).filter(([, q]) => q > 0).map(([productId, qty]) => ({ productId, qty }));
+  if (!items.length) { toast('제품 수량을 하나 이상 넣어 주세요.'); return; }
+  if (!F.ids.length && !(F.useNew && (F.nl.name || F.nl.building))) { toast('받는 고객을 고르거나 새 배달지를 입력해 주세요.'); return; }
+  if (!F.date) { toast('배달일을 골라 주세요.'); return; }
+  const made = [];
+  F.ids.forEach(id => made.push(normOrder({ type: F.type, customerId: id, date: F.date, items: clone(items), note: F.note })));
+  if (F.useNew) made.push(normOrder({ type: F.type, customerId: null, name: F.nl.name, loc: { type: isNumB(F.nl.building) ? 'apt' : 'store', ...F.nl }, date: F.date, items: clone(items), note: F.note }));
+  S.orders.push(...made);
+  ensureRouteOrder();
+  const ids = made.map(o => o.id); const date = F.date;
+  save('orders', 'config'); closeSheet(); render();
+  toast(`${fmt(date)} 동선·발주표에 ${made.length}건 반영했어요`, () => { S.orders = S.orders.filter(o => !ids.includes(o.id)); save('orders'); render(); });
+}
+
+/* ================= customer edit sheet ================= */
+let CF = null;
+function openCustSheet(id) {
+  const c = id ? custById(id) : null;
+  CF = c ? clone(c) : normCust({ loc: { type: 'apt' }, regular: [], ice: true });
+  CF._new = !c;
+  openSheet(`<div id="cf" style="display:grid;gap:14px"></div>`, () => { CF = null; });
+  renderCF();
+}
+function readCF() {
+  if (!CF) return;
+  const v = id => $('#' + id)?.value ?? '';
+  CF.name = v('cfName').trim(); CF.contractNo = v('cfContract').trim(); CF.phone = v('cfPhone').trim();
+  CF.loc.type = v('cfType') || 'apt'; CF.loc.building = v('cfB').trim(); CF.loc.unit = v('cfU').trim(); CF.loc.label = v('cfLabel').trim();
+  const course = v('cfCourse').trim(); CF.course = course === '' ? null : (isNaN(+course) ? course : +course);
+  CF.payment = v('cfPay') || 'card'; CF.bill = v('cfBill') || 'mobile';
+  CF.member = !!$('#cfMember')?.checked; CF.ice = !!$('#cfIce')?.checked; CF.bag = !!$('#cfBag')?.checked; CF.active = !!$('#cfActive')?.checked;
+  CF.notes = v('cfNotes');
+}
+function renderCF() {
+  const el = $('#cf'); if (!el || !CF) return;
+  const t = TODAY();
+  el.innerHTML = `${sheetHead(CF._new ? '고객 추가' : esc(CF.name || '고객'))}
+  <div class="grid2"><div class="field"><label class="lbl" for="cfName">이름</label><input type="text" id="cfName" value="${esc(CF.name)}" autofocus></div>
+  <div class="field"><label class="lbl" for="cfPhone">연락처</label><input type="tel" id="cfPhone" value="${esc(CF.phone)}" placeholder="010-0000-0000"></div></div>
+  <div class="grid2"><div class="field"><label class="lbl" for="cfType">위치 종류</label><select id="cfType">${Object.entries(LOC_TYPES).map(([k, n]) => `<option value="${k}" ${CF.loc.type === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+  <div class="field"><label class="lbl" for="cfContract">정기계약번호</label><input type="text" id="cfContract" inputmode="numeric" value="${esc(CF.contractNo)}"></div></div>
+  <div class="grid3"><div class="field"><label class="lbl" for="cfB">동</label><input type="text" id="cfB" value="${esc(CF.loc.building)}" placeholder="411, 상가B"></div>
+  <div class="field"><label class="lbl" for="cfU">호·층</label><input type="text" id="cfU" value="${esc(CF.loc.unit)}" placeholder="304, B3"></div>
+  <div class="field"><label class="lbl" for="cfCourse">hy 코스</label><input type="text" id="cfCourse" inputmode="numeric" value="${esc(CF.course ?? '')}"></div></div>
+  <div class="field"><label class="lbl" for="cfLabel">장소 설명 (세대가 아닐 때)</label><input type="text" id="cfLabel" value="${esc(CF.loc.label)}" placeholder="예: 411동 B3층 미화휴게실"></div>
+  <div class="field"><span class="lbl">정기 품목</span><div class="regedit">${CF.regular.map((r, i) => `<div class="regrow">
+      <select data-chg="cfProd" data-i="${i}" aria-label="제품">${S.config.products.map(p => `<option value="${p.id}" ${p.id === r.productId ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}${prodById(r.productId) ? '' : `<option selected value="${esc(r.productId)}">${esc(r.productId)}</option>`}</select>
+      <button class="btn sm ghost" data-act="cfDelReg" data-i="${i}" aria-label="품목 삭제">✕</button>
+      <div class="r2"><div class="daypick">${[1, 2, 3, 4, 5, 6].map(d => `<button aria-pressed="${r.days.includes(d)}" data-act="cfDay" data-i="${i}" data-d="${d}">${DL[d]}</button>`).join('')}</div>
+      <span class="stepper"><button data-act="cfQty" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b>${r.qty}</b><button data-act="cfQty" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span></div></div>`).join('')}
+    <button class="btn sm" style="justify-self:start" data-act="cfAddReg">+ 품목 추가</button></div></div>
+  <div class="grid2"><div class="field"><label class="lbl" for="cfPay">수금 구분</label><select id="cfPay">${Object.entries(PAY).map(([k, n]) => `<option value="${k}" ${CF.payment === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+  <div class="field"><label class="lbl" for="cfBill">청구서</label><select id="cfBill"><option value="mobile" ${CF.bill === 'mobile' ? 'selected' : ''}>모바일</option><option value="paper" ${CF.bill === 'paper' ? 'selected' : ''}>종이</option></select></div></div>
+  <div class="row" style="gap:16px">${[['cfIce', 'ice', '아이스팩'], ['cfBag', 'bag', '전달주머니'], ['cfMember', 'member', '회원'], ['cfActive', 'active', '계약 유지']].map(([id, k, n]) => `<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="${id}" ${CF[k] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)">${n}</label>`).join('')}</div>
+  <div class="field"><label class="lbl" for="cfNotes">메모 (배달할 때 보여요)</label><textarea id="cfNotes">${esc(CF.notes)}</textarea></div>
+  <div class="field"><span class="lbl">배달 중지 기간</span>
+    <div style="display:grid;gap:6px">${CF.pauses.slice().sort((a, b) => a.from.localeCompare(b.from)).map(p => `<div class="row" style="justify-content:space-between;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)"><span><b>${fmt(p.from)} – ${fmt(p.to)}</b> ${p.to < t ? '<span class="badge">지남</span>' : p.from <= t ? '<span class="badge warn">중지 중</span>' : '<span class="badge warn">예정</span>'} <span class="muted">${esc(p.reason)}</span></span><button class="btn sm ghost" data-act="cfDelPause" data-p="${p.id}">삭제</button></div>`).join('') || '<span class="hint">없음</span>'}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input type="date" id="cfPF" aria-label="시작일" value="${defaultOrderDate()}"><input type="date" id="cfPT" aria-label="종료일" value="${defaultOrderDate()}"></div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:6px"><input type="text" id="cfPR" placeholder="사유 (예: 여행)" aria-label="사유"><button class="btn" data-act="cfAddPause">중지 추가</button></div></div></div>
+  <div class="sact">${CF._new ? '' : '<button class="btn danger" data-act="cfDelete">삭제</button>'}<button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="cfSave">저장</button></div>`;
+}
+function saveCF() {
+  readCF();
+  if (!CF.name && !CF.loc.building) { toast('이름이나 동을 입력해 주세요.'); return; }
+  const c = normCust(CF); const isNew = CF._new;
+  if (isNew) S.customers.push(c); else S.customers = S.customers.map(x => x.id === c.id ? c : x);
+  ensureRouteOrder(); save('customers', 'config'); closeSheet(); render();
+  toast(isNew ? `${c.name || '고객'} 추가했어요. 동선과 발주표에 반영돼요.` : '저장했어요. 동선과 발주표에 반영돼요.');
+}
+
+/* ================= bulk sheets ================= */
+const selectedCustomers = () => S.customers.filter(c => UI.selected.has(c.id));
+function bulkPause() {
+  const n = UI.selected.size; const nd = defaultOrderDate();
+  const t = TODAY(); const wkEnd = (() => { let x = t; while (dow(x) !== 5) x = addDays(x, 1); return x; })();
+  const nextMon = (() => { let x = addDays(t, 1); while (dow(x) !== 1) x = addDays(x, 1); return x; })();
+  const presets = [[nd, nd, '다음 배달일 하루'], [nd, wkEnd >= nd ? wkEnd : addDays(nextMon, 4), '이번 주 남은 날'], [nextMon, addDays(nextMon, 4), `다음 주 ${fmtShort(nextMon)}–${fmtShort(addDays(nextMon, 4))}`]];
+  openSheet(`${sheetHead(`${n}명 배달 중지`)}
+    <div class="chips">${presets.map(p => `<button class="chip" data-act="pausePreset" data-f="${p[0]}" data-t="${p[1]}">${p[2]}</button>`).join('')}</div>
+    <div class="grid2"><div class="field"><label class="lbl" for="bpF">시작</label><input type="date" id="bpF" value="${nd}"></div><div class="field"><label class="lbl" for="bpT">끝 (이날까지 중지)</label><input type="date" id="bpT" value="${nd}"></div></div>
+    <div class="field"><label class="lbl" for="bpR">사유</label><input type="text" id="bpR" placeholder="예: 추석 연휴, 여행"></div>
+    <p class="hint" id="bpHint"></p>
+    <div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="bulkPauseSave">중지하기</button></div>`);
+  const upd = () => { const to = $('#bpT').value; if (to) $('#bpHint').textContent = `끝나면 ${fmt(nextDeliveryDay(to))}부터 자동으로 다시 배달되고, 그 전에 홈에 알림이 떠요.`; };
+  $('#bpT').addEventListener('change', upd); upd();
+}
+function bulkPauseSave() {
+  const from = $('#bpF').value, to = $('#bpT').value, reason = $('#bpR').value.trim();
+  if (!from || !to || to < from) { toast('시작일과 끝나는 날을 확인해 주세요.'); return; }
+  const before = clone(S.customers);
+  selectedCustomers().forEach(c => c.pauses.push({ id: uid('p_'), from, to, reason, ack: false }));
+  const n = UI.selected.size; save('customers'); closeSheet(); render();
+  toast(`${n}명 ${fmtShort(from)}–${fmtShort(to)} 중지했어요`, () => { S.customers = before.map(normCust); save('customers'); render(); });
+}
+function bulkResume() {
+  const t = TODAY(); const before = clone(S.customers);
+  selectedCustomers().forEach(c => {
+    c.pauses = c.pauses.filter(p => p.from < t).map(p => (p.to >= t ? { ...p, to: addDays(t, -1), ack: true } : p));
+  });
+  save('customers'); render();
+  toast(`선택한 고객의 오늘 이후 중지를 풀었어요`, () => { S.customers = before.map(normCust); save('customers'); render(); });
+}
+function bulkNote() {
+  openSheet(`${sheetHead(`${UI.selected.size}명 메모`)}
+  <div class="seg"><button aria-pressed="true" data-act="segPick" data-g="nm" data-v="append">기존 메모 뒤에 붙이기</button><button aria-pressed="false" data-act="segPick" data-g="nm" data-v="replace">바꾸기</button></div>
+  <textarea id="bnT" placeholder="예: 10월부터 경비실 보관" autofocus></textarea>
+  <label class="row" style="gap:6px"><input type="checkbox" id="bnD" checked style="width:18px;height:18px;accent-color:var(--accent)"> 앞에 오늘 날짜 붙이기</label>
+  <div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="bulkNoteSave">저장</button></div>`);
+}
+function bulkNoteSave() {
+  const txt = $('#bnT').value.trim(); if (!txt) { toast('메모를 입력해 주세요.'); return; }
+  const mode = $('[data-g="nm"][aria-pressed="true"]').dataset.v; const line = ($('#bnD').checked ? fmtShort(TODAY()) + ' ' : '') + txt;
+  const before = clone(S.customers);
+  selectedCustomers().forEach(c => { c.notes = mode === 'replace' || !c.notes ? line : c.notes + '\n' + line; });
+  save('customers'); closeSheet(); render(); toast('메모를 넣었어요', () => { S.customers = before.map(normCust); save('customers'); render(); });
+}
+function bulkQty() {
+  openSheet(`${sheetHead(`${UI.selected.size}명 정기 수량 변경`)}
+  <div class="field"><label class="lbl" for="bqP">제품</label><select id="bqP">${S.config.products.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div>
+  <div class="seg"><button aria-pressed="true" data-act="segPick" data-g="qm" data-v="set">이 수량으로 맞추기</button><button aria-pressed="false" data-act="segPick" data-g="qm" data-v="add">더하기·빼기</button></div>
+  <div class="field"><label class="lbl" for="bqV">수량 (빼려면 −1처럼)</label><input type="number" id="bqV" value="1"></div>
+  <div class="field"><span class="lbl">이 제품이 없는 고객에게 새로 넣을 때 요일</span><div class="daypick" id="bqD">${[1, 2, 3, 4, 5, 6].map(d => `<button aria-pressed="${d <= 5}" data-act="togglePress">${DL[d]}</button>`).join('')}</div></div>
+  <p class="hint">“맞추기”는 그 제품이 없는 고객에게 새 품목으로 추가해요. 0으로 맞추면 해당 품목을 쉬게 해요.</p>
+  <div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="bulkQtySave">적용</button></div>`);
+}
+function bulkQtySave() {
+  const pid = $('#bqP').value; const v = Math.round(+$('#bqV').value || 0); const mode = $('[data-g="qm"][aria-pressed="true"]').dataset.v;
+  const days = $$('#bqD button').map((b, i) => b.getAttribute('aria-pressed') === 'true' ? i + 1 : 0).filter(Boolean);
+  const before = clone(S.customers); let n = 0;
+  selectedCustomers().forEach(c => {
+    const items = c.regular.filter(r => r.productId === pid);
+    if (items.length) { items.forEach(r => { r.qty = Math.max(0, mode === 'set' ? v : r.qty + v); }); n++; }
+    else if (v > 0) { c.regular.push({ productId: pid, qty: v, days: days.length ? days : [1, 2, 3, 4, 5] }); n++; }
+  });
+  save('customers'); closeSheet(); render(); toast(`${n}명 ${pName(pid)} 수량을 바꿨어요`, () => { S.customers = before.map(normCust); save('customers'); render(); });
+}
+function bulkPay() {
+  openSheet(`${sheetHead(`${UI.selected.size}명 수금`)}
+  <div class="field"><span class="lbl">수금 구분 바꾸기</span><div class="seg">${Object.entries(PAY).map(([k, n]) => `<button aria-pressed="false" data-act="segPick" data-g="pm" data-v="${k}">${n}</button>`).join('')}</div></div>
+  <div class="field"><span class="lbl">이번 달(${MONTH().slice(5)}월) 현금 수금</span><div class="seg"><button aria-pressed="false" data-act="segPick" data-g="pp" data-v="paid">수금 완료</button><button aria-pressed="false" data-act="segPick" data-g="pp" data-v="unpaid">미수</button></div></div>
+  <div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="bulkPaySave">적용</button></div>`);
+}
+function bulkPaySave() {
+  const pm = $('[data-g="pm"][aria-pressed="true"]')?.dataset.v; const pp = $('[data-g="pp"][aria-pressed="true"]')?.dataset.v;
+  if (!pm && !pp) { toast('바꿀 항목을 골라 주세요.'); return; }
+  const before = clone(S.customers);
+  selectedCustomers().forEach(c => { if (pm) c.payment = pm; if (pp) c.paidMonth = pp === 'paid' ? MONTH() : ''; });
+  save('customers'); closeSheet(); render(); toast('수금 정보를 바꿨어요', () => { S.customers = before.map(normCust); save('customers'); render(); });
+}
+function bulkDelete() {
+  const n = UI.selected.size;
+  confirmSheet(`${n}명 삭제`, `선택한 고객과 그 고객의 앞으로 남은 주문이 지워져요. 해지만 하려면 고객을 열어 “계약 유지”를 끄세요.`, '삭제', () => {
+    const ids = new Set(UI.selected); const bc = clone(S.customers), bo = clone(S.orders);
+    S.customers = S.customers.filter(c => !ids.has(c.id)); S.orders = S.orders.filter(o => !(ids.has(o.customerId) && o.date >= TODAY()));
+    UI.selected.clear(); save('customers', 'orders'); render();
+    toast(`${n}명 삭제했어요`, () => { S.customers = bc.map(normCust); S.orders = bo.map(normOrder); save('customers', 'orders'); render(); });
+  });
+}
+
+/* ================= AI import (sample capability) ================= */
+let AI = null;
+function openAI(mode) {
+  if (F && mode === 'orders') { AI = { mode, back: clone(F) }; } else AI = { mode };
+  const can = !!sampleFn;
+  const isC = mode === 'customers';
+  openSheet(`${sheetHead(isC ? '고객 가져오기' : '메시지·사진으로 주문 넣기')}
+  <p class="hint">${isC ? 'hy 모바일 고객관리의 “고객조회” 목록 화면을 캡처해서 올리거나, 한 줄에 한 명씩 붙여 넣으세요. 예: 김하늘, 411-304, 010-1234-5678, 카드' : '카톡 주문 메시지를 붙여 넣거나 캡처를 올리면 Claude가 고객·제품·날짜를 찾아서 주문 초안을 만들어요. 확인 후 넣어요.'}</p>
+  <textarea id="aiT" placeholder="${isC ? '이름, 동-호, 연락처, 수금(카드/계좌/현금)' : '예: 411동 304호 윌 저지방 2개 수요일에 부탁드려요'}"></textarea>
+  ${can && sampleImages ? `<label class="btn" style="cursor:pointer;justify-self:start">사진 고르기<input type="file" id="aiF" accept="image/*" multiple hidden data-chg="aiFiles"></label><span class="hint" id="aiFn"></span>` : ''}
+  ${can ? '' : `<p class="hint">${isC ? 'Claude를 쓸 수 없는 화면이라 줄 단위로만 읽어요.' : 'Claude를 쓸 수 없는 화면이에요. 주문 추가 양식을 이용해 주세요.'}</p>`}
+  <div id="aiOut" class="aires"></div>
+  <div class="sact"><button class="btn" data-act="aiBack">닫기</button><button class="btn pri" id="aiGo" data-act="aiRun">${can ? '읽기' : '줄 단위로 읽기'}</button></div>`, () => { AI = null; });
+}
+function prodListText() { return S.config.products.map(p => `${p.id} | ${p.name} | ${p.orderName} | ${p.short}`).join('\n'); }
+function custListText() { return S.customers.map(c => `${c.id} | ${c.name} | ${c.loc.building}-${c.loc.unit} | ${c.loc.label}`).join('\n'); }
+async function runAI() {
+  const text = $('#aiT').value.trim(); const files = $('#aiF')?.files;
+  if (!text && !(files && files.length)) { toast('글을 붙여 넣거나 사진을 골라 주세요.'); return; }
+  const out = $('#aiOut'); const btn = $('#aiGo');
+  if (!sampleFn) { AI.results = AI.mode === 'customers' ? parseCustLines(text) : []; renderAIResults(); return; }
+  btn.disabled = true; out.innerHTML = `<p class="hint">Claude가 읽는 중… (처음에는 허용 여부를 물어봐요)</p>`;
+  const t = TODAY(); const dd = defaultOrderDate();
+  const prompt = AI.mode === 'customers'
+    ? `hy(한국야쿠르트) 배달 매니저의 고객 목록을 정리해. 아래 글이나 사진(hy 모바일 고객관리 "고객조회" 화면)에서 고객을 찾아 JSON 배열로만 답해.
+각 항목: {"name":"이름","contractNo":"정기계약번호 또는 빈 문자열","building":"동 번호","unit":"호 또는 층","label":"세대가 아니면 장소 설명, 아니면 빈 문자열","type":"apt|office|security|store|community","phone":"010-0000-0000 형식 또는 빈 문자열","course":숫자 또는 null,"payment":"card|account|cash","member":true/false,"bill":"mobile|paper"}
+규칙: "헬리오시티) 411-304" → building "411", unit "304", type "apt". "403동 지하3층 휴게실" → building "403", unit "B3", label "403동 지하3층 휴게실", type "office". 보안실은 security, 상가는 store, 주민센터·경로당은 community. 카드자동이체 → card, 계좌자동이체 → account, 현금 → cash. "회원" 표시는 member true, "비회원"은 false. "종이 청구서" → paper, "모바일 청구서" → mobile. 화면에서 잘린 고객은 빼.
+${text ? `글:\n"""\n${text.slice(0, 12000)}\n"""` : '사진을 읽어.'}`
+    : `hy(한국야쿠르트) 배달 매니저의 주문 메시지를 정리해. 오늘은 ${t}(${DL[dow(t)]}). 날짜가 없으면 "${dd}". "수요일"처럼 요일만 있으면 오늘 이후 가장 가까운 그 요일.
+주문 종류: adhoc(일반 추가주문), sample(샘플, 지점에서 받아오는 것), fredit(Fredit·프레딧 온라인 주문).
+제품 목록 (id | 배달표 이름 | 출고신청 이름 | 줄임말):
+${prodListText()}
+고객 목록 (id | 이름 | 동-호 | 장소):
+${custListText().slice(0, 30000)}
+JSON 배열로만 답해. 각 항목: {"type":"adhoc|sample|fredit","customerId":"고객 id 또는 null","name":"이름","building":"동","unit":"호","date":"YYYY-MM-DD","items":[{"productId":"제품 id","qty":숫자}],"note":"요청사항"}
+같은 사람이나 같은 동-호가 고객 목록에 있으면 customerId를 넣어. 제품을 확실히 모르겠으면 items에서 빼고 note에 원문을 남겨.
+${text ? `메시지:\n"""\n${text.slice(0, 12000)}\n"""` : '사진을 읽어.'}`;
+  try {
+    const opts = { modelTier: 'default' }; if (files && files.length && sampleImages) opts.images = files;
+    const data = await sampleFn.json(prompt, opts);
+    AI.results = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+    if (!AI) return; renderAIResults();
+  } catch (e) {
+    const code = e && e.code;
+    const msg = { not_granted: 'Claude 사용이 허용되지 않았어요. 직접 입력해 주세요.', rate_limited: '요청이 많아요. 잠시 뒤에 다시 눌러 주세요.', invalid_json: '읽은 결과를 정리하지 못했어요. 글을 조금 줄여서 다시 해 보세요.', image_rejected: '이 사진은 읽을 수 없어요. 다른 캡처로 해 보세요.', refused: '이 내용은 읽지 못했어요.', cancelled: '' }[code] ?? '연결 문제로 읽지 못했어요. 다시 눌러 주세요.';
+    if (code === 'not_granted' || code === 'sampling_disabled') sampleFn = null;
+    if (out) out.innerHTML = msg ? `<p class="warnbox">${msg}</p>` : '';
+  } finally { if (btn) btn.disabled = false; }
+}
+function parseCustLines(text) {
+  return text.split(/\n+/).map(l => l.trim()).filter(Boolean).map(l => {
+    const parts = l.split(/[,\t]/).map(s => s.trim());
+    const m = l.match(/(\d{3})\s*[-동\s]\s*(\d{3,4}|B\d)/i); const ph = l.match(/01\d[-\s]?\d{3,4}[-\s]?\d{4}/);
+    const pay = /현금/.test(l) ? 'cash' : /계좌/.test(l) ? 'account' : 'card';
+    return { name: parts[0] || '', building: m ? m[1] : '', unit: m ? m[2] : '', phone: ph ? ph[0] : '', payment: pay, type: 'apt' };
+  }).filter(x => x.name || x.building);
+}
+function renderAIResults() {
+  const out = $('#aiOut'); if (!out || !AI) return;
+  const R = AI.results || [];
+  if (!R.length) { out.innerHTML = `<p class="warnbox">찾은 항목이 없어요.</p>`; return; }
+  if (AI.mode === 'customers') {
+    out.innerHTML = `<b>${R.length}명 찾음</b>` + R.map((c, i) => {
+      const dup = S.customers.find(x => (c.contractNo && x.contractNo === c.contractNo) || (x.name === c.name && x.loc.building === String(c.building) && x.loc.unit === String(c.unit)));
+      return `<label><input type="checkbox" data-ai="${i}" checked><span><b>${esc(c.name)}</b> ${plate({ building: c.building, unit: c.unit })} <span class="muted">${esc(c.label || '')} ${esc(c.phone || '')} · ${PAY[c.payment] || ''}</span>${dup ? ' <span class="badge acc">기존 고객 정보 갱신</span>' : ''}</span></label>`;
+    }).join('') + `<button class="btn pri" data-act="aiApply">선택한 고객 넣기</button>`;
+  } else {
+    out.innerHTML = `<b>주문 ${R.length}건</b>` + R.map((o, i) => {
+      const c = o.customerId ? custById(o.customerId) : null;
+      const items = (o.items || []).filter(it => prodById(it.productId));
+      return `<label><input type="checkbox" data-ai="${i}" ${items.length ? 'checked' : ''}><span><span class="badge t-${TYPES.includes(o.type) ? o.type : 'adhoc'}">${TYPE_NAME[o.type] || '추가'}</span> <b>${esc(c ? c.name : (o.name || '이름 없음'))}</b> ${plate(c ? c.loc : { building: o.building, unit: o.unit })} ${c ? '' : '<span class="badge warn">새 배달지</span>'}<br><span class="muted">${fmt(o.date)} · ${items.map(it => `${esc(pName(it.productId))}×${+it.qty}`).join(', ') || '제품 확인 필요'}${o.note ? ' · ' + esc(o.note) : ''}</span></span></label>`;
+    }).join('') + `<button class="btn pri" data-act="aiApply">선택한 주문 넣기</button>`;
+  }
+}
+function applyAI() {
+  const R = AI.results || []; const picks = $$('[data-ai]').filter(x => x.checked).map(x => R[+x.dataset.ai]);
+  if (!picks.length) { toast('넣을 항목을 골라 주세요.'); return; }
+  if (AI.mode === 'customers') {
+    let add = 0, upd = 0;
+    picks.forEach(c => {
+      const dup = S.customers.find(x => (c.contractNo && x.contractNo === c.contractNo) || (x.name === c.name && x.loc.building === String(c.building) && x.loc.unit === String(c.unit)));
+      const fields = { name: c.name, contractNo: c.contractNo || '', phone: c.phone || '', course: c.course ?? null, payment: PAY[c.payment] ? c.payment : 'card', member: !!c.member, bill: c.bill === 'paper' ? 'paper' : 'mobile' };
+      const loc = { type: LOC_TYPES[c.type] ? c.type : 'apt', building: String(c.building || ''), unit: String(c.unit || ''), label: c.label || '' };
+      if (dup) { Object.assign(dup, Object.fromEntries(Object.entries(fields).filter(([, v]) => v !== '' && v != null))); dup.loc = { ...dup.loc, ...Object.fromEntries(Object.entries(loc).filter(([, v]) => v)) }; upd++; }
+      else { S.customers.push(normCust({ ...fields, loc, regular: [] })); add++; }
+    });
+    ensureRouteOrder(); save('customers', 'config'); closeSheet(); render();
+    toast(`새 고객 ${add}명, 갱신 ${upd}명. 정기 품목은 고객 카드에서 넣어 주세요.`);
+  } else {
+    const made = picks.map(o => {
+      const c = o.customerId ? custById(o.customerId) : null;
+      return normOrder({ type: o.type, customerId: c ? c.id : null, name: c ? '' : o.name, loc: c ? null : { type: isNumB(o.building) ? 'apt' : 'store', building: String(o.building || ''), unit: String(o.unit || ''), label: '' }, date: /^\d{4}-\d\d-\d\d$/.test(o.date || '') ? o.date : defaultOrderDate(), items: (o.items || []).filter(it => prodById(it.productId)).map(it => ({ productId: it.productId, qty: Math.max(1, Math.round(+it.qty || 1)) })), note: o.note || '' });
+    }).filter(o => o.items.length);
+    if (!made.length) { toast('제품이 확인된 주문이 없어요. 주문 추가 양식으로 넣어 주세요.'); return; }
+    S.orders.push(...made); ensureRouteOrder(); save('orders', 'config'); closeSheet(); render();
+    const ids = made.map(o => o.id);
+    toast(`주문 ${made.length}건을 동선·발주표에 넣었어요`, () => { S.orders = S.orders.filter(o => !ids.includes(o.id)); save('orders'); render(); });
+  }
+}
+
+/* ================= route actions & drag ================= */
+function dayRec(date) { return S.days[date] || (S.days[date] = {}); }
+function toggleDone(date, key) {
+  const d = dayRec(date); d.done = d.done || {};
+  if (d.done[key]) delete d.done[key]; else d.done[key] = Date.now();
+  save('days'); render();
+}
+function setSeq(date, keys) { dayRec(date).seq = keys; save('days'); render(); }
+function routeMore(date) {
+  const custom = !!S.days[date]?.seq;
+  openSheet(`${sheetHead(`${fmt(date)} 순서`)}
+  <button class="btn" data-act="seqReset" data-date="${date}" ${custom ? '' : 'disabled'}>자동 동선으로 되돌리기</button>
+  <p class="hint">이 날짜에 끌어서 바꾼 순서를 지우고, 기본 동선 순서(동 순서 → 출입구 라인 → 층)로 다시 정렬해요.</p>
+  <button class="btn pri" data-act="seqBase" data-date="${date}">지금 순서를 기본 동선으로 저장</button>
+  <p class="hint">다른 날짜에도 이 고객들은 이 순서로 나와요. 새 고객은 가까운 위치에 자동으로 끼워져요.</p>`);
+}
+function saveAsBase(date) {
+  const today = orderedStops(date).map(s => s.key).filter(k => !k.startsWith('o:'));
+  const all = sortAuto(S.customers.map(c => ({ key: c.id, loc: c.loc })));
+  const fullOld = mergeSeq(all, S.config.baseSeq || []);
+  S.config.baseSeq = mergeSeq(fullOld, today).map(x => x.key);
+  if (S.days[date]) delete S.days[date].seq;
+  save('config', 'days'); closeSheet(); render(); toast('기본 동선으로 저장했어요');
+}
+function moveToSheet(date, key) {
+  const stops = orderedStops(date); const i = stops.findIndex(s => s.key === key); const st = stops[i];
+  openSheet(`${sheetHead('순서 옮기기')}<p style="margin:0"><b>${esc(st?.name || '')}</b> ${plate(st?.loc)} · 지금 ${i + 1}번</p>
+  <div class="field"><label class="lbl" for="mvN">몇 번으로? (1–${stops.length})</label><input type="number" id="mvN" min="1" max="${stops.length}" value="${i + 1}" inputmode="numeric" autofocus></div>
+  <div class="row"><button class="btn" data-act="mvQuick" data-v="1">맨 앞</button><button class="btn" data-act="mvQuick" data-v="${stops.length}">맨 뒤</button></div>
+  <div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn pri" id="mvGo">옮기기</button></div>`);
+  $('#mvGo').onclick = () => {
+    let n = Math.max(1, Math.min(stops.length, Math.round(+$('#mvN').value || 1)));
+    const keys = stops.map(s => s.key).filter(k => k !== key); keys.splice(n - 1, 0, key);
+    closeSheet(); setSeq(date, keys);
+  };
+}
+let drag = null;
+document.addEventListener('pointerdown', e => {
+  const h = e.target.closest('.handle'); if (!h) return;
+  const row = h.closest('.rrow'); const list = row?.parentElement; if (!row || !list) return;
+  e.preventDefault();
+  drag = { row, list, id: e.pointerId, date: list.dataset.date, moved: false, startY: e.clientY };
+  row.classList.add('dragging');
+  try { h.setPointerCapture(e.pointerId); } catch (err) { }
+});
+document.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  e.preventDefault();
+  const y = e.clientY; if (Math.abs(y - drag.startY) > 4) drag.moved = true;
+  const rows = [...drag.list.children].filter(r => r !== drag.row);
+  let before = null;
+  for (const r of rows) { const b = r.getBoundingClientRect(); if (y < b.top + b.height / 2) { before = r; break; } }
+  if (before !== drag.row.nextElementSibling) drag.list.insertBefore(drag.row, before);
+  const vh = window.innerHeight; if (y < 140) window.scrollBy(0, -12); else if (y > vh - 150) window.scrollBy(0, 12);
+}, { passive: false });
+function endDrag(e) {
+  if (!drag || (e && e.pointerId !== drag.id)) return;
+  const { row, list, date, moved } = drag; drag = null; row.classList.remove('dragging');
+  if (!moved) return;
+  const visible = [...list.children].map(r => r.dataset.key);
+  const all = orderedStops(date).map(s => s.key);
+  // keep hidden (done) rows at their relative place
+  const hidden = all.filter(k => !visible.includes(k));
+  const merged = mergeSeq(all.map(k => ({ key: k })), visible).map(x => x.key);
+  setSeq(date, hidden.length ? merged : visible);
+}
+document.addEventListener('pointerup', endDrag);
+document.addEventListener('pointercancel', endDrag);
+
+/* ================= action router ================= */
+const ACT = {
+  tab: a => { UI.tab = a.dataset.tab; if (UI.tab !== 'customers') UI.selected.clear(); saveUI(); render(); window.scrollTo(0, 0); },
+  closeSheet: () => closeSheet(),
+  undo: () => { const u = toastUndo; $('#toast').hidden = true; toastUndo = null; if (u) u(); },
+  newOrder: () => openOrderSheet({ customerIds: UI.tab === 'customers' ? [...UI.selected] : [] }),
+  newCust: () => openCustSheet(null),
+  editCust: a => openCustSheet(a.dataset.id),
+  gotoOrder: a => { UI.orderDate = a.dataset.date; UI.tab = 'order'; saveUI(); render(); window.scrollTo(0, 0); },
+  filterCash: () => { UI.tab = 'customers'; UI.custF = 'cash'; saveUI(); render(); },
+  ackPause: a => { const c = custById(a.dataset.id); const p = c?.pauses.find(x => x.id === a.dataset.p); if (p) { p.ack = true; save('customers'); render(); } },
+  cancelOrder: a => { const o = S.orders.find(x => x.id === a.dataset.id); if (!o) return; o.status = 'cancelled'; save('orders'); render(); toast(`${fmt(o.date)} 주문을 취소했어요. 발주표와 동선에서 빠져요.`, () => { o.status = 'open'; save('orders'); render(); }); },
+  restoreOrder: a => { const o = S.orders.find(x => x.id === a.dataset.id); if (o) { o.status = 'open'; save('orders'); render(); } },
+  // customers
+  custF: a => { UI.custF = a.dataset.f; render(); },
+  qty: a => { const c = custById(a.dataset.id); const r = c?.regular[+a.dataset.i]; if (!r) return; r.qty = Math.max(0, r.qty + (+a.dataset.d)); save('customers'); renderCustList(); },
+  togglePaid: a => { const c = custById(a.dataset.id); if (!c) return; c.paidMonth = c.paidMonth === MONTH() ? '' : MONTH(); save('customers'); renderCustList(); },
+  clearSel: () => { UI.selected.clear(); render(); },
+  bulk: a => ({ pause: bulkPause, resume: bulkResume, qty: bulkQty, note: bulkNote, pay: bulkPay, delete: bulkDelete, order: () => openOrderSheet({ customerIds: [...UI.selected] }) })[a.dataset.k](),
+  pausePreset: a => { $('#bpF').value = a.dataset.f; $('#bpT').value = a.dataset.t; $('#bpT').dispatchEvent(new Event('change')); },
+  bulkPauseSave, bulkNoteSave, bulkQtySave, bulkPaySave,
+  segPick: a => { $$(`[data-g="${a.dataset.g}"]`).forEach(b => b.setAttribute('aria-pressed', b === a ? 'true' : 'false')); },
+  togglePress: a => a.setAttribute('aria-pressed', a.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'),
+  // order sheet (T-2)
+  orderDate: a => { const d = +a.dataset.d; const cur = UI.orderDate || orderTarget(); UI.orderDate = d === 0 ? null : (d > 0 ? nextDeliveryDay(cur) : prevDeliveryDay(cur)); UI.openP = null; render(); },
+  toggleP: (a, e) => { if (e.target.closest('input')) return; UI.openP = UI.openP === a.dataset.id ? null : a.dataset.id; render(); },
+  stockZero: () => { const before = clone(S.config.stock); S.config.stock = {}; save('config'); render(); toast('재고를 0으로 맞췄어요', () => { S.config.stock = before; save('config'); render(); }); },
+  copyOrder: a => { const d = a.dataset.date; const rows = sheetFor(d).filter(r => r.buy > 0); const txt = `${fmt(d)} 배달분 발주\n` + (rows.length ? rows.map(r => `${r.p.orderName || r.p.name} ${r.buy}`).join('\n') : '발주할 제품 없음'); copyText(txt); },
+  confirmOrder: a => { const d = a.dataset.date; const rec = dayRec(d); rec.confirmed = Object.fromEntries(sheetFor(d).map(r => [r.p.id, r.buy])); rec.confirmedAt = Date.now(); save('days'); render(); toast(`${fmt(d)} 발주를 확정했어요. 이후 바뀌면 알려 드려요.`); },
+  // route
+  routeDate: a => { const cur = UI.routeDate || routeDefaultDate(); UI.routeDate = +a.dataset.d > 0 ? nextDeliveryDay(cur) : prevDeliveryDay(cur); UI.mapB = null; render(); },
+  routeMode: a => { UI.routeMode = a.dataset.m; saveUI(); render(); },
+  hideDone: () => { UI.hideDone = !UI.hideDone; saveUI(); render(); },
+  toggleDone: a => toggleDone(a.dataset.date, a.dataset.key),
+  moveTo: a => moveToSheet(a.dataset.date, a.dataset.key),
+  mvQuick: a => { $('#mvN').value = a.dataset.v; },
+  routeMore: a => routeMore(a.dataset.date),
+  seqReset: a => { const d = S.days[a.dataset.date]; if (d) delete d.seq; save('days'); closeSheet(); render(); toast('자동 동선으로 되돌렸어요'); },
+  seqBase: a => saveAsBase(a.dataset.date),
+  mapB: a => { UI.mapB = UI.mapB === a.dataset.b ? null : a.dataset.b; render(); },
+  // order ingestion
+  ofType: a => { F.type = a.dataset.t; renderOF(); },
+  ofPick: a => { F.ids.push(a.dataset.id); F.q = ''; renderOF(); },
+  ofUnpick: a => { F.ids = F.ids.filter(x => x !== a.dataset.id); renderOF(); },
+  ofNew: () => { F.useNew = !F.useNew; renderOF(); },
+  ofDate: a => { F.date = a.dataset.date; renderOF(); },
+  ofQty: a => { const id = a.dataset.id; F.items[id] = Math.max(0, (F.items[id] || 0) + (+a.dataset.d)); renderOF(); },
+  ofSave: () => saveOF(),
+  aiImport: a => openAI(a.dataset.mode),
+  aiRun: () => runAI(),
+  aiApply: () => applyAI(),
+  aiBack: () => { const back = AI?.back; closeSheet(); if (back) { openOrderSheet({}); F = back; renderOF(); } },
+  // customer sheet
+  cfAddReg: () => { readCF(); CF.regular.push({ productId: S.config.products[0]?.id, qty: 1, days: [1, 2, 3, 4, 5] }); renderCF(); },
+  cfDelReg: a => { readCF(); CF.regular.splice(+a.dataset.i, 1); renderCF(); },
+  cfDay: a => { readCF(); const r = CF.regular[+a.dataset.i]; const d = +a.dataset.d; r.days = r.days.includes(d) ? r.days.filter(x => x !== d) : [...r.days, d].sort(); renderCF(); },
+  cfQty: a => { readCF(); const r = CF.regular[+a.dataset.i]; r.qty = Math.max(0, r.qty + (+a.dataset.d)); renderCF(); },
+  cfAddPause: () => { const f = $('#cfPF').value, t = $('#cfPT').value; if (!f || !t || t < f) { toast('중지 기간을 확인해 주세요.'); return; } const r = $('#cfPR').value.trim(); readCF(); CF.pauses.push({ id: uid('p_'), from: f, to: t, reason: r, ack: false }); renderCF(); },
+  cfDelPause: a => { readCF(); CF.pauses = CF.pauses.filter(p => p.id !== a.dataset.p); renderCF(); },
+  cfSave: () => saveCF(),
+  cfDelete: () => { const id = CF.id, nm = CF.name; confirmSheet(`${nm} 삭제`, '이 고객과 앞으로 남은 주문이 지워져요.', '삭제', () => { const bc = clone(S.customers), bo = clone(S.orders); S.customers = S.customers.filter(c => c.id !== id); S.orders = S.orders.filter(o => !(o.customerId === id && o.date >= TODAY())); UI.selected.delete(id); save('customers', 'orders'); render(); toast(`${nm} 삭제했어요`, () => { S.customers = bc.map(normCust); S.orders = bo.map(normOrder); save('customers', 'orders'); render(); }); }); },
+  // settings
+  leadMode: a => { S.config.leadMode = a.dataset.m; save('config'); render(); },
+  floorDir: a => { S.config.floorDir = a.dataset.m; save('config'); render(); },
+  delivDay: a => { const d = +a.dataset.d; const L = S.config.deliveryDays; S.config.deliveryDays = L.includes(d) ? L.filter(x => x !== d) : [...L, d].sort(); save('config'); render(); },
+  addHoliday: () => { const d = $('#hDate').value; if (!d) { toast('날짜를 골라 주세요.'); return; } S.config.holidays = S.config.holidays.filter(h => h.date !== d); S.config.holidays.push({ date: d, name: $('#hName').value.trim() || '휴무' }); save('config'); render(); toast(`${fmt(d)} 휴무: 정기 배달과 발주에서 빠져요`); },
+  delHoliday: a => { S.config.holidays = S.config.holidays.filter(h => h.date !== a.dataset.date); save('config'); render(); },
+  rMove: a => { const i = +a.dataset.i, d = +a.dataset.d, L = S.config.routeOrder; const j = i + d; if (j < 0 || j >= L.length) return; [L[i], L[j]] = [L[j], L[i]]; save('config'); render(); },
+  rDel: a => { S.config.routeOrder.splice(+a.dataset.i, 1); save('config'); render(); },
+  rAdd: () => { const v = $('#rNew').value.trim().replace(/동$/, ''); if (!v) return; if (!S.config.routeOrder.includes(v)) S.config.routeOrder.push(v); save('config'); render(); },
+  clearBase: () => { S.config.baseSeq = null; save('config'); render(); toast('기본 동선을 지웠어요. 동 순서대로 자동 정렬돼요.'); },
+  addProd: () => { S.config.products.push({ id: uid('p_'), name: '새 제품', short: '새 제품', orderName: '새 제품', hue: Math.floor(Math.random() * 360) }); save('config'); render(); },
+  delProd: a => {
+    const p = S.config.products[+a.dataset.i]; if (!p) return;
+    const used = S.customers.some(c => c.regular.some(r => r.productId === p.id)) || S.orders.some(o => o.status === 'open' && o.date >= TODAY() && o.items.some(i => i.productId === p.id));
+    if (used) { toast(`${p.name}은(는) 고객이나 주문에 쓰이고 있어서 지울 수 없어요.`); return; }
+    S.config.products.splice(+a.dataset.i, 1); save('config'); render();
+  },
+  backup: async () => {
+    if (!downloadsNs) return;
+    try { await downloadsNs.save({ filename: `헬리오배달수첩-${TODAY()}.json`, data: JSON.stringify(S, null, 1) }); }
+    catch (e) { if (e?.code !== 'declined') toast('백업 파일을 저장하지 못했어요.'); }
+  },
+  clearExamples: () => confirmSheet('예시 데이터 지우기', '“예시” 표시가 있는 고객과 주문만 지워요. 직접 넣은 데이터는 그대로예요.', '지우기', () => {
+    const ex = new Set(S.customers.filter(c => c.tags.includes('예시')).map(c => c.id));
+    S.customers = S.customers.filter(c => !ex.has(c.id)); S.orders = S.orders.filter(o => !o.tags.includes('예시') && !ex.has(o.customerId));
+    S.config.baseSeq = null; S.days = {}; UI.selected.clear(); save('customers', 'orders', 'config', 'days'); render(); toast('예시 데이터를 지웠어요');
+  }),
+};
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const fn = ACT[a.dataset.act]; if (!fn) return;
+  if (a.tagName === 'A') e.preventDefault();
+  fn(a, e);
+});
+const CHG = {
+  pick: el => { el.checked ? UI.selected.add(el.dataset.id) : UI.selected.delete(el.dataset.id); el.closest('.ccard')?.classList.toggle('sel', el.checked); renderBulk(); $('#fab').hidden = UI.selected.size > 0; const all = $('#selAll'); if (all) { const vis = filteredCustomers().map(c => c.id); all.checked = vis.every(id => UI.selected.has(id)); all.indeterminate = !all.checked && vis.some(id => UI.selected.has(id)); } },
+  selAll: el => { const vis = filteredCustomers().map(c => c.id); vis.forEach(id => el.checked ? UI.selected.add(id) : UI.selected.delete(id)); render(); },
+  stock: el => { const v = Math.max(0, Math.round(+el.value || 0)); if (v) S.config.stock[el.dataset.id] = v; else delete S.config.stock[el.dataset.id]; save('config'); updateOrderNumbers(); },
+  ofdate: el => { if (el.value) { F.date = el.value; renderOF(); } },
+  cfProd: el => { readCF(); CF.regular[+el.dataset.i].productId = el.value; renderCF(); },
+  leadDays: el => { S.config.leadDays = Math.max(0, Math.min(7, Math.round(+el.value || 0))); save('config'); render(); },
+  purchase: el => { S.config.purchase[el.dataset.k] = el.checked; save('config'); render(); },
+  prod: el => { const p = S.config.products[+el.dataset.i]; if (!p) return; p[el.dataset.f] = el.value.trim() || p[el.dataset.f]; save('config'); },
+  aiFiles: el => { const n = el.files?.length || 0; const f = $('#aiFn'); if (f) f.textContent = n ? `사진 ${n}장` : ''; },
+  restore: el => {
+    const file = el.files?.[0]; if (!file) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const o = JSON.parse(rd.result); if (!o || !Array.isArray(o.customers)) throw new Error('bad');
+        confirmSheet('백업 불러오기', `고객 ${o.customers.length}명, 주문 ${(o.orders || []).length}건으로 지금 데이터를 바꿔요.`, '불러오기', () => {
+          S.customers = o.customers.map(normCust); S.orders = (o.orders || []).map(normOrder); S.config = normConfig(o.config); S.days = o.days || {};
+          save(...DOCS); render(); toast('백업을 불러왔어요');
+        }, false);
+      } catch (e) { toast('이 파일은 헬리오 배달수첩 백업이 아니에요.'); }
+    };
+    rd.readAsText(file); el.value = '';
+  },
+};
+document.addEventListener('change', e => { const el = e.target.closest('[data-chg]'); if (el && CHG[el.dataset.chg]) CHG[el.dataset.chg](el); });
+const INP = {
+  custq: el => { UI.custQ = el.value; renderCustList(); },
+  ofq: el => { F.q = el.value; renderOFRes(); },
+  ofnote: el => { F.note = el.value; },
+  ofnl: el => { F.nl[el.dataset.f] = el.value; const i = $('#ofimp'); if (i) i.innerHTML = ofImpact(); },
+};
+document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && INP[el.dataset.inp]) INP[el.dataset.inp](el); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+// stock inputs: update numbers in place while typing across rows, full render when focus leaves the table
+function updateOrderNumbers() {
+  const rows = sheetFor(UI.orderDate || orderTarget());
+  rows.forEach(r => { const el = document.querySelector(`[data-buy="${CSS.escape(r.p.id)}"]`); if (el) { el.textContent = r.buy; el.classList.toggle('zero', !r.buy); } });
+  const show = rows.filter(r => r.need || r.excl || r.stock);
+  const tb = $('#totBuy'); if (tb) tb.textContent = show.reduce((s, r) => s + r.buy, 0);
+  const ts = $('#totStock'); if (ts) ts.textContent = show.reduce((s, r) => s + r.stock, 0);
+}
+document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches('.ot input')) setTimeout(() => { if (!document.activeElement || !document.activeElement.matches('.ot input')) render(); }, 0); });
+
+/* ================= boot ================= */
+loadLocal();
+if (ensureRouteOrder()) cacheLocal();
+render();
+initRuntime();
+// roll the date over if the page stays open past midnight
+let lastDay = TODAY();
+setInterval(() => { if (TODAY() !== lastDay) { lastDay = TODAY(); UI.routeDate = null; UI.orderDate = null; render(); } }, 60000);
+</script>
