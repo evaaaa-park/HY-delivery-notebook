@@ -184,6 +184,7 @@ table.ot{width:100%;border-collapse:collapse;font-size:14px}
 .ot .buy{font-family:var(--f-display);font-size:22px;color:var(--accent);line-height:1}
 .ot .buy.zero{color:var(--muted)}
 .ot input{width:68px;min-height:40px;text-align:right;padding:4px 8px;font-variant-numeric:tabular-nums}
+.ot tr.cat td{background:var(--sunk);font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;padding:6px 8px;text-align:left}
 .ot tr.detail td{background:var(--sunk);text-align:left;padding:8px 12px}
 .ot tfoot td{font-weight:700;border-bottom:0}
 .diff{font-size:12px;font-weight:700;margin-left:4px}
@@ -427,24 +428,46 @@ const mqSplit = matchMedia('(min-width: 1024px)');
 
 /* ================= defaults (app config, not records) ================= */
 const DEFAULT_PRODUCTS = [
-  { id: 'yakult', name: '야쿠르트 라이트', short: '야쿠르트', orderName: '야쿠르트 라이트', hue: 205 },
-  { id: 'will_lf', name: '윌 저지방', short: '윌저', orderName: '윌 저지방', hue: 150 },
-  { id: 'will_org', name: '윌 오리지널', short: '윌', orderName: '윌 오리지널', hue: 120 },
-  { id: 'will_bal', name: '윌 당밸런스', short: '윌당', orderName: '윌 당밸런스', hue: 90 },
-  { id: 'helico', name: '헬리코박터 프로젝트 윌', short: '헬리코', orderName: '헬리코박터 프로젝트 윌', hue: 175 },
-  { id: 'kupers', name: '쿠퍼스', short: '쿠퍼스', orderName: '쿠퍼스', hue: 20 },
-  { id: 'mpro3', name: 'MPRO3', short: '엠프로', orderName: 'MPRO3', hue: 260 },
-  { id: 'mech', name: '메치니코프', short: '메치', orderName: '메치니코프', hue: 330 },
-  { id: 'haru', name: '하루야채 오리지널', short: '하루', orderName: '하루야채 오리지널', hue: 55 },
-  { id: 'haru_kg', name: '하루야채키즈 포도', short: '키즈포도', orderName: '하루야채 유기농 포도비트', hue: 290 },
-  { id: 'haru_ko', name: '하루야채키즈 오렌지', short: '키즈오렌지', orderName: '하루야채 유기농 오렌지당근', hue: 35 },
+  { id: 'ykl', name: '야쿠르트 라이트', short: '야쿠르트', orderName: '야쿠르트라이트', cat: '발효유(영업)', hue: 205 },
+  { id: 'ykpl', name: '야쿠르트 프리미엄 라이트', short: '프리미엄', orderName: '야쿠르트프리미엄라이트', cat: '발효유(영업)', hue: 190 },
+  { id: 'multi', name: '멀티비타', short: '멀티비타', orderName: '멀티비타프로바이오틱스', cat: '발효유(영업)', hue: 45 },
+  { id: 'will', name: '윌', short: '윌', orderName: '윌', cat: '발효유(영업)', hue: 125 },
+  { id: 'will_lf', name: '윌 (저지방)', short: '윌저', orderName: '윌 저지방', cat: '발효유(영업)', hue: 150 },
+  { id: 'mpro', name: '엠프로 (면역)', short: '엠프로', orderName: 'MPRO(엠프로) 장&면역', cat: '발효유(영업)', hue: 265 },
+  { id: 'kup_f', name: '쿠퍼스 (피로케어)', short: '피로케어', orderName: '피로케어 쿠퍼스', cat: '발효유(영업)', hue: 20 },
+  { id: 'will_bal', name: '윌 (당밸런스)', short: '윌당', orderName: '윌 당밸런스', cat: '발효유(영업)', hue: 95 },
+  { id: 'will_jy', name: '윌 (작약)', short: '윌작약', orderName: '윌 작약', cat: '발효유(영업)', hue: 340 },
+  { id: 'ykxo', name: '야쿠르트 XO', short: 'XO', orderName: '야쿠르트 XO', cat: '발효유(영업)', hue: 230 },
+  { id: 's100_st', name: '슈퍼100 딸기', short: '딸기', orderName: '슈퍼100 딸기(2025)', cat: '발효유(영업)', hue: 355 },
+  { id: 's100_pc', name: '슈퍼100 복숭아', short: '복숭아', orderName: '슈퍼100 복숭아(2025)', cat: '발효유(영업)', hue: 15 },
+  { id: 's100_pl', name: '슈퍼100 플레인', short: '100플레인', orderName: '슈퍼100 플레인(2025)', cat: '발효유(영업)', hue: 60 },
+  { id: 's100_bb', name: '슈퍼100 블루베리', short: '블루베리', orderName: '슈퍼100 블루베리(2025)', cat: '발효유(영업)', hue: 250 },
+  { id: 's100_ap', name: '슈퍼100 사과', short: '사과', orderName: '슈퍼100 사과(2025)', cat: '발효유(영업)', hue: 0 },
+  { id: 'greekd', name: '그릭드링크 플레인', short: '그릭드링크', orderName: '슈퍼100 그릭드링크 플레인', cat: '발효유(영업)', hue: 180 },
+  { id: 'greeky', name: '그릭요거트', short: '그릭요거트', orderName: '슈퍼100 그릭요거트', cat: '발효유(영업)', hue: 200 },
+  { id: 'kup_b', name: '쿠퍼스 (혈행케어)', short: '혈행케어', orderName: '쿠퍼스 블러드케어', cat: '발효유(영업)', hue: 350 },
+  { id: 'milk_s', name: '일반우유 (소)', short: '우유小', orderName: '(내)클래식200', cat: '우유', hue: 210 },
+  { id: 'milk_l', name: '일반우유 (대)', short: '우유大', orderName: '(내)클래식930', cat: '우유', hue: 215 },
+  { id: 'lfm_s', name: '저지방우유 (소)', short: '저지방小', orderName: '(내)클래식저지방200', cat: '우유', hue: 170 },
+  { id: 'calc', name: '소화 고칼슘 우유 (930)', short: '고칼슘', orderName: '소화가 잘되는 고칼슘 우유(930)', cat: '우유', hue: 40 },
+  { id: 'lfm_l', name: '저지방우유 (대)', short: '저지방大', orderName: '(내)클래식저지방930', cat: '우유', hue: 175 },
+  { id: 'haru', name: '하루야채 오리지널', short: '하루', orderName: '하루야채 오리지널', cat: '영업음료', hue: 30 },
+  { id: 'haru_pp', name: '하루야채 퍼플', short: '퍼플', orderName: '하루야채 퍼플', cat: '영업음료', hue: 285 },
+  { id: 'haru_yl', name: '하루야채 옐로우', short: '옐로우', orderName: '하루야채 옐로우', cat: '영업음료', hue: 50 },
+  { id: 'haru_lt', name: '하루야채 라이트', short: '하루라이트', orderName: '하루야채 라이트', cat: '영업음료', hue: 80 },
+  { id: 'haru_kg', name: '하루야채키즈 포도', short: '키즈포도', orderName: '하루야채 유기농 포도비트', cat: '영업음료', hue: 300 },
+  { id: 'haru_ko', name: '하루야채키즈 오렌지', short: '키즈오렌지', orderName: '하루야채 유기농 오렌지당근', cat: '영업음료', hue: 28 },
+  { id: 'haru_bb', name: '하루야채 (BB)', short: 'BB', orderName: '하루야채 BB', cat: '영업음료', hue: 110 },
+  { id: 'egg', name: '무항생제 신선란 10구', short: '신선란', orderName: '무항생제 신선란 10구', cat: '신선간편식(후불)', hue: 38 },
+  { id: 'eo_salad', name: '이츠온 폴드포크 크리스피 어니언 샐러드', short: '이츠온샐러드', orderName: '이츠온 폴드포크 크리스피 어니언 샐러드', cat: '기타(Fredit 등)', hue: 140 },
+  { id: 'eo_tofu', name: '이츠온 하루연두부', short: '연두부', orderName: '이츠온 하루연두부', cat: '기타(Fredit 등)', hue: 65 },
+  { id: 'yk_upside', name: '거꾸로 먹는 야쿠르트', short: '거꾸로야쿠르트', orderName: '거꾸로 먹는 야쿠르트', cat: '기타(Fredit 등)', hue: 220 },
 ];
-const r4 = []; for (let b = 401; b <= 421; b++) if (b !== 415) r4.push(String(b));
-const DEFAULT_ROUTE = ['415', '주민센터', ...r4, '경로당', '204', '213', '2보안실', '상가B'];
+const DEFAULT_ROUTE = ['405', '403', '404', '411', '413', '418', '417', '414', '410', '경로당', '402', '406', '401', '407', '408', '409', '415', '주민센터', '204', '205', '203', '206', '202', '209', '211', '216', '215', '212', '214', '213', '2보안실', '상가B'];
 const DEFAULT_CONFIG = {
   products: DEFAULT_PRODUCTS, routeOrder: DEFAULT_ROUTE, leadDays: 2, leadMode: 'business',
   deliveryDays: [1, 2, 3, 4, 5], holidays: [], floorDir: 'desc',
-  purchase: { regular: true, adhoc: true, sample: false, fredit: false },
+  purchase: { regular: true, adhoc: false, sample: false, fredit: false },
   stock: {}, baseSeq: null, v: 1,
 };
 const TYPES = ['regular', 'adhoc', 'sample', 'fredit'];
@@ -471,9 +494,9 @@ function normCust(c) {
     id: c.id || uid('c_'), name: c.name || '', contractNo: c.contractNo || '', phone: c.phone || '',
     loc: { type: c.loc?.type || 'apt', building: String(c.loc?.building ?? ''), unit: String(c.loc?.unit ?? ''), label: c.loc?.label || '' },
     course: c.course ?? null, slot: c.slot || '',
-    regular: (c.regular || []).filter(r => r && r.productId).map(r => ({ productId: r.productId, qty: Math.max(0, +r.qty || 0), days: (r.days && r.days.length ? r.days : [1, 2, 3, 4, 5]).map(Number) })),
+    regular: (c.regular || []).filter(r => r && r.productId).map(r => ({ productId: r.productId, qty: Math.max(0, +r.qty || 0), days: (r.days && r.days.length ? r.days : [1, 2, 3, 4, 5]).map(Number), every: +r.every === 2 ? 2 : 1, anchor: r.anchor || '' })),
     payment: c.payment || 'card', member: !!c.member, bill: c.bill || 'mobile', ice: !!c.ice, bag: !!c.bag,
-    notes: c.notes || '', pauses: (c.pauses || []).filter(p => p && p.from && p.to).map(p => ({ id: p.id || uid('p_'), from: p.from, to: p.to, reason: p.reason || '', ack: !!p.ack })),
+    notes: c.notes || '', pauses: (c.pauses || []).filter(p => p && p.from && p.to).map(p => ({ id: p.id || uid('p_'), from: p.from, to: p.to, reason: p.reason || '', ack: !!p.ack, days: Array.isArray(p.days) ? p.days.map(Number) : [] })),
     paidMonth: c.paidMonth || '', tags: Array.isArray(c.tags) ? c.tags : [], active: c.active !== false, createdAt: c.createdAt || Date.now(),
   };
 }
@@ -681,7 +704,10 @@ function orderDayFor(t) {
   if (S.config.leadMode === 'calendar') return addDays(t, -L);
   let x = t, n = 0; for (let i = 0; i < 60 && n < L; i++) { x = addDays(x, -1); if (isWorkday(x)) n++; } return x;
 }
-const pauseOn = (c, d) => c.pauses.find(p => p.from <= d && d <= p.to);
+const pauseOn = (c, d) => c.pauses.find(p => p.from <= d && d <= p.to && (!p.days || !p.days.length || p.days.includes(dow(d))));
+const pauseDays = p => p.days && p.days.length ? ' (' + p.days.map(x => DL[x]).join('') + '요일만)' : '';
+// every-other-week items: deliver on weeks an even number of weeks from the anchor date
+const onCycle = (r, d) => r.every !== 2 || !r.anchor || ((Math.round(daysBetween(r.anchor, d) / 7) % 2) + 2) % 2 === 0;
 function routeDefaultDate() { const t = TODAY(); return isDeliveryDay(t) ? t : nextDeliveryDay(t); }
 
 /* ================= location & route ================= */
@@ -748,7 +774,7 @@ function stopsFor(date) {
   const regularDay = S.config.deliveryDays.includes(w) && !isHoliday(date);
   if (regularDay) for (const c of S.customers) {
     if (!c.active || pauseOn(c, date)) continue;
-    const items = c.regular.filter(r => r.qty > 0 && r.days.includes(w));
+    const items = c.regular.filter(r => r.qty > 0 && r.days.includes(w) && onCycle(r, date));
     if (items.length) map.set(c.id, { key: c.id, cust: c, items: items.map(r => ({ pid: r.productId, qty: r.qty, type: 'regular' })), orders: [] });
   }
   for (const o of S.orders) {
@@ -807,7 +833,7 @@ function buildAlerts() {
       const dd = daysBetween(t, resume);
       if (dd >= -2 && dd <= 3) out.push({ kind: 'ok', html: `<b>${esc(c.name)}</b> 배달 재개 ${fmt(resume)}`, sub: `${fmtShort(p.from)}–${fmtShort(p.to)} 중지 끝 · 동선과 발주표에 자동으로 다시 들어가요`, act: `<button class="btn sm" data-act="ackPause" data-id="${c.id}" data-p="${p.id}">확인</button>` });
       const ds = daysBetween(t, p.from);
-      if (ds >= 0 && ds <= 2) out.push({ kind: 'info', html: `<b>${esc(c.name)}</b> ${fmt(p.from)}부터 배달 중지`, sub: `${fmtShort(p.from)}–${fmtShort(p.to)}${p.reason ? ' · ' + esc(p.reason) : ''}` });
+      if (ds >= 0 && ds <= 2) out.push({ kind: 'info', html: `<b>${esc(c.name)}</b> ${fmt(p.from)}부터 배달 중지${pauseDays(p)}`, sub: `${fmtShort(p.from)}–${fmtShort(p.to)}${p.reason ? ' · ' + esc(p.reason) : ''}` });
     }
   }
   const tgt = orderTarget();
@@ -897,6 +923,7 @@ function custFilters() {
   sers.forEach(s => defs.push(['s:' + s, s, c => seriesOf(c.loc.building) === s]));
   defs.push(['next', fmtShort(t) + ' 배달', c => has.has(c.id)]);
   defs.push(['paused', '중지·예정', c => c.pauses.some(p => p.to >= TODAY())]);
+  defs.push(['off', '배달 안 함', c => !c.active]);
   defs.push(['cash', '현금 미수', c => c.payment === 'cash' && c.paidMonth !== MONTH()]);
   if (S.customers.some(c => c.tags.includes('예시'))) defs.push(['ex', '예시', c => c.tags.includes('예시')]);
   return defs;
@@ -922,11 +949,11 @@ function renderCustomers() {
 function daysText(days) { const s = [...days].sort(); if (s.join() === '1,2,3,4,5') return '월–금'; if (s.join() === '1,3,5') return '월수금'; if (s.join() === '2,4') return '화목'; return s.map(d => DL[d]).join(''); }
 function custCard(c) {
   const t = TODAY(); const sel = UI.selected.has(c.id);
-  const pNow = pauseOn(c, t); const pNext = c.pauses.filter(p => p.from > t).sort((a, b) => a.from.localeCompare(b.from))[0];
-  const pause = pNow || pNext;
+  const pNow = pauseOn(c, t);
+  const pause = c.pauses.filter(p => p.to >= t).sort((a, b) => a.from.localeCompare(b.from))[0];
   const badges = [];
-  if (pause) badges.push(`<span class="badge warn">${pNow ? '중지 중' : '중지 예정'} ${fmtShort(pause.from)}–${fmtShort(pause.to)}</span>`);
-  if (!c.active) badges.push(`<span class="badge">해지</span>`);
+  if (pause) badges.push(`<span class="badge warn">${pause.from <= t ? '중지 중' : '중지 예정'} ${fmtShort(pause.from)}–${fmtShort(pause.to)}${pauseDays(pause)}</span>`);
+  if (!c.active) badges.push(`<span class="badge">배달 안 함</span>`);
   if (c.tags.includes('예시')) badges.push(`<span class="badge">예시</span>`);
   const upcoming = S.orders.filter(o => o.customerId === c.id && o.status === 'open' && o.date >= t);
   if (upcoming.length) badges.push(`<span class="badge acc">주문 ${upcoming.length}건</span>`);
@@ -936,7 +963,7 @@ function custCard(c) {
     <div class="cbody">
       <div class="chead"><button class="cname" data-act="editCust" data-id="${c.id}">${esc(c.name || '이름 없음')}</button>${badges.join('')}</div>
       <div class="cloc">${plate(c.loc)}<span class="muted">${esc(c.loc.label || (c.loc.type !== 'apt' ? LOC_TYPES[c.loc.type] : ''))}</span>${c.course != null && c.course !== '' ? `<span class="muted">코스 ${esc(c.course)}</span>` : ''}</div>
-      ${c.regular.length ? `<div class="ritems">${c.regular.map((r, i) => `<div class="ritem ${r.qty ? '' : 'zero'}"><span class="pdot" style="--h:${pHue(r.productId)}"></span><span class="pn">${esc(pName(r.productId))}</span><span class="dd">${daysText(r.days)}</span><span class="stepper"><button data-act="qty" data-id="${c.id}" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b>${r.qty}</b><button data-act="qty" data-id="${c.id}" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span></div>`).join('')}</div>` : `<div class="muted" style="font-size:13px">정기 품목 없음</div>`}
+      ${c.regular.length ? `<div class="ritems">${c.regular.map((r, i) => `<div class="ritem ${r.qty ? '' : 'zero'}"><span class="pdot" style="--h:${pHue(r.productId)}"></span><span class="pn">${esc(pName(r.productId))}</span><span class="dd">${r.every === 2 ? '격주 ' : ''}${daysText(r.days)}</span><span class="stepper"><button data-act="qty" data-id="${c.id}" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b>${r.qty}</b><button data-act="qty" data-id="${c.id}" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span></div>`).join('')}</div>` : `<div class="muted" style="font-size:13px">정기 품목 없음</div>`}
       <div class="cmeta">${pay}${c.ice ? '<span class="badge">아이스팩</span>' : ''}${c.bag ? '<span class="badge">전달주머니</span>' : ''}${c.bill === 'paper' ? '<span class="badge">종이 청구서</span>' : ''}${c.member ? '<span class="badge">회원</span>' : ''}</div>
       ${c.notes ? `<div class="cnote">${esc(c.notes)}</div>` : ''}
     </div></article>`;
@@ -985,11 +1012,12 @@ function renderOrder() {
   <div class="ogrid"><div>
   ${show.length ? `<div class="card tblwrap"><table class="ot">
     <thead><tr><th>제품 (출고신청 이름)</th><th>필요</th><th>재고</th><th>발주</th></tr></thead>
-    <tbody>${show.map(r => {
+    <tbody>${show.map((r, ri) => {
+      const catRow = (ri === 0 || (show[ri - 1].p.cat || '') !== (r.p.cat || '')) && r.p.cat ? `<tr class="cat"><td colspan="4">${esc(r.p.cat)}</td></tr>` : '';
       const open = UI.openP === r.p.id;
       const c = conf ? (+conf[r.p.id] || 0) : null; const d = c == null ? 0 : r.buy - c;
       const parts = TYPES.filter(x => r.r[x]).map(x => `${TYPE_NAME[x]} ${r.r[x]}${P[x] ? '' : '(제외)'}`).join(' · ');
-      return `<tr class="prow" data-act="toggleP" data-id="${esc(r.p.id)}"><td><div class="pname"><span class="pdot" style="--h:${r.p.hue ?? 210}"></span><div><b>${esc(r.p.orderName || r.p.name)}</b>${r.p.orderName && r.p.orderName !== r.p.name ? `<small>배달표: ${esc(r.p.name)}</small>` : ''}<small>${parts || '주문 없음'}</small></div></div></td>
+      return catRow + `<tr class="prow" data-act="toggleP" data-id="${esc(r.p.id)}"><td><div class="pname"><span class="pdot" style="--h:${r.p.hue ?? 210}"></span><div><b>${esc(r.p.orderName || r.p.name)}</b>${r.p.orderName && r.p.orderName !== r.p.name ? `<small>배달표: ${esc(r.p.name)}</small>` : ''}<small>${parts || '주문 없음'}</small></div></div></td>
       <td>${r.need}</td><td><input type="number" inputmode="numeric" min="0" value="${r.stock}" data-chg="stock" data-id="${esc(r.p.id)}" aria-label="${esc(r.p.name)} 재고"></td>
       <td><span class="buy ${r.buy ? '' : 'zero'}" data-buy="${esc(r.p.id)}">${r.buy}</span>${d ? `<span class="diff ${d > 0 ? 'up' : 'dn'}">${d > 0 ? '+' : ''}${d}</span>` : ''}</td></tr>
       ${open ? `<tr class="detail"><td colspan="4"><div class="brk">${r.r.rows.map(x => `<div><span class="badge t-${x.type}">${TYPE_NAME[x.type]}</span><span>${esc(x.name)} <span class="muted">${esc(locText(x.loc))}</span></span><b class="num">${x.qty}</b></div>`).join('') || '<div class="muted">주문 없음</div>'}</div></td></tr>` : ''}`;
@@ -1120,7 +1148,7 @@ function renderSettings() {
     <div class="field"><span class="lbl">같은 동 안에서</span><div class="seg"><button aria-pressed="${C.floorDir === 'desc'}" data-act="floorDir" data-m="desc">위층부터 내려오기</button><button aria-pressed="${C.floorDir === 'asc'}" data-act="floorDir" data-m="asc">아래층부터</button></div></div>
   </div></div>
   <div class="sec"><div class="sec-h"><h2>발주에 포함할 주문</h2></div><div class="card">
-    ${[['regular', '정기 배달', '정기(애음) 계약 수량'], ['adhoc', '추가주문', '정기 외 한 번만 배달하는 주문'], ['sample', '샘플', '끄면 발주에서 빠지고 “지점에서 받아오기” 목록에만 떠요'], ['fredit', 'Fredit 온라인 주문', '끄면 자동 발주로 보고 동선에만 넣어요']].map(([k, n, d]) => `<label class="chk"><input type="checkbox" data-chg="purchase" data-k="${k}" ${C.purchase[k] ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label>`).join('')}
+    ${[['regular', '정기 배달', '정기(애음) 계약 수량'], ['adhoc', '추가주문', '끄면 자동 발주로 보고 동선에만 넣어요'], ['sample', '샘플', '끄면 발주에서 빠지고 “지점에서 받아오기” 목록에만 떠요'], ['fredit', 'Fredit 온라인 주문', '끄면 자동 발주로 보고 동선에만 넣어요']].map(([k, n, d]) => `<label class="chk"><input type="checkbox" data-chg="purchase" data-k="${k}" ${C.purchase[k] ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label>`).join('')}
   </div></div>
   <div class="sec"><div class="sec-h"><h2>휴무일</h2></div><div class="card">
     <div class="slist">${C.holidays.slice().sort((a, b) => a.date.localeCompare(b.date)).map(h => `<div class="it"><div class="t"><b>${fmt(h.date)}</b> ${esc(h.name)}</div><button class="btn sm ghost" data-act="delHoliday" data-date="${h.date}">삭제</button></div>`).join('') || '<div class="it muted">등록된 휴무일이 없어요. 공휴일을 넣으면 그날은 모든 정기 배달이 빠져요.</div>'}</div>
@@ -1270,15 +1298,17 @@ function renderCF() {
       <select data-chg="cfProd" data-i="${i}" aria-label="제품">${S.config.products.map(p => `<option value="${p.id}" ${p.id === r.productId ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}${prodById(r.productId) ? '' : `<option selected value="${esc(r.productId)}">${esc(r.productId)}</option>`}</select>
       <button class="btn sm ghost" data-act="cfDelReg" data-i="${i}" aria-label="품목 삭제">✕</button>
       <div class="r2"><div class="daypick">${[1, 2, 3, 4, 5, 6].map(d => `<button aria-pressed="${r.days.includes(d)}" data-act="cfDay" data-i="${i}" data-d="${d}">${DL[d]}</button>`).join('')}</div>
-      <span class="stepper"><button data-act="cfQty" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b>${r.qty}</b><button data-act="cfQty" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span></div></div>`).join('')}
+      <span class="stepper"><button data-act="cfQty" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b>${r.qty}</b><button data-act="cfQty" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span></div>
+      <div class="r2"><label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" data-chg="cfEvery" data-i="${i}" ${r.every === 2 ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)"> 격주</label>${r.every === 2 ? `<label class="row" style="gap:6px;flex:1;min-width:0"><span class="hint" style="white-space:nowrap">배달하는 주의 날짜</span><input type="date" value="${esc(r.anchor)}" data-chg="cfAnchor" data-i="${i}" style="flex:1;min-width:0" aria-label="격주 기준 날짜"></label>` : ''}</div></div>`).join('')}
     <button class="btn sm" style="justify-self:start" data-act="cfAddReg">+ 품목 추가</button></div></div>
   <div class="grid2"><div class="field"><label class="lbl" for="cfPay">수금 구분</label><select id="cfPay">${Object.entries(PAY).map(([k, n]) => `<option value="${k}" ${CF.payment === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
   <div class="field"><label class="lbl" for="cfBill">청구서</label><select id="cfBill"><option value="mobile" ${CF.bill === 'mobile' ? 'selected' : ''}>모바일</option><option value="paper" ${CF.bill === 'paper' ? 'selected' : ''}>종이</option></select></div></div>
-  <div class="row" style="gap:16px">${[['cfIce', 'ice', '아이스팩'], ['cfBag', 'bag', '전달주머니'], ['cfMember', 'member', '회원'], ['cfActive', 'active', '계약 유지']].map(([id, k, n]) => `<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="${id}" ${CF[k] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)">${n}</label>`).join('')}</div>
+  <div class="row" style="gap:16px">${[['cfIce', 'ice', '아이스팩'], ['cfBag', 'bag', '전달주머니'], ['cfMember', 'member', '회원'], ['cfActive', 'active', '배달 중']].map(([id, k, n]) => `<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="${id}" ${CF[k] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)">${n}</label>`).join('')}</div>
   <div class="field"><label class="lbl" for="cfNotes">메모 (배달할 때 보여요)</label><textarea id="cfNotes">${esc(CF.notes)}</textarea></div>
   <div class="field"><span class="lbl">배달 중지 기간</span>
-    <div style="display:grid;gap:6px">${CF.pauses.slice().sort((a, b) => a.from.localeCompare(b.from)).map(p => `<div class="row" style="justify-content:space-between;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)"><span><b>${fmt(p.from)} – ${fmt(p.to)}</b> ${p.to < t ? '<span class="badge">지남</span>' : p.from <= t ? '<span class="badge warn">중지 중</span>' : '<span class="badge warn">예정</span>'} <span class="muted">${esc(p.reason)}</span></span><button class="btn sm ghost" data-act="cfDelPause" data-p="${p.id}">삭제</button></div>`).join('') || '<span class="hint">없음</span>'}
+    <div style="display:grid;gap:6px">${CF.pauses.slice().sort((a, b) => a.from.localeCompare(b.from)).map(p => `<div class="row" style="justify-content:space-between;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)"><span><b>${fmt(p.from)} – ${fmt(p.to)}</b>${pauseDays(p)} ${p.to < t ? '<span class="badge">지남</span>' : p.from <= t ? '<span class="badge warn">중지 중</span>' : '<span class="badge warn">예정</span>'} <span class="muted">${esc(p.reason)}</span></span><button class="btn sm ghost" data-act="cfDelPause" data-p="${p.id}">삭제</button></div>`).join('') || '<span class="hint">없음</span>'}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input type="date" id="cfPF" aria-label="시작일" value="${defaultOrderDate()}"><input type="date" id="cfPT" aria-label="종료일" value="${defaultOrderDate()}"></div>
+    <div class="row" style="gap:8px"><span class="hint">특정 요일만 쉴 때 고르기 (안 고르면 전부)</span><div class="daypick" id="cfPD">${[1, 2, 3, 4, 5, 6].map(d => `<button aria-pressed="false" data-act="togglePress">${DL[d]}</button>`).join('')}</div></div>
     <div style="display:grid;grid-template-columns:1fr auto;gap:6px"><input type="text" id="cfPR" placeholder="사유 (예: 여행)" aria-label="사유"><button class="btn" data-act="cfAddPause">중지 추가</button></div></div></div>
   <div class="sact">${CF._new ? '' : '<button class="btn danger" data-act="cfDelete">삭제</button>'}<button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="cfSave">저장</button></div>`;
 }
@@ -1581,7 +1611,7 @@ const ACT = {
   orderDate: a => { const d = +a.dataset.d; const cur = UI.orderDate || orderTarget(); UI.orderDate = d === 0 ? null : (d > 0 ? nextDeliveryDay(cur) : prevDeliveryDay(cur)); UI.openP = null; render(); },
   toggleP: (a, e) => { if (e.target.closest('input')) return; UI.openP = UI.openP === a.dataset.id ? null : a.dataset.id; render(); },
   stockZero: () => { const before = clone(S.config.stock); S.config.stock = {}; save('config'); render(); toast('재고를 0으로 맞췄어요', () => { S.config.stock = before; save('config'); render(); }); },
-  copyOrder: a => { const d = a.dataset.date; const rows = sheetFor(d).filter(r => r.buy > 0); const txt = `${fmt(d)} 배달분 발주\n` + (rows.length ? rows.map(r => `${r.p.orderName || r.p.name} ${r.buy}`).join('\n') : '발주할 제품 없음'); copyText(txt); },
+  copyOrder: a => { const d = a.dataset.date; const rows = sheetFor(d).filter(r => r.buy > 0); let last = null; const lines = []; rows.forEach(r => { const c = r.p.cat || ''; if (c && c !== last) { lines.push((lines.length ? '\n' : '') + `[${c}]`); last = c; } lines.push(`${r.p.orderName || r.p.name} ${r.buy}`); }); const txt = `${fmt(d)} 배달분 발주\n\n` + (rows.length ? lines.join('\n') : '발주할 제품 없음'); copyText(txt); },
   confirmOrder: a => { const d = a.dataset.date; const rec = dayRec(d); rec.confirmed = Object.fromEntries(sheetFor(d).map(r => [r.p.id, r.buy])); rec.confirmedAt = Date.now(); save('days'); render(); toast(`${fmt(d)} 발주를 확정했어요. 이후 바뀌면 알려 드려요.`); },
   // route
   routeDate: a => { const cur = UI.routeDate || routeDefaultDate(); UI.routeDate = +a.dataset.d > 0 ? nextDeliveryDay(cur) : prevDeliveryDay(cur); UI.mapB = null; render(); },
@@ -1611,7 +1641,7 @@ const ACT = {
   cfDelReg: a => { readCF(); CF.regular.splice(+a.dataset.i, 1); renderCF(); },
   cfDay: a => { readCF(); const r = CF.regular[+a.dataset.i]; const d = +a.dataset.d; r.days = r.days.includes(d) ? r.days.filter(x => x !== d) : [...r.days, d].sort(); renderCF(); },
   cfQty: a => { readCF(); const r = CF.regular[+a.dataset.i]; r.qty = Math.max(0, r.qty + (+a.dataset.d)); renderCF(); },
-  cfAddPause: () => { const f = $('#cfPF').value, t = $('#cfPT').value; if (!f || !t || t < f) { toast('중지 기간을 확인해 주세요.'); return; } const r = $('#cfPR').value.trim(); readCF(); CF.pauses.push({ id: uid('p_'), from: f, to: t, reason: r, ack: false }); renderCF(); },
+  cfAddPause: () => { const f = $('#cfPF').value, t = $('#cfPT').value; if (!f || !t || t < f) { toast('중지 기간을 확인해 주세요.'); return; } const r = $('#cfPR').value.trim(); const pd = $$('#cfPD button').map((b, i) => b.getAttribute('aria-pressed') === 'true' ? i + 1 : 0).filter(Boolean); readCF(); CF.pauses.push({ id: uid('p_'), from: f, to: t, reason: r, ack: false, days: pd }); renderCF(); },
   cfDelPause: a => { readCF(); CF.pauses = CF.pauses.filter(p => p.id !== a.dataset.p); renderCF(); },
   cfSave: () => saveCF(),
   cfDelete: () => { const id = CF.id, nm = CF.name; confirmSheet(`${nm} 삭제`, '이 고객과 앞으로 남은 주문이 지워져요.', '삭제', () => { const bc = clone(S.customers), bo = clone(S.orders); S.customers = S.customers.filter(c => c.id !== id); S.orders = S.orders.filter(o => !(o.customerId === id && o.date >= TODAY())); UI.selected.delete(id); save('customers', 'orders'); render(); toast(`${nm} 삭제했어요`, () => { S.customers = bc.map(normCust); S.orders = bo.map(normOrder); save('customers', 'orders'); render(); }); }); },
@@ -1625,7 +1655,7 @@ const ACT = {
   rDel: a => { S.config.routeOrder.splice(+a.dataset.i, 1); save('config'); render(); },
   rAdd: () => { const v = $('#rNew').value.trim().replace(/동$/, ''); if (!v) return; if (!S.config.routeOrder.includes(v)) S.config.routeOrder.push(v); save('config'); render(); },
   clearBase: () => { S.config.baseSeq = null; save('config'); render(); toast('기본 동선을 지웠어요. 동 순서대로 자동 정렬돼요.'); },
-  addProd: () => { S.config.products.push({ id: uid('p_'), name: '새 제품', short: '새 제품', orderName: '새 제품', hue: Math.floor(Math.random() * 360) }); save('config'); render(); },
+  addProd: () => { S.config.products.push({ id: uid('p_'), name: '새 제품', short: '새 제품', orderName: '새 제품', cat: '기타(Fredit 등)', hue: Math.floor(Math.random() * 360) }); save('config'); render(); },
   delProd: a => {
     const p = S.config.products[+a.dataset.i]; if (!p) return;
     const used = S.customers.some(c => c.regular.some(r => r.productId === p.id)) || S.orders.some(o => o.status === 'open' && o.date >= TODAY() && o.items.some(i => i.productId === p.id));
@@ -1655,6 +1685,8 @@ const CHG = {
   stock: el => { const v = Math.max(0, Math.round(+el.value || 0)); if (v) S.config.stock[el.dataset.id] = v; else delete S.config.stock[el.dataset.id]; save('config'); updateOrderNumbers(); },
   ofdate: el => { if (el.value) { F.date = el.value; renderOF(); } },
   cfProd: el => { readCF(); CF.regular[+el.dataset.i].productId = el.value; renderCF(); },
+  cfEvery: el => { readCF(); const r = CF.regular[+el.dataset.i]; r.every = el.checked ? 2 : 1; if (el.checked && !r.anchor) { let x = TODAY(); for (let k = 0; k < 14 && !r.days.includes(dow(x)); k++) x = addDays(x, 1); r.anchor = x; } renderCF(); },
+  cfAnchor: el => { if (CF) CF.regular[+el.dataset.i].anchor = el.value; },
   leadDays: el => { S.config.leadDays = Math.max(0, Math.min(7, Math.round(+el.value || 0))); save('config'); render(); },
   purchase: el => { S.config.purchase[el.dataset.k] = el.checked; save('config'); render(); },
   prod: el => { const p = S.config.products[+el.dataset.i]; if (!p) return; p[el.dataset.f] = el.value.trim() || p[el.dataset.f]; save('config'); },
