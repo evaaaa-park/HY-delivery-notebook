@@ -46,7 +46,7 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .brand{white-space:nowrap;font-family:var(--f-display);font-size:23px;letter-spacing:.01em;line-height:1}
 .brand small{display:block;font-family:var(--f-body);font-size:12px;color:var(--muted);letter-spacing:0;margin-top:4px}
 .top .sp{flex:1}
-.sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:4px 9px;border:1px solid var(--line);border-radius:99px;background:var(--surface);white-space:nowrap}
+.sync{font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:4px 9px;border:1px solid var(--line);border-radius:99px;background:var(--surface);white-space:nowrap}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--muted)}
 .sync.db i{background:var(--ok)} .sync.saving i{background:var(--warn)} .sync.local i{background:var(--warn)}
 .iconbtn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
@@ -359,7 +359,7 @@ button,.chip,.check,.seq,.tile,.cell{touch-action:manipulation}
 <header class="top"><div class="wrap">
   <div class="brand">헬리오 배달수첩<small id="hdate"></small></div>
   <div class="sp"></div>
-  <span class="sync" id="sync"><i></i><span>불러오는 중</span></span>
+  <button class="sync" id="sync" data-act="syncInfo" aria-label="저장 상태 보기"><i></i><span>불러오는 중</span></button>
   <button class="iconbtn theme-btn" id="themeBtn" data-act="theme" aria-label="화면 모드"></button>
   <button class="iconbtn phone-only" data-act="tab" data-tab="settings" aria-label="설정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div></header>
@@ -503,16 +503,29 @@ const pShort = id => prodById(id)?.short || prodById(id)?.name || id;
 const pHue = id => prodById(id)?.hue ?? 210;
 
 /* ================= persistence ================= */
-function bodyOf(n) { if (n === 'customers') return { list: S.customers }; if (n === 'orders') return { list: S.orders }; if (n === 'days') return { map: S.days }; return S.config; }
+const LS_META = 'helio-delivery-meta';
+const META = { t: {}, pending: {}, syncedAt: 0, err: '' };
+const DOC_NAME = { customers: '고객', orders: '주문', config: '설정·재고', days: '배달 체크·순서' };
+function loadMeta() { try { const m = JSON.parse(localStorage.getItem(LS_META) || '{}'); META.t = m.t || {}; META.pending = m.pending || {}; META.syncedAt = m.syncedAt || 0; } catch (e) { } }
+function saveMeta() { try { localStorage.setItem(LS_META, JSON.stringify(META)); } catch (e) { } }
+// every saved document carries _t = when it was last edited on any device; newer edit wins
+function bodyOf(n) {
+  const _t = META.t[n] || Date.now();
+  if (n === 'customers') return { list: S.customers, _t };
+  if (n === 'orders') return { list: S.orders, _t };
+  if (n === 'days') return { map: S.days, _t };
+  return { ...S.config, _t };
+}
 function applyBody(n, b) {
   if (n === 'customers') S.customers = (b.list || []).map(normCust);
   else if (n === 'orders') S.orders = (b.list || []).map(normOrder);
   else if (n === 'days') S.days = b.map || {};
-  else S.config = normConfig(b);
+  else { const c = { ...b }; delete c._t; S.config = normConfig(c); }
 }
 function stable(v) { return JSON.stringify(v, (k, x) => (x && typeof x === 'object' && !Array.isArray(x)) ? Object.keys(x).sort().reduce((o, kk) => (o[kk] = x[kk], o), {}) : x); }
 function cacheLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { } }
 function loadLocal() {
+  loadMeta();
   try {
     const raw = localStorage.getItem(LS_KEY); if (!raw) return;
     const o = JSON.parse(raw);
@@ -526,36 +539,74 @@ function loadLocal() {
 function saveUI() { try { localStorage.setItem(LS_UI, JSON.stringify({ tab: UI.tab, routeMode: UI.routeMode, hideDone: UI.hideDone })); } catch (e) { } }
 function save(...names) {
   prune();
-  cacheLocal();
-  if (!store.db) return;
-  for (const n of names) {
+  const now = Date.now();
+  for (const n of names) { META.t[n] = now; META.pending[n] = true; }
+  saveMeta(); cacheLocal();            // on this device immediately, survives closing the app
+  if (store.db) for (const n of names) {
     store.dirty[n] = true; clearTimeout(store.timers[n]);
-    store.timers[n] = setTimeout(() => flush(n), 450);
+    store.timers[n] = setTimeout(() => flush(n), 400);
   }
   renderSync();
 }
 async function flush(n) {
+  if (!store.db || !store.refs[n]) return;
+  clearTimeout(store.timers[n]);
   if (store.writing[n]) { store.again[n] = true; return; }
   store.writing[n] = true; renderSync();
-  let retry = false;
+  const t0 = META.t[n];
   try {
-    const body = JSON.parse(JSON.stringify(bodyOf(n)));
+    const body = clone(bodyOf(n));
     store.last[n] = stable(body);
     await store.refs[n].set(body);
+    if (META.t[n] === t0) META.pending[n] = false;
+    META.syncedAt = Date.now(); META.err = ''; store.fails = 0; saveMeta();
   } catch (e) {
     const code = e && e.code;
-    if (code === 'unavailable' && !store.retried) { store.retried = true; retry = true; }
-    else if (code === 'quota_exceeded') toast('저장 공간이 가득 찼어요. 설정 > 데이터에서 지난 기록을 정리해 주세요.');
-    else if (code === 'invalid_argument') { toast('저장 권한이 없어요. 이 기기에만 보관할게요.'); store.db = null; store.mode = 'local'; }
-    else if (code === 'revoked') { store.db = null; store.mode = 'local'; }
-    else toast('서버 저장이 잠시 안 됐어요. 이 기기에는 보관돼 있어요.');
+    if (code === 'quota_exceeded') { META.err = '공간 부족'; toast('저장 공간이 가득 찼어요. 설정 > 데이터에서 지난 기록을 정리해 주세요.'); }
+    else if (code === 'invalid_argument' || code === 'revoked' || code === 'not_granted') { store.db = null; store.mode = code === 'invalid_argument' ? 'guest' : 'local'; toast('서버 저장 권한이 없어요. 이 기기에만 보관할게요.'); }
+    else { META.err = navigator.onLine === false ? '오프라인' : '연결 대기'; scheduleRetry(); }
+    saveMeta();
   } finally {
     store.writing[n] = false;
-    if (retry) setTimeout(() => { store.retried = false; flush(n); }, 1200 + Math.random() * 1200);
-    else if (store.again[n]) { store.again[n] = false; flush(n); }
+    if (store.again[n]) { store.again[n] = false; store.dirty[n] = true; flush(n); }
     else store.dirty[n] = false;
     renderSync();
   }
+}
+let retryT = null;
+function scheduleRetry() {
+  if (retryT) return;
+  store.fails = (store.fails || 0) + 1;
+  const d = Math.min(60000, 3000 * 2 ** Math.min(store.fails - 1, 4));
+  retryT = setTimeout(() => { retryT = null; flushPending(); }, d);
+}
+function flushPending() { if (store.db) DOCS.forEach(n => { if (META.pending[n] && !store.writing[n]) flush(n); }); }
+function flushNow() { if (store.db) DOCS.forEach(n => { if (store.dirty[n] && !store.writing[n]) flush(n); }); }
+function subscribe(n) {
+  try { store.unsub[n] && store.unsub[n](); } catch (e) { }
+  store.unsub[n] = store.refs[n].onSnapshot(snap => {
+    store.live[n] = true;
+    if (store.dirty[n] || store.writing[n]) return;
+    if (!snap.exists) {
+      if (snap.metadata && snap.metadata.fromCache) return;
+      store.loaded[n] = true;
+      if (META.pending[n] || store.localHad[n]) { META.pending[n] = true; META.t[n] = META.t[n] || Date.now(); flush(n); }
+      renderSync(); return;
+    }
+    store.loaded[n] = true;
+    const body = snap.data(); const key = stable(body);
+    if (key === store.last[n]) { renderSync(); return; }
+    const serverT = +body._t || 0;
+    // edits made here while offline are newer than the server copy: send them up instead of overwriting
+    if (META.pending[n] && (META.t[n] || 0) >= serverT) { flush(n); return; }
+    store.last[n] = key; META.t[n] = serverT; META.pending[n] = false; saveMeta();
+    applyBody(n, clone(body)); cacheLocal(); scheduleRender();
+  }, err => {
+    store.live[n] = false;
+    const code = err && err.code;
+    if (code === 'revoked' || code === 'invalid_argument') { store.db = null; store.mode = 'local'; renderSync(); }
+    else setTimeout(() => { if (store.db) subscribe(n); }, 3000);
+  });
 }
 async function initRuntime() {
   if (!window.claude || typeof window.claude.use !== 'function') { store.mode = 'local'; renderSync(); return; }
@@ -567,22 +618,8 @@ async function initRuntime() {
   if (smp && smp.limits) { try { const l = await smp.limits(); sampleImages = !!l.images; } catch (e) { sampleImages = false; } }
   let owner = true; try { if (user && typeof user.isOwner === 'function') owner = (await user.isOwner()) !== false; } catch (e) { }
   if (!db || !owner) { store.mode = owner ? 'local' : 'guest'; renderSync(); render(); return; }
-  store.db = db; store.mode = 'db';
-  for (const n of DOCS) {
-    const ref = db.doc('hy/' + n); store.refs[n] = ref;
-    ref.onSnapshot(snap => {
-      if (store.dirty[n] || store.writing[n]) return;
-      if (!snap.exists) {
-        if (snap.metadata && snap.metadata.fromCache) return;
-        if (!store.loaded[n]) { store.loaded[n] = true; if (store.localHad[n]) save(n); }
-        renderSync(); return;
-      }
-      store.loaded[n] = true;
-      const body = snap.data(); const key = stable(body);
-      if (key === store.last[n]) return;
-      store.last[n] = key; applyBody(n, clone(body)); cacheLocal(); scheduleRender();
-    }, err => { if (err && (err.code === 'revoked' || err.code === 'invalid_argument')) { store.db = null; store.mode = 'local'; renderSync(); } });
-  }
+  store.db = db; store.mode = 'db'; store.unsub = {}; store.live = {};
+  for (const n of DOCS) { store.refs[n] = db.doc('hy/' + n); subscribe(n); }
   renderSync(); render();
 }
 function prune() {
@@ -593,12 +630,33 @@ function prune() {
 }
 function renderSync() {
   const el = $('#sync'); if (!el) return;
-  const saving = Object.values(store.dirty).some(Boolean) || Object.values(store.writing).some(Boolean);
-  let cls = 'local', txt = '이 기기에 저장';
+  const writing = DOCS.some(n => store.writing[n] || store.dirty[n]);
+  const pend = DOCS.filter(n => META.pending[n]).length;
+  let cls = 'local', txt = '이 기기에만 저장';
   if (store.mode === 'loading') { cls = ''; txt = '불러오는 중'; }
-  else if (store.db) { cls = saving ? 'saving' : 'db'; txt = saving ? '저장 중' : '동기화됨'; }
-  else if (store.mode === 'guest') { txt = '보기 전용'; }
+  else if (store.db) {
+    if (writing) { cls = 'saving'; txt = '저장 중'; }
+    else if (pend) { cls = 'saving'; txt = navigator.onLine === false ? '오프라인 · 연결되면 저장' : '저장 대기 중'; }
+    else { cls = 'db'; txt = '서버에 저장됨'; }
+  } else if (store.mode === 'guest') txt = '보기 전용';
   el.className = 'sync ' + cls; el.lastElementChild.textContent = txt;
+}
+function syncSheet() {
+  const pend = DOCS.filter(n => META.pending[n]);
+  const when = META.syncedAt ? new Date(META.syncedAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '이 기기에서는 아직 없음';
+  const live = store.db && DOCS.every(n => store.live[n]);
+  const body = store.db ? `
+    <p style="margin:0">입력하는 순간 이 기기에 먼저 저장되고, 1초 안에 claude.ai 계정 서버에도 저장돼요. 앱을 닫거나 iPad를 꺼도 남아 있고, 같은 계정으로 연 iPhone·컴퓨터에 실시간으로 나타나요.</p>
+    <div class="card slist">
+      <div class="it"><div class="t">서버 연결</div><b>${live ? '실시간 연결됨' : '다시 연결하는 중'}</b></div>
+      <div class="it"><div class="t">이 기기에서 마지막 서버 저장</div><b class="num">${when}</b></div>
+      <div class="it"><div class="t">서버에 아직 안 올라간 것</div><b>${pend.length ? pend.map(n => DOC_NAME[n]).join(', ') : '없음'}</b></div>
+    </div>
+    ${pend.length ? `<p class="hint">신호가 약한 곳(지하 주차장 등)에서는 이 기기에 보관했다가 연결되면 자동으로 올려요. 앱을 닫아도 다음에 열 때 이어서 올려요.</p><button class="btn pri" data-act="syncNow">지금 다시 저장</button>` : ''}
+    <p class="hint">두 기기에서 같은 항목을 오프라인으로 동시에 고치면, 나중에 고친 쪽이 남아요.</p>`
+    : store.mode === 'guest' ? `<p style="margin:0">이 수첩의 데이터는 소유자 계정에만 저장돼요. 여기서 고친 내용은 이 기기에만 남아요.</p>`
+      : `<p style="margin:0">지금은 서버에 연결되지 않아 이 브라우저에만 저장돼요. claude.ai에 로그인한 상태로 이 수첩 링크를 열면 서버 저장과 기기 간 실시간 동기화가 켜져요.</p>`;
+  openSheet(sheetHead('저장 상태') + body);
 }
 let renderQueued = false;
 function scheduleRender() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
@@ -1495,6 +1553,8 @@ document.addEventListener('pointercancel', endDrag);
 const ACT = {
   tab: a => { UI.tab = a.dataset.tab; if (UI.tab !== 'customers') UI.selected.clear(); saveUI(); render(); window.scrollTo(0, 0); },
   closeSheet: () => closeSheet(),
+  syncInfo: () => syncSheet(),
+  syncNow: () => { store.fails = 0; clearTimeout(retryT); retryT = null; flushPending(); closeSheet(); toast('서버에 다시 저장하는 중이에요'); },
   theme: () => { const order = ['auto', 'light', 'dark']; const m = order[(order.indexOf(getTheme()) + 1) % 3]; applyTheme(m); toast(`화면: ${THEME_NAME[m]}${m === 'auto' ? ' (기기 설정 따라감)' : ''}`); if (UI.tab === 'settings') render(); },
   setTheme: a => { applyTheme(a.dataset.m); render(); },
   focusB: a => { if (!mqSplit.matches) return; UI.mapB = a.dataset.b; render(); },
@@ -1652,4 +1712,15 @@ initRuntime();
 // roll the date over if the page stays open past midnight
 let lastDay = TODAY();
 setInterval(() => { if (TODAY() !== lastDay) { lastDay = TODAY(); UI.routeDate = null; UI.orderDate = null; render(); } }, 60000);
+// leaving the app (home button, app switch, closing the tab): keep the local copy and push pending edits right away
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { cacheLocal(); flushNow(); return; }
+  flushPending();
+  if (store.db) DOCS.forEach(n => { if (!store.live[n]) subscribe(n); });
+  if (TODAY() !== lastDay) { lastDay = TODAY(); UI.routeDate = null; UI.orderDate = null; }
+  render();
+});
+window.addEventListener('pagehide', () => { cacheLocal(); flushNow(); });
+window.addEventListener('online', () => { store.fails = 0; flushPending(); renderSync(); });
+window.addEventListener('offline', renderSync);
 </script>
