@@ -16,12 +16,12 @@
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --r:12px; --nav-h:62px;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-app-theme="light"]){
   --bg:#0E121A; --surface:#161B25; --sunk:#1D2330; --ink:#E7EBF3; --muted:#97A1B4; --line:#2A3241;
   --accent:#819BFF; --accent-ink:#0A0F1F; --accent-soft:#1E2847;
   --ok:#52C483; --ok-soft:#143021; --warn:#F2B24C; --warn-soft:#33260E; --bad:#FF7D71; --bad-soft:#3A1917;
   --plate:#222A38; --plate-ink:#E2E8F2; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}}
-:root[data-theme="dark"]{
+:root[data-theme="dark"]:not([data-app-theme="light"]),:root[data-app-theme="dark"]{
   --bg:#0E121A; --surface:#161B25; --sunk:#1D2330; --ink:#E7EBF3; --muted:#97A1B4; --line:#2A3241;
   --accent:#819BFF; --accent-ink:#0A0F1F; --accent-soft:#1E2847;
   --ok:#52C483; --ok-soft:#143021; --warn:#F2B24C; --warn-soft:#33260E; --bad:#FF7D71; --bad-soft:#3A1917;
@@ -43,7 +43,7 @@ h1,h2,h3{text-wrap:balance;margin:0}
 /* header */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;align-items:center;gap:10px;height:60px}
-.brand{font-family:var(--f-display);font-size:23px;letter-spacing:.01em;line-height:1}
+.brand{white-space:nowrap;font-family:var(--f-display);font-size:23px;letter-spacing:.01em;line-height:1}
 .brand small{display:block;font-family:var(--f-body);font-size:12px;color:var(--muted);letter-spacing:0;margin-top:4px}
 .top .sp{flex:1}
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:4px 9px;border:1px solid var(--line);border-radius:99px;background:var(--surface);white-space:nowrap}
@@ -97,7 +97,7 @@ main{padding-block:16px calc(var(--nav-h) + 96px + env(safe-area-inset-bottom,0p
 .pdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:hsl(var(--h,210) 60% 50%);flex:none}
 .empty{padding:28px 18px;text-align:center;color:var(--muted);display:grid;gap:10px;justify-items:center}
 .empty h3{color:var(--ink);font-size:16px}
-input[type=text],input[type=search],input[type=date],input[type=number],input[type=tel],select,textarea{width:100%;min-height:42px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+input[type=text],input[type=search],input[type=date],input[type=number],input[type=tel],select,textarea{width:100%;min-height:44px;padding:8px 11px;font-size:16px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
 textarea{min-height:76px;resize:vertical}
 .lbl{font-size:13px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px}
 .field{display:grid;gap:0}
@@ -140,9 +140,7 @@ textarea{min-height:76px;resize:vertical}
 .ctool{display:grid;gap:10px;margin-bottom:12px}
 .ctool .srch{display:flex;gap:8px}
 .ctool .srch input{flex:1;min-width:0}
-.clist{display:grid;gap:10px;grid-template-columns:1fr}
-@media (min-width:760px){.clist{grid-template-columns:1fr 1fr}}
-@media (min-width:1060px){.clist{grid-template-columns:1fr 1fr 1fr}}
+.clist{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr))}
 .ccard{display:flex;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;min-width:0}
 .ccard.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 .ccard .pick{display:grid;place-items:start center;padding:14px 4px 0 12px;cursor:pointer}
@@ -150,9 +148,9 @@ textarea{min-height:76px;resize:vertical}
 .cbody{flex:1;min-width:0;padding:11px 12px 11px 8px;display:grid;gap:7px}
 .chead{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .cname{border:0;background:none;padding:0;font-weight:700;font-size:16px;text-align:left}
-.cname:hover{text-decoration:underline}
 .cloc{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:13.5px}
-.ritems{display:grid;gap:5px}
+.ritems{display:grid;gap:5px;grid-template-columns:minmax(0,1fr)}
+.cbody>*{min-width:0}
 .ritem{display:flex;align-items:center;gap:7px;font-size:14px}
 .ritem .pn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ritem .dd{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
@@ -181,12 +179,11 @@ table.ot{width:100%;border-collapse:collapse;font-size:14px}
 .ot td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle}
 .ot td:first-child{text-align:left}
 .ot tr.prow{cursor:pointer}
-.ot tr.prow:hover td{background:var(--sunk)}
 .ot .pname{display:flex;gap:7px;align-items:center;min-width:0}
 .ot .pname small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3}
 .ot .buy{font-family:var(--f-display);font-size:22px;color:var(--accent);line-height:1}
 .ot .buy.zero{color:var(--muted)}
-.ot input{width:62px;min-height:34px;text-align:right;padding:4px 8px;font-variant-numeric:tabular-nums}
+.ot input{width:68px;min-height:40px;text-align:right;padding:4px 8px;font-variant-numeric:tabular-nums}
 .ot tr.detail td{background:var(--sunk);text-align:left;padding:8px 12px}
 .ot tfoot td{font-weight:700;border-bottom:0}
 .diff{font-size:12px;font-weight:700;margin-left:4px}
@@ -266,7 +263,6 @@ table.ot{width:100%;border-collapse:collapse;font-size:14px}
 #sheet{position:fixed;inset:0;z-index:40}
 .backdrop{position:absolute;inset:0;background:rgba(8,12,20,.45)}
 .panel{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow-y:auto;background:var(--bg);border-radius:18px 18px 0 0;padding:6px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:14px;align-content:start;overscroll-behavior:contain}
-@media (min-width:700px){.panel{left:50%;right:auto;width:600px;transform:translateX(-50%);bottom:24px;border-radius:18px;max-height:calc(100% - 48px)}}
 .panel::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 0}
 .sh{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .sh h2{font-family:var(--f-display);font-weight:400;font-size:22px}
@@ -293,14 +289,79 @@ table.ot{width:100%;border-collapse:collapse;font-size:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + 80px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .toast button{border:0;background:none;color:var(--accent);font-weight:700;filter:brightness(1.4)}
 .banner{font-size:13px;padding:9px 12px;border-radius:9px;background:var(--warn-soft);color:var(--warn);margin-bottom:14px}
+@media (max-width:480px){.sync span{display:none}.sync{padding:7px}.brand{font-size:21px}}
+.tile .bn.txt{font-size:12px;word-break:keep-all;text-align:center;line-height:1.2}
+/* touch */
+button,.chip,.check,.seq,.tile,.cell{touch-action:manipulation}
+.handle{touch-action:none;-webkit-touch-callout:none}
+.nav,.rrow,.btn,.chip,.seg,.tile,.cell,.check,.seq,.stepper,.daypick,.handle{-webkit-user-select:none;user-select:none}
+.rnote{-webkit-user-select:text;user-select:text}
+.rail-only{display:none!important}
+.oside-empty{display:none}
+@media (pointer:coarse){
+  .btn{min-height:44px}.btn.sm{min-height:40px;padding:0 12px;font-size:14px}
+  .iconbtn{width:44px;height:44px}
+  .stepper button{width:42px;height:40px}.stepper b{min-width:28px}
+  .daypick button{width:40px;height:40px}
+  .chip{padding:8px 14px}
+  .seg button{padding:10px}
+  .check{width:52px;height:52px}
+  .handle{width:40px}
+  .seq{min-width:38px;height:38px}
+  .ccard .pick{padding-top:12px}.ccard .pick input{width:24px;height:24px}
+  .tile{min-height:64px}.cell{min-height:46px}
+  .bulkbar button{padding:10px 13px}
+}
+@media (hover:hover){.ot tr.prow:hover td{background:var(--sunk)}.cname:hover{text-decoration:underline}}
+@keyframes sheetUp{from{transform:translateY(28px);opacity:.5}to{transform:none;opacity:1}}
+@keyframes sheetIn{from{transform:translateX(48px);opacity:.5}to{transform:none;opacity:1}}
+.panel{animation:sheetUp .18s ease-out}
+
+/* tablet (iPad portrait and up): side rail, inspector-style sheets */
+@media (min-width:744px){
+  :root{--rail:88px}
+  body{padding-left:calc(var(--rail) + env(safe-area-inset-left,0px))}
+  .wrap{max-width:1240px}
+  .phone-only{display:none!important}
+  .rail-only{display:flex!important}
+  .nav{top:0;right:auto;width:calc(var(--rail) + env(safe-area-inset-left,0px));border-top:0;border-right:1px solid var(--line);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+  .nav .wrap{display:flex;flex-direction:column;height:100%;padding:12px 8px;gap:4px;max-width:none}
+  .nav button{height:62px;border-radius:12px;flex:none;font-size:12.5px}
+  .nav button[aria-current="page"]{background:var(--accent-soft)}
+  .nav .railnew{background:var(--accent);color:var(--accent-ink);font-weight:700;height:66px;margin-bottom:14px}
+  .nav .railset{margin-top:auto}
+  .nav .dot{left:calc(50% + 6px)}
+  .fab{display:none}
+  .bulkbar{left:calc(var(--rail) + env(safe-area-inset-left,0px));bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+  main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(28px + env(safe-area-inset-bottom,0px));left:calc(50% + var(--rail) / 2)}
+  .panel{left:auto;right:0;top:0;bottom:0;width:min(500px,100%);max-height:none;border-radius:0;border-left:1px solid var(--line);padding-top:calc(16px + env(safe-area-inset-top,0px));padding-left:22px;padding-right:max(22px,env(safe-area-inset-right,0px));animation:sheetIn .2s ease-out}
+  .panel::before{display:none}
+  .hello h1{font-size:34px}
+}
+/* wide (iPad landscape): split views */
+@media (min-width:1024px){
+  .homegrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:start}
+  .ogrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:24px;align-items:start}
+  .oside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+  .oside .sec{margin-top:0!important}
+  .oside-empty{display:grid}
+  .rsplit{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start}
+  .rside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 61px + var(--rhead-h,140px));max-height:calc(100dvh - 77px - var(--rhead-h,140px) - env(safe-area-inset-top,0px));overflow-y:auto;overscroll-behavior:contain;padding:8px 2px 12px}
+  .rside .tiles{grid-template-columns:repeat(auto-fill,minmax(58px,1fr))}
+  .rinfo[data-act]{cursor:pointer}
+  .rrow.focus{background:color-mix(in srgb,var(--accent-soft) 55%,var(--surface))}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
+<script>try{var t=localStorage.getItem('helio-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-app-theme',t)}catch(e){}</script>
 
 <header class="top"><div class="wrap">
   <div class="brand">헬리오 배달수첩<small id="hdate"></small></div>
   <div class="sp"></div>
   <span class="sync" id="sync"><i></i><span>불러오는 중</span></span>
-  <button class="iconbtn" data-act="tab" data-tab="settings" aria-label="설정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  <button class="iconbtn theme-btn" id="themeBtn" data-act="theme" aria-label="화면 모드"></button>
+  <button class="iconbtn phone-only" data-act="tab" data-tab="settings" aria-label="설정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div></header>
 
 <main><div class="wrap" id="view"></div></main>
@@ -309,10 +370,12 @@ table.ot{width:100%;border-collapse:collapse;font-size:14px}
 <div id="bulk"></div>
 
 <nav class="nav" aria-label="화면"><div class="wrap">
+  <button class="rail-only railnew" data-act="newOrder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>주문</button>
   <button data-act="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>오늘</button>
   <button data-act="tab" data-tab="customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/></svg>고객</button>
   <button data-act="tab" data-tab="order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>발주<span class="dot" id="orderDot" hidden></span></button>
   <button data-act="tab" data-tab="route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8"/></svg>배달</button>
+  <button class="rail-only railset" data-act="tab" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>설정</button>
 </div></nav>
 
 <div id="sheet" hidden></div>
@@ -344,6 +407,23 @@ const ICON = {
   right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
 };
+
+/* ================= theme (per device) ================= */
+const THEME_NAME = { auto: '자동', light: '라이트', dark: '다크' };
+const THEME_ICON = {
+  auto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>',
+  light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',
+  dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+};
+function getTheme() { try { const t = localStorage.getItem('helio-theme'); return t === 'light' || t === 'dark' ? t : 'auto'; } catch (e) { return 'auto'; } }
+function applyTheme(m) {
+  const r = document.documentElement;
+  if (m === 'auto') r.removeAttribute('data-app-theme'); else r.setAttribute('data-app-theme', m);
+  try { localStorage.setItem('helio-theme', m); } catch (e) { }
+  const b = document.getElementById('themeBtn');
+  if (b) { b.innerHTML = THEME_ICON[m]; b.setAttribute('aria-label', '화면 모드: ' + THEME_NAME[m] + ' (눌러서 바꾸기)'); b.title = '화면: ' + THEME_NAME[m]; }
+}
+const mqSplit = matchMedia('(min-width: 1024px)');
 
 /* ================= defaults (app config, not records) ================= */
 const DEFAULT_PRODUCTS = [
@@ -702,11 +782,13 @@ function render() {
   else if (UI.tab === 'route') v.innerHTML = renderRoute();
   else if (UI.tab === 'settings') v.innerHTML = renderSettings();
   $('#fab').hidden = UI.tab === 'settings' || (UI.tab === 'customers' && UI.selected.size > 0);
+  setRheadH();
   renderBulk();
   const tgt = orderTarget(); const diffs = [TODAY(), tgt].map(d => confirmDiff(d, sheetFor(d))).filter(x => x && x.length).length;
   const dot = $('#orderDot'); dot.hidden = !diffs; dot.textContent = diffs;
   renderSync();
 }
+function setRheadH() { const rh = $('.rhead'); if (rh) document.documentElement.style.setProperty('--rhead-h', rh.offsetHeight + 'px'); }
 function storageBanner() {
   if (store.mode === 'guest') return `<div class="banner">이 수첩의 고객 정보는 소유자에게만 보여요. 여기서 입력하는 내용은 이 기기에만 저장돼요.</div>`;
   if (store.mode === 'local') return `<div class="banner">지금은 이 브라우저에만 저장돼요. claude.ai에서 로그인한 상태로 열면 휴대폰과 컴퓨터가 같은 데이터를 써요.</div>`;
@@ -730,6 +812,7 @@ function renderHome() {
   return storageBanner() + `
   <div class="hello"><div><div class="eyebrow">${dd === t ? '오늘 배달' : '다음 배달'}</div><h1>${fmt(dd)}</h1></div>
   <button class="btn pri" data-act="tab" data-tab="route">배달 시작</button></div>
+  <div class="homegrid"><div>
   <div class="sec">
     <div class="kpis">
       <div class="card kpi"><span class="eyebrow">배달지</span><span class="big num">${done}<small>/ ${stops.length}</small></span><div class="bar"><i style="width:${stops.length ? done / stops.length * 100 : 0}%"></i></div><span class="muted" style="font-size:13px">제품 ${items}개</span></div>
@@ -737,13 +820,14 @@ function renderHome() {
     </div>
   </div>
   ${alerts.length ? `<div class="sec"><div class="sec-h"><h2>알림</h2><span class="muted num" style="font-size:13px">${alerts.length}건</span></div><div class="alerts">${alerts.map(a => `<div class="alert ${a.kind}"><div class="t">${a.html}<small>${a.sub || ''}</small></div>${a.act || ''}</div>`).join('')}</div></div>` : ''}
+  </div><div>
   <div class="sec"><div class="sec-h"><h2>최근 들어온 주문</h2><button class="btn sm" data-act="newOrder">+ 주문</button></div>
     ${recent.length ? `<div class="card recent">${recent.map(o => {
       const c = o.customerId ? custById(o.customerId) : null; const nm = c ? c.name : o.name; const loc = c ? c.loc : o.loc;
       return `<div class="it"><span class="badge t-${o.type}">${TYPE_NAME[o.type]}</span><div class="t"><div><b>${esc(nm || '이름 없음')}</b> <span class="muted">${esc(locText(loc))}</span></div><div class="muted" style="font-size:13px">${fmt(o.date)} · ${o.items.map(i => `${esc(pShort(i.productId))}×${i.qty}`).join(' ')}${o.status === 'cancelled' ? ' · 취소됨' : ''}</div></div>
       ${o.status === 'cancelled' ? `<button class="btn sm" data-act="restoreOrder" data-id="${o.id}">되살리기</button>` : `<button class="btn sm ghost" data-act="cancelOrder" data-id="${o.id}">취소</button>`}</div>`;
     }).join('')}</div>` : `<div class="card empty"><p>추가주문, 샘플, Fredit 주문을 넣으면 여기와 동선, 발주표에 바로 들어가요.</p></div>`}
-  </div>`;
+  </div></div></div>`;
 }
 
 /* ================= render: customers (bulk) ================= */
@@ -840,6 +924,7 @@ function renderOrder() {
     ${diff && diff.length ? `<div class="warnbox"><b>확정 후 바뀐 수량</b><br>${diff.map(x => `${esc(x.name)} ${x.d > 0 ? '+' : ''}${x.d}`).join(' · ')}${odFor < t ? '<br>이미 발주한 날짜예요. 남는 재고로 채우거나 지점에 추가 요청하세요.' : ''}</div>` : ''}
     ${resumes.length ? `<div class="infobox">중지 끝나고 다시 들어온 고객: ${resumes.map(c => esc(c.name)).join(', ')}</div>` : ''}
   </div>
+  <div class="ogrid"><div>
   ${show.length ? `<div class="card tblwrap"><table class="ot">
     <thead><tr><th>제품 (출고신청 이름)</th><th>필요</th><th>재고</th><th>발주</th></tr></thead>
     <tbody>${show.map(r => {
@@ -860,10 +945,12 @@ function renderOrder() {
   </div>
   ${conf ? `<p class="hint" style="text-align:right;margin-top:6px">확정: ${new Date(S.days[date].confirmedAt || 0).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · 그 뒤로 바뀐 수량은 빨간 +로 표시돼요</p>` : ''}`
     : `<div class="card empty"><h3>${fmt(date)}에 배달할 제품이 없어요</h3><p>정기 고객이 없거나 모두 중지된 날이에요.</p></div>`}
+  </div><aside class="oside">
   ${samples.length || fredit.length ? `<div class="sec" style="margin-top:22px"><div class="sec-h"><h2>발주에서 뺀 주문</h2></div>
     ${samples.length ? `<div class="card" style="padding:12px"><div class="row" style="justify-content:space-between"><b>샘플 · 지점에서 받아오기</b><span class="badge t-sample">${samples.length}건</span></div><div class="brk" style="margin-top:8px">${samples.map(o => orderLine(o)).join('')}</div></div>` : ''}
     ${fredit.length ? `<div class="card" style="padding:12px"><div class="row" style="justify-content:space-between"><b>Fredit · 자동 발주</b><span class="badge t-fredit">${fredit.length}건</span></div><div class="brk" style="margin-top:8px">${fredit.map(o => orderLine(o)).join('')}</div></div>` : ''}
-    <p class="hint">설정 &gt; 발주에 포함할 주문에서 바꿀 수 있어요.</p></div>` : ''}`;
+    <p class="hint">설정 &gt; 발주에 포함할 주문에서 바꿀 수 있어요.</p></div>` : `<div class="card empty oside-empty"><h3>발주에서 뺀 주문 없음</h3><p>샘플(지점 수령)과 Fredit(자동 발주) 주문은 여기에 따로 모여요. 행을 누르면 고객별 내역이 펼쳐져요.</p></div>`}
+  </aside></div>`;
 }
 function orderLine(o) { const c = o.customerId ? custById(o.customerId) : null; return `<div><span>${o.items.map(i => `${esc(pShort(i.productId))}×${i.qty}`).join(' ')}</span><span>${esc(c ? c.name : o.name)} <span class="muted">${esc(locText(c ? c.loc : o.loc))}</span></span></div>`; }
 
@@ -874,18 +961,20 @@ function renderRoute() {
   const done = stops.filter(s => doneMap[s.key]).length;
   const items = stops.reduce((s, st) => s + st.items.reduce((a, i) => a + i.qty, 0), 0);
   const custom = !!S.days[date]?.seq;
+  const split = mqSplit.matches;
   const head = `<div class="rhead">
     <div class="datenav"><button class="iconbtn" data-act="routeDate" data-d="-1" aria-label="이전 배달일">${ICON.left}</button>
       <div class="d">${fmt(date)}<small>${date === TODAY() ? '오늘' : (daysBetween(TODAY(), date) > 0 ? daysBetween(TODAY(), date) + '일 뒤' : '지난 날')} · 배달지 ${stops.length}곳 · 제품 ${items}개</small></div>
       <button class="iconbtn" data-act="routeDate" data-d="1" aria-label="다음 배달일">${ICON.right}</button></div>
     <div class="prog"><div class="bar"><i style="width:${stops.length ? done / stops.length * 100 : 0}%"></i></div><b class="num">${done}/${stops.length}</b></div>
     <div class="row" style="justify-content:space-between">
-      <div class="seg" style="flex:none"><button aria-pressed="${UI.routeMode === 'list'}" data-act="routeMode" data-m="list">목록</button><button aria-pressed="${UI.routeMode === 'map'}" data-act="routeMode" data-m="map">단지 지도</button></div>
-      ${UI.routeMode === 'list' ? `<div class="row"><button class="btn sm" data-act="hideDone" aria-pressed="${UI.hideDone}">${UI.hideDone ? '완료 보이기' : '완료 숨기기'}</button><button class="btn sm" data-act="routeMore" data-date="${date}">순서${custom ? ' (수정됨)' : ''}</button></div>` : ''}
+      ${split ? '<span class="muted" style="font-size:13px">배달지를 누르면 오른쪽에 그 동 배치가 떠요</span>' : `<div class="seg" style="flex:none"><button aria-pressed="${UI.routeMode === 'list'}" data-act="routeMode" data-m="list">목록</button><button aria-pressed="${UI.routeMode === 'map'}" data-act="routeMode" data-m="map">단지 지도</button></div>`}
+      ${UI.routeMode === 'list' || split ? `<div class="row"><button class="btn sm" data-act="hideDone" aria-pressed="${UI.hideDone}">${UI.hideDone ? '완료 보이기' : '완료 숨기기'}</button><button class="btn sm" data-act="routeMore" data-date="${date}">순서${custom ? ' (수정됨)' : ''}</button></div>` : ''}
     </div></div>`;
   if (!stops.length) return storageBanner() + head + `<div class="card empty"><h3>${isHoliday(date) ? esc(holidayName(date)) : '배달이 없는 날이에요'}</h3><p>${isHoliday(date) ? '정기 배달은 쉬고, 이 날짜로 넣은 주문만 보여요.' : '이 날짜에 배달할 고객이나 주문이 없어요.'}</p></div>`;
-  if (UI.routeMode === 'map') return storageBanner() + head + renderMap(date, stops, doneMap);
-  const nextKey = stops.find(s => !doneMap[s.key])?.key;
+  if (UI.routeMode === 'map' && !split) return storageBanner() + head + renderMap(date, stops, doneMap);
+  const nextStop = stops.find(s => !doneMap[s.key]); const nextKey = nextStop?.key;
+  const focusB = split ? ((UI.mapB && stops.some(s => s.loc.building === UI.mapB)) ? UI.mapB : (nextStop || stops[0])?.loc.building) : null;
   let prevB = null;
   const rows = stops.map((st, i) => {
     const isDone = !!doneMap[st.key];
@@ -900,26 +989,28 @@ function renderRoute() {
     const notes = [c?.notes, ...st.orders.map(o => o.note)].filter(Boolean).join(' / ');
     const agg = {}; st.items.forEach(it => { const k = it.pid + '|' + it.type; agg[k] = (agg[k] || 0) + it.qty; });
     const chips = Object.entries(agg).map(([k, q]) => { const [pid, ty] = k.split('|'); return `<span class="it-chip ${ty === 'regular' ? '' : ty}"><span class="pdot" style="--h:${pHue(pid)}"></span>${esc(pShort(pid))}<b>×${q}</b></span>`; }).join('');
-    return `<li class="rrow ${isDone ? 'done' : ''} ${st.key === nextKey ? 'next' : ''} ${newb ? 'newb' : ''}" data-key="${esc(st.key)}" data-b="${esc(bldName(b))}">
+    return `<li class="rrow ${isDone ? 'done' : ''} ${st.key === nextKey ? 'next' : ''} ${newb ? 'newb' : ''} ${split && b === focusB ? 'focus' : ''}" data-key="${esc(st.key)}" data-b="${esc(bldName(b))}">
       <button class="handle" aria-label="끌어서 순서 바꾸기">${ICON.grip}</button>
       <button class="seq" data-act="moveTo" data-key="${esc(st.key)}" data-date="${date}" aria-label="${i + 1}번, 순서 옮기기">${i + 1}</button>
-      <div class="rinfo"><div class="rtop">${plate(st.loc)}<span class="rname">${esc(st.name)}</span>${st.loc.label ? `<span class="muted" style="font-size:12.5px">${esc(st.loc.label)}</span>` : ''}</div>
+      <div class="rinfo" ${split ? `data-act="focusB" data-b="${esc(b)}"` : ''}><div class="rtop">${plate(st.loc)}<span class="rname">${esc(st.name)}</span>${st.loc.label ? `<span class="muted" style="font-size:12.5px">${esc(st.loc.label)}</span>` : ''}</div>
         <div class="rits">${chips}</div>${flags.length ? `<div class="rflags">${flags.join('')}</div>` : ''}${notes ? `<div class="rnote">${esc(notes)}</div>` : ''}</div>
       <button class="check" data-act="toggleDone" data-key="${esc(st.key)}" data-date="${date}" aria-pressed="${isDone}" aria-label="${esc(st.name)} 배달 완료">${ICON.check}</button></li>`;
   }).join('');
-  return storageBanner() + head + `<ol class="rlist" id="rlist" data-date="${date}">${rows}</ol>
+  const listHtml = `<ol class="rlist" id="rlist" data-date="${date}">${rows}</ol>
   <p class="hint" style="margin-top:14px">왼쪽 점 손잡이를 끌거나 번호를 눌러 순서를 옮겨요. 바꾼 순서는 이 날짜에만 적용되고, “순서”에서 기본 동선으로 저장할 수 있어요.</p>`;
+  if (split) return storageBanner() + head + `<div class="rsplit"><div>${listHtml}</div><aside class="rside" aria-label="동 배치">${renderMap(date, stops, doneMap, focusB)}</aside></div>`;
+  return storageBanner() + head + listHtml;
 }
-function renderMap(date, stops, doneMap) {
+function renderMap(date, stops, doneMap, autoSel) {
   const byB = {}; stops.forEach(s => { (byB[s.loc.building] = byB[s.loc.building] || []).push(s); });
   const order = S.config.routeOrder.slice(); Object.keys(byB).forEach(b => { if (!order.includes(b)) order.push(b); });
   const groups = {}; order.forEach(b => { const g = seriesOf(b); (groups[g] = groups[g] || []).push(b); });
   const gnames = Object.keys(groups).sort((a, b) => (a === '상가·기타') - (b === '상가·기타'));
-  const sel = UI.mapB && byB[UI.mapB] ? UI.mapB : null;
+  const sel = UI.mapB && byB[UI.mapB] ? UI.mapB : (autoSel && byB[autoSel] ? autoSel : null);
   let html = gnames.map(g => `<div class="mapsec"><h3>${esc(g)} <span class="num">${groups[g].reduce((s, b) => s + (byB[b]?.length || 0), 0)}곳</span></h3><div class="tiles">${groups[g].map(b => {
     const l = byB[b] || []; const dn = l.filter(s => doneMap[s.key]).length;
     const cls = !l.length ? 'none' : dn === l.length ? 'full' : 'pend';
-    return `<button class="tile ${cls}" data-act="mapB" data-b="${esc(b)}" aria-pressed="${sel === b}" ${l.length ? '' : 'tabindex="-1"'}><span class="bn">${esc(b)}</span><span class="cnt">${l.length ? `${dn}/${l.length}` : '—'}</span></button>`;
+    return `<button class="tile ${cls}" data-act="mapB" data-b="${esc(b)}" aria-pressed="${sel === b}" ${l.length ? '' : 'tabindex="-1"'}><span class="bn ${isNumB(b) ? '' : 'txt'}">${esc(b)}</span><span class="cnt">${l.length ? `${dn}/${l.length}` : '—'}</span></button>`;
   }).join('')}</div></div>`).join('');
   if (sel) html += renderFloorplan(sel, byB[sel], doneMap, date);
   else html += `<p class="hint">파란 칸을 누르면 그 동의 층·라인 배치가 보여요. 칸 안에서 바로 완료 체크할 수 있어요.</p>`;
@@ -953,6 +1044,16 @@ function renderFloorplan(b, list, doneMap, date) {
 function renderSettings() {
   const C = S.config;
   return storageBanner() + `<div class="sec-h" style="margin-bottom:14px"><h2 style="font-family:var(--f-display);font-weight:400;font-size:24px">설정</h2><button class="btn sm" data-act="tab" data-tab="home">닫기</button></div>
+  <div class="sec"><div class="sec-h"><h2>화면</h2></div><div class="card" style="padding:12px;display:grid;gap:10px">
+    <div class="seg">${['auto', 'light', 'dark'].map(m => `<button aria-pressed="${getTheme() === m}" data-act="setTheme" data-m="${m}">${THEME_NAME[m]}</button>`).join('')}</div>
+    <p class="hint">자동은 기기 설정(라이트·다크)을 따라가요. 위쪽 동그라미 버튼으로도 바꿀 수 있고, 기기마다 따로 저장돼요.</p>
+  </div></div>
+  <div class="sec"><div class="sec-h"><h2>iPad·iPhone 홈 화면에 추가</h2></div><div class="card" style="padding:12px;display:grid;gap:6px;font-size:14px">
+    <div>1. Safari에서 이 수첩의 claude.ai 링크를 열어요.</div>
+    <div>2. 공유 버튼 → <b>홈 화면에 추가</b> → 추가.</div>
+    <div>3. 홈 화면에서 처음 열 때 로그인을 물으면 claude.ai에 한 번 로그인하세요. 그러면 iPad와 iPhone이 같은 데이터를 써요.</div>
+    <p class="hint">키보드 연결 시: 1–4 화면 이동 · N 주문 추가 · / 고객 검색 · Esc 닫기</p>
+  </div></div>
   <div class="sec"><div class="sec-h"><h2>발주 기준</h2></div><div class="card" style="padding:12px;display:grid;gap:12px">
     <div class="grid2"><div class="field"><label class="lbl" for="leadDays">며칠 전에 발주</label><input type="number" id="leadDays" min="0" max="7" value="${C.leadDays}" data-chg="leadDays"></div>
     <div class="field"><span class="lbl">세는 방법</span><div class="seg"><button aria-pressed="${C.leadMode === 'business'}" data-act="leadMode" data-m="business">평일만</button><button aria-pressed="${C.leadMode === 'calendar'}" data-act="leadMode" data-m="calendar">달력 날짜</button></div></div></div>
@@ -1394,6 +1495,9 @@ document.addEventListener('pointercancel', endDrag);
 const ACT = {
   tab: a => { UI.tab = a.dataset.tab; if (UI.tab !== 'customers') UI.selected.clear(); saveUI(); render(); window.scrollTo(0, 0); },
   closeSheet: () => closeSheet(),
+  theme: () => { const order = ['auto', 'light', 'dark']; const m = order[(order.indexOf(getTheme()) + 1) % 3]; applyTheme(m); toast(`화면: ${THEME_NAME[m]}${m === 'auto' ? ' (기기 설정 따라감)' : ''}`); if (UI.tab === 'settings') render(); },
+  setTheme: a => { applyTheme(a.dataset.m); render(); },
+  focusB: a => { if (!mqSplit.matches) return; UI.mapB = a.dataset.b; render(); },
   undo: () => { const u = toastUndo; $('#toast').hidden = true; toastUndo = null; if (u) u(); },
   newOrder: () => openOrderSheet({ customerIds: UI.tab === 'customers' ? [...UI.selected] : [] }),
   newCust: () => openCustSheet(null),
@@ -1518,7 +1622,17 @@ const INP = {
   ofnl: el => { F.nl[el.dataset.f] = el.value; const i = $('#ofimp'); if (i) i.innerHTML = ofImpact(); },
 };
 document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && INP[el.dataset.inp]) INP[el.dataset.inp](el); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!$('#sheet').hidden) closeSheet(); else if (UI.selected.size) { UI.selected.clear(); render(); } return; }
+  if (e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
+  if (e.target.closest('input,textarea,select,[contenteditable]') || !$('#sheet').hidden) return;
+  const tabs = { '1': 'home', '2': 'customers', '3': 'order', '4': 'route' };
+  if (tabs[e.key]) { e.preventDefault(); ACT.tab({ dataset: { tab: tabs[e.key] } }); }
+  else if (e.key === 'n' || e.key === 'N' || e.key === 'ㅜ') { e.preventDefault(); ACT.newOrder(); }
+  else if (e.key === '/') { e.preventDefault(); if (UI.tab !== 'customers') ACT.tab({ dataset: { tab: 'customers' } }); $('#custq')?.focus(); }
+});
+mqSplit.addEventListener?.('change', () => render());
+let rsT = null; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(setRheadH, 120); });
 // stock inputs: update numbers in place while typing across rows, full render when focus leaves the table
 function updateOrderNumbers() {
   const rows = sheetFor(UI.orderDate || orderTarget());
@@ -1530,6 +1644,7 @@ function updateOrderNumbers() {
 document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches('.ot input')) setTimeout(() => { if (!document.activeElement || !document.activeElement.matches('.ot input')) render(); }, 0); });
 
 /* ================= boot ================= */
+applyTheme(getTheme());
 loadLocal();
 if (ensureRouteOrder()) cacheLocal();
 render();
