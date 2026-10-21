@@ -9,7 +9,7 @@
   --bg:#F1F3F7; --surface:#FFFFFF; --sunk:#E7EBF2; --ink:#121823; --muted:#596377; --line:#D9DFE8;
   --accent:#2F54EB; --accent-ink:#FFFFFF; --accent-soft:#E4EAFF;
   --ok:#1C8248; --ok-soft:#DFF2E6; --warn:#9E5E00; --warn-soft:#FFEFD2; --bad:#C2362C; --bad-soft:#FCE5E2;
-  --plate:#EBEFF5; --plate-ink:#1B2433;
+  --plate:#EBEFF5; --plate-ink:#1B2433; --fredit:#7A3FCF;
   --shadow:0 1px 2px rgba(18,24,35,.06),0 6px 18px rgba(18,24,35,.07);
   --f-display:"Do Hyeon","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
@@ -20,12 +20,12 @@
   --bg:#0E121A; --surface:#161B25; --sunk:#1D2330; --ink:#E7EBF3; --muted:#97A1B4; --line:#2A3241;
   --accent:#819BFF; --accent-ink:#0A0F1F; --accent-soft:#1E2847;
   --ok:#52C483; --ok-soft:#143021; --warn:#F2B24C; --warn-soft:#33260E; --bad:#FF7D71; --bad-soft:#3A1917;
-  --plate:#222A38; --plate-ink:#E2E8F2; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}}
+  --plate:#222A38; --plate-ink:#E2E8F2; --fredit:#B48CFF; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}}
 :root[data-theme="dark"]:not([data-app-theme="light"]),:root[data-app-theme="dark"]{
   --bg:#0E121A; --surface:#161B25; --sunk:#1D2330; --ink:#E7EBF3; --muted:#97A1B4; --line:#2A3241;
   --accent:#819BFF; --accent-ink:#0A0F1F; --accent-soft:#1E2847;
   --ok:#52C483; --ok-soft:#143021; --warn:#F2B24C; --warn-soft:#33260E; --bad:#FF7D71; --bad-soft:#3A1917;
-  --plate:#222A38; --plate-ink:#E2E8F2; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}
+  --plate:#222A38; --plate-ink:#E2E8F2; --fredit:#B48CFF; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}
 
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
@@ -246,6 +246,52 @@ table.ot{width:100%;border-collapse:collapse;font-size:14px}
 .cell .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gap{font-size:11px;color:var(--muted);text-align:center}
 
+/* route: compact list, entrance groups */
+.rh1{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}
+.rh1 .dn{display:flex;align-items:center;gap:6px}
+.rh1 .d{text-align:center;min-width:118px}
+.rh1 .d b{display:block;font-family:var(--f-display);font-weight:400;font-size:22px;line-height:1.1}
+.rh1 .d small{font-size:12px;color:var(--muted)}
+.rh1 .prog{flex:1;min-width:150px}
+.rh2{gap:6px}
+.rgh{list-style:none;font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.03em;padding:14px 4px 2px}
+.rlist .rrow{margin-top:6px}
+.rmain{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:3px 12px;cursor:pointer;padding:2px 0}
+.who{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+.who .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:10em}
+.its{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:14px}
+.ic{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.ic b{font-family:var(--f-mono);font-weight:600}
+.ic.adhoc{color:var(--accent)} .ic.sample{color:var(--warn)} .ic.fredit{color:var(--fredit)}
+.rflags{display:flex;flex-wrap:wrap;gap:4px;width:100%}
+.rmain .rnote{width:100%}
+.ent{font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 5px;white-space:nowrap}
+.mk{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block;flex:none}
+.badge.xs{font-size:11px;padding:1px 5px}
+.plate.sm{font-size:12.5px;padding:0 5px}
+.rlist.dense{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.rlist.dense .rgh{background:var(--sunk);padding:5px 10px;border-top:1px solid var(--line);font-size:12px}
+.rlist.dense .rgh:first-child{border-top:0}
+.rlist.dense .rrow{margin:0;border-radius:0;border-width:1px 0 0;padding:5px 6px 5px 0;gap:6px}
+.rlist.dense .rgh + .rrow{border-top:0}
+.rlist.dense .rrow.next{box-shadow:inset 3px 0 0 var(--accent);border-color:var(--line)}
+.rlist.dense .rrow.done{background:var(--surface)}
+.rlist.dense .check{width:38px;height:38px}
+.rlist.dense .check svg{width:18px;height:18px}
+.rlist.dense .seq{min-width:28px;height:28px;font-size:12px}
+.rlist.dense .handle{width:26px}
+.rrow.skip .rmain,.rrow.done .rmain{opacity:.45}
+.rrow.done .nm{text-decoration:line-through}
+.rrow.skip .nm{text-decoration:line-through}
+@media (pointer:coarse){.rlist.dense .check{width:42px;height:42px}.rlist.dense .seq{min-width:32px;height:32px}.rlist.dense .handle{width:32px}}
+.tiles{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
+.tile .ents{display:flex;gap:3px;width:100%;padding:0 4px}
+.tile .ents i{flex:1;font-style:normal;font-size:10px;line-height:1.2;border-radius:4px;padding:2px 0;background:var(--sunk);color:var(--muted);text-align:center;font-variant-numeric:tabular-nums;min-width:0}
+.tile .ents i b{display:block;font-size:11px}
+.tile .ents i.pend{background:var(--accent);color:var(--accent-ink)}
+.tile .ents i.full{background:var(--ok);color:#fff}
+.tile.pend,.tile.full{background:var(--surface)}
+.fl .lh{font-size:11px;color:var(--muted);text-align:center;font-family:var(--f-mono)}
 /* settings */
 .slist{display:grid}
 .slist .it{display:flex;gap:8px;align-items:center;padding:8px 10px;border-top:1px solid var(--line)}
@@ -349,7 +395,7 @@ button,.chip,.check,.seq,.tile,.cell{touch-action:manipulation}
   .oside-empty{display:grid}
   .rsplit{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start}
   .rside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 61px + var(--rhead-h,140px));max-height:calc(100dvh - 77px - var(--rhead-h,140px) - env(safe-area-inset-top,0px));overflow-y:auto;overscroll-behavior:contain;padding:8px 2px 12px}
-  .rside .tiles{grid-template-columns:repeat(auto-fill,minmax(58px,1fr))}
+  .rside .tiles{grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}
   .rinfo[data-act]{cursor:pointer}
   .rrow.focus{background:color-mix(in srgb,var(--accent-soft) 55%,var(--surface))}
 }
@@ -517,6 +563,7 @@ function normConfig(b) {
   if (!Array.isArray(c.routeOrder) || !c.routeOrder.length) c.routeOrder = clone(DEFAULT_ROUTE);
   if (!Array.isArray(c.deliveryDays)) c.deliveryDays = [1, 2, 3, 4, 5];
   if (!Array.isArray(c.holidays)) c.holidays = [];
+  c.entrances = b.entrances && typeof b.entrances === 'object' && !Array.isArray(b.entrances) ? { ...b.entrances } : {};
   return c;
 }
 const custById = id => S.customers.find(c => c.id === id);
@@ -557,9 +604,9 @@ function loadLocal() {
     if (o.config) { S.config = normConfig(o.config); store.localHad.config = true; }
     if (o.days) { S.days = o.days; store.localHad.days = Object.keys(o.days).length > 0; }
   } catch (e) { }
-  try { const u = JSON.parse(localStorage.getItem(LS_UI) || '{}'); if (u.tab) UI.tab = u.tab; if (u.routeMode) UI.routeMode = u.routeMode; UI.hideDone = !!u.hideDone; } catch (e) { }
+  try { const u = JSON.parse(localStorage.getItem(LS_UI) || '{}'); if (u.tab) UI.tab = u.tab; if (u.routeMode) UI.routeMode = u.routeMode; UI.hideDone = !!u.hideDone; UI.routeDense = u.routeDense !== false; } catch (e) { }
 }
-function saveUI() { try { localStorage.setItem(LS_UI, JSON.stringify({ tab: UI.tab, routeMode: UI.routeMode, hideDone: UI.hideDone })); } catch (e) { } }
+function saveUI() { try { localStorage.setItem(LS_UI, JSON.stringify({ tab: UI.tab, routeMode: UI.routeMode, hideDone: UI.hideDone, routeDense: UI.routeDense !== false })); } catch (e) { } }
 function save(...names) {
   prune();
   const now = Date.now();
@@ -732,7 +779,7 @@ function autoKey(loc) {
   const order = S.config.routeOrder; const b = loc?.building || '';
   let r = order.indexOf(b); if (r < 0) r = order.length + (parseInt(b) || 999);
   const { floor, line } = parseUnit(loc?.unit);
-  const ent = line ? Math.ceil(line / 2) : 0;
+  const ent = line ? entIndex(b, line) + 1 : 0;
   let f = 0; if (floor != null) f = floor < 0 ? -10000 + floor : (S.config.floorDir === 'desc' ? -floor : floor);
   return [r, ent, f, line, String(loc?.unit || '')];
 }
@@ -772,8 +819,11 @@ function ensureRouteOrder() {
 function stopsFor(date) {
   const map = new Map(); const w = dow(date);
   const regularDay = S.config.deliveryDays.includes(w) && !isHoliday(date);
-  if (regularDay) for (const c of S.customers) {
-    if (!c.active || pauseOn(c, date)) continue;
+  const ovs = S.days[date]?.ov || {};
+  for (const c of S.customers) {
+    const ov = ovs[c.id];
+    if (ov) { map.set(c.id, { key: c.id, cust: c, items: ov.skip ? [] : (ov.items || []).filter(i => i.qty > 0).map(i => ({ pid: i.pid, qty: i.qty, type: 'regular' })), orders: [], ov: true }); continue; }
+    if (!regularDay || !c.active || pauseOn(c, date)) continue;
     const items = c.regular.filter(r => r.qty > 0 && r.days.includes(w) && onCycle(r, date));
     if (items.length) map.set(c.id, { key: c.id, cust: c, items: items.map(r => ({ pid: r.productId, qty: r.qty, type: 'regular' })), orders: [] });
   }
@@ -786,7 +836,7 @@ function stopsFor(date) {
     st.orders.push(o);
     o.items.forEach(it => st.items.push({ pid: it.productId, qty: it.qty, type: o.type }));
   }
-  return [...map.values()].map(st => ({ ...st, loc: st.cust ? st.cust.loc : (st.orders[0]?.loc || { building: '', unit: '' }), name: st.cust ? st.cust.name : (st.orders[0]?.name || '이름 없음') }));
+  return [...map.values()].map(st => ({ ...st, skipped: st.items.length === 0, loc: st.cust ? st.cust.loc : (st.orders[0]?.loc || { building: '', unit: '' }), name: st.cust ? st.cust.name : (st.orders[0]?.name || '이름 없음') }));
 }
 function orderedStops(date) {
   let ref = sortAuto(stopsFor(date));
@@ -1040,55 +1090,104 @@ function renderOrder() {
 }
 function orderLine(o) { const c = o.customerId ? custById(o.customerId) : null; return `<div><span>${o.items.map(i => `${esc(pShort(i.productId))}×${i.qty}`).join(' ')}</span><span>${esc(c ? c.name : o.name)} <span class="muted">${esc(locText(c ? c.loc : o.loc))}</span></span></div>`; }
 
+/* ================= entrances (1·2호 / 3·4호 or 3·4·5호) ================= */
+function entrancesOf(b) {
+  const o = S.config.entrances && S.config.entrances[b];
+  if (Array.isArray(o) && o.length) return o;
+  return [[1, 2], [3, 4, 5, 6, 7, 8, 9]];
+}
+function entIndex(b, line) {
+  if (!line || !isNumB(b)) return -1;
+  const E = entrancesOf(b); const i = E.findIndex(g => g.includes(line));
+  return i < 0 ? E.length - 1 : i;
+}
+function linesIn(b) {
+  const s = new Set();
+  S.customers.forEach(c => { if (c.loc.building === b) { const u = parseUnit(c.loc.unit); if (u.line) s.add(u.line); } });
+  S.orders.forEach(o => { if (o.loc && o.loc.building === b) { const u = parseUnit(o.loc.unit); if (u.line) s.add(u.line); } });
+  return s;
+}
+function entLines(b, idx) {
+  const g = entrancesOf(b)[idx] || []; if (!g.length) return [];
+  const present = linesIn(b); const used = g.filter(l => present.has(l));
+  const max = Math.max(...used, g[Math.min(1, g.length - 1)]);
+  return g.filter(l => l <= max);
+}
+const entName = (b, idx) => idx < 0 ? '' : entLines(b, idx).join('·') + '호';
+function groupKey(loc) {
+  const b = loc?.building || ''; const u = parseUnit(loc?.unit);
+  if (u.floor != null && u.floor < 0) return b + '|B';
+  return b + '|' + entIndex(b, u.line);
+}
+function groupLabel(loc) {
+  const b = loc?.building || ''; const u = parseUnit(loc?.unit);
+  if (u.floor != null && u.floor < 0) return bldName(b) + ' · 지하';
+  const i = entIndex(b, u.line);
+  return bldName(b) + (i >= 0 ? ' · ' + entName(b, i) + ' 입구' : '');
+}
+function itemAgg(st) {
+  const agg = new Map();
+  st.items.forEach(it => { const k = it.pid + '|' + it.type; agg.set(k, (agg.get(k) || 0) + it.qty); });
+  return [...agg].map(([k, q]) => { const [pid, ty] = k.split('|'); return { pid, ty, q }; });
+}
+const stopNotes = st => [st.cust?.notes, ...st.orders.map(o => o.note)].filter(Boolean).join(' / ');
+
 /* ================= render: route ================= */
 function renderRoute() {
   const date = UI.routeDate || routeDefaultDate();
   const stops = orderedStops(date); const doneMap = S.days[date]?.done || {};
-  const done = stops.filter(s => doneMap[s.key]).length;
-  const items = stops.reduce((s, st) => s + st.items.reduce((a, i) => a + i.qty, 0), 0);
-  const custom = !!S.days[date]?.seq;
-  const split = mqSplit.matches;
+  const live = stops.filter(s => !s.skipped);
+  const done = live.filter(s => doneMap[s.key]).length;
+  const items = live.reduce((s, st) => s + st.items.reduce((a, i) => a + i.qty, 0), 0);
+  const custom = !!S.days[date]?.seq; const split = mqSplit.matches; const dense = UI.routeDense !== false;
+  const dd = daysBetween(TODAY(), date);
+  const rel = date === TODAY() ? '오늘' : (dd > 0 ? dd + '일 뒤' : '지난 날');
   const head = `<div class="rhead">
-    <div class="datenav"><button class="iconbtn" data-act="routeDate" data-d="-1" aria-label="이전 배달일">${ICON.left}</button>
-      <div class="d">${fmt(date)}<small>${date === TODAY() ? '오늘' : (daysBetween(TODAY(), date) > 0 ? daysBetween(TODAY(), date) + '일 뒤' : '지난 날')} · 배달지 ${stops.length}곳 · 제품 ${items}개</small></div>
+    <div class="rh1"><div class="dn"><button class="iconbtn" data-act="routeDate" data-d="-1" aria-label="이전 배달일">${ICON.left}</button>
+      <div class="d"><b>${fmt(date)}</b><small>${rel} · ${live.length}곳 · ${items}개</small></div>
       <button class="iconbtn" data-act="routeDate" data-d="1" aria-label="다음 배달일">${ICON.right}</button></div>
-    <div class="prog"><div class="bar"><i style="width:${stops.length ? done / stops.length * 100 : 0}%"></i></div><b class="num">${done}/${stops.length}</b></div>
-    <div class="row" style="justify-content:space-between">
-      ${split ? '<span class="muted" style="font-size:13px">배달지를 누르면 오른쪽에 그 동 배치가 떠요</span>' : `<div class="seg" style="flex:none"><button aria-pressed="${UI.routeMode === 'list'}" data-act="routeMode" data-m="list">목록</button><button aria-pressed="${UI.routeMode === 'map'}" data-act="routeMode" data-m="map">단지 지도</button></div>`}
-      ${UI.routeMode === 'list' || split ? `<div class="row"><button class="btn sm" data-act="hideDone" aria-pressed="${UI.hideDone}">${UI.hideDone ? '완료 보이기' : '완료 숨기기'}</button><button class="btn sm" data-act="routeMore" data-date="${date}">순서${custom ? ' (수정됨)' : ''}</button></div>` : ''}
+      <div class="prog"><div class="bar"><i style="width:${live.length ? done / live.length * 100 : 0}%"></i></div><b class="num">${done}/${live.length}</b></div></div>
+    <div class="row rh2">
+      ${split ? '' : `<div class="seg" style="flex:none"><button aria-pressed="${UI.routeMode === 'list'}" data-act="routeMode" data-m="list">목록</button><button aria-pressed="${UI.routeMode === 'map'}" data-act="routeMode" data-m="map">단지 지도</button></div>`}
+      <span style="flex:1"></span>
+      ${UI.routeMode === 'list' || split ? `<button class="btn sm" data-act="routeDense">${dense ? '자세히' : '간단히'}</button><button class="btn sm" data-act="hideDone" aria-pressed="${UI.hideDone}">${UI.hideDone ? '완료 보기' : '완료 숨김'}</button><button class="btn sm" data-act="routeMore" data-date="${date}">순서${custom ? ' *' : ''}</button>` : ''}
+      ${stops.length ? `<button class="btn sm" data-act="routeImage" data-date="${date}" aria-label="동선 리스트 사진으로 저장">사진</button>` : ''}
     </div></div>`;
   if (!stops.length) return storageBanner() + head + `<div class="card empty"><h3>${isHoliday(date) ? esc(holidayName(date)) : '배달이 없는 날이에요'}</h3><p>${isHoliday(date) ? '정기 배달은 쉬고, 이 날짜로 넣은 주문만 보여요.' : '이 날짜에 배달할 고객이나 주문이 없어요.'}</p></div>`;
   if (UI.routeMode === 'map' && !split) return storageBanner() + head + renderMap(date, stops, doneMap);
-  const nextStop = stops.find(s => !doneMap[s.key]); const nextKey = nextStop?.key;
+  const nextStop = live.find(s => !doneMap[s.key]); const nextKey = nextStop?.key;
   const focusB = split ? ((UI.mapB && stops.some(s => s.loc.building === UI.mapB)) ? UI.mapB : (nextStop || stops[0])?.loc.building) : null;
-  let prevB = null;
-  const rows = stops.map((st, i) => {
-    const isDone = !!doneMap[st.key];
-    const b = st.loc.building; const newb = b !== prevB; prevB = b;
-    if (UI.hideDone && isDone) return '';
-    const flags = [];
-    const c = st.cust;
-    if (c?.ice) flags.push('<span class="badge">아이스팩</span>');
-    if (c?.bag) flags.push('<span class="badge">주머니</span>');
-    if (c?.payment === 'cash' && c.paidMonth !== MONTH()) flags.push('<span class="badge bad">현금 미수</span>');
-    st.orders.forEach(o => flags.push(`<span class="badge t-${o.type}">${TYPE_NAME[o.type]}${o.type === 'sample' ? ' · 지점 수령' : ''}</span>`));
-    const notes = [c?.notes, ...st.orders.map(o => o.note)].filter(Boolean).join(' / ');
-    const agg = {}; st.items.forEach(it => { const k = it.pid + '|' + it.type; agg[k] = (agg[k] || 0) + it.qty; });
-    const chips = Object.entries(agg).map(([k, q]) => { const [pid, ty] = k.split('|'); return `<span class="it-chip ${ty === 'regular' ? '' : ty}"><span class="pdot" style="--h:${pHue(pid)}"></span>${esc(pShort(pid))}<b>×${q}</b></span>`; }).join('');
-    return `<li class="rrow ${isDone ? 'done' : ''} ${st.key === nextKey ? 'next' : ''} ${newb ? 'newb' : ''} ${split && b === focusB ? 'focus' : ''}" data-key="${esc(st.key)}" data-b="${esc(bldName(b))}">
+  const num = new Map(); let k = 0; stops.forEach(s => { if (!s.skipped) num.set(s.key, ++k); });
+  const vis = stops.filter(s => !(UI.hideDone && doneMap[s.key]));
+  let prevG = null;
+  const rows = vis.map(st => {
+    const isDone = !!doneMap[st.key]; const c = st.cust;
+    const g = groupKey(st.loc); let gh = '';
+    if (g !== prevG) { gh = `<li class="rgh" aria-hidden="true">${esc(groupLabel(st.loc))}</li>`; prevG = g; }
+    const u = parseUnit(st.loc.unit); const ei = entIndex(st.loc.building, u.line);
+    const its = itemAgg(st).map(x => `<span class="ic ${x.ty === 'regular' ? '' : x.ty}"><span class="pdot" style="--h:${pHue(x.pid)}"></span>${esc(pShort(x.pid))}<b>${x.q}</b></span>`).join('');
+    const notes = stopNotes(st);
+    const tags = [...new Set(st.orders.map(o => o.type))].map(t => `<span class="badge xs t-${t}">${TYPE_NAME[t]}${t === 'sample' && !dense ? ' · 지점 수령' : ''}</span>`).join('')
+      + (st.skipped ? '<span class="badge xs">이날 빠짐</span>' : st.ov ? '<span class="badge xs acc">이날 변경</span>' : '');
+    const flags = dense ? '' : [c?.ice ? '아이스팩' : '', c?.bag ? '주머니' : '', c?.payment === 'cash' && c.paidMonth !== MONTH() ? '현금 미수' : ''].filter(Boolean).map(f => `<span class="badge xs ${f === '현금 미수' ? 'bad' : ''}">${f}</span>`).join('');
+    return gh + `<li class="rrow ${isDone ? 'done' : ''} ${st.key === nextKey ? 'next' : ''} ${st.skipped ? 'skip' : ''} ${split && st.loc.building === focusB ? 'focus' : ''}" data-key="${esc(st.key)}">
       <button class="handle" aria-label="끌어서 순서 바꾸기">${ICON.grip}</button>
-      <button class="seq" data-act="moveTo" data-key="${esc(st.key)}" data-date="${date}" aria-label="${i + 1}번, 순서 옮기기">${i + 1}</button>
-      <div class="rinfo" ${split ? `data-act="focusB" data-b="${esc(b)}"` : ''}><div class="rtop">${plate(st.loc)}<span class="rname">${esc(st.name)}</span>${st.loc.label ? `<span class="muted" style="font-size:12.5px">${esc(st.loc.label)}</span>` : ''}</div>
-        <div class="rits">${chips}</div>${flags.length ? `<div class="rflags">${flags.join('')}</div>` : ''}${notes ? `<div class="rnote">${esc(notes)}</div>` : ''}</div>
+      <button class="seq" data-act="moveTo" data-key="${esc(st.key)}" data-date="${date}" aria-label="${num.get(st.key) || ''}번, 순서 옮기기">${num.get(st.key) || '–'}</button>
+      <div class="rmain" data-act="openStop" data-key="${esc(st.key)}" data-date="${date}" data-b="${esc(st.loc.building)}" role="button" tabindex="0" aria-label="${esc(st.name)} 수량·메모 고치기">
+        <span class="who"><span class="plate sm">${esc(st.loc.building || '—')}${st.loc.unit ? '<i>-</i>' + esc(st.loc.unit) : ''}</span>${!dense && ei >= 0 ? `<span class="ent">${entName(st.loc.building, ei)}</span>` : ''}<span class="nm">${esc(st.name)}</span>${tags}${dense && notes ? '<span class="mk" title="메모 있음"></span>' : ''}</span>
+        <span class="its">${its || '<span class="muted">제품 없음</span>'}</span>
+        ${!dense && (flags || st.loc.label) ? `<span class="rflags">${st.loc.label ? `<span class="muted" style="font-size:12.5px">${esc(st.loc.label)}</span>` : ''}${flags}</span>` : ''}
+        ${!dense && notes ? `<span class="rnote">${esc(notes)}</span>` : ''}
+      </div>
       <button class="check" data-act="toggleDone" data-key="${esc(st.key)}" data-date="${date}" aria-pressed="${isDone}" aria-label="${esc(st.name)} 배달 완료">${ICON.check}</button></li>`;
   }).join('');
-  const listHtml = `<ol class="rlist" id="rlist" data-date="${date}">${rows}</ol>
-  <p class="hint" style="margin-top:14px">왼쪽 점 손잡이를 끌거나 번호를 눌러 순서를 옮겨요. 바꾼 순서는 이 날짜에만 적용되고, “순서”에서 기본 동선으로 저장할 수 있어요.</p>`;
+  const listHtml = `<ol class="rlist ${dense ? 'dense' : ''}" id="rlist" data-date="${date}">${rows}</ol>
+  <p class="hint" style="margin-top:12px">이름 쪽을 누르면 수량·메모·주문을 고칠 수 있어요. 점 손잡이를 끌거나 번호를 눌러 순서를 옮겨요.</p>`;
   if (split) return storageBanner() + head + `<div class="rsplit"><div>${listHtml}</div><aside class="rside" aria-label="동 배치">${renderMap(date, stops, doneMap, focusB)}</aside></div>`;
   return storageBanner() + head + listHtml;
 }
 function renderMap(date, stops, doneMap, autoSel) {
-  const byB = {}; stops.forEach(s => { (byB[s.loc.building] = byB[s.loc.building] || []).push(s); });
+  const byB = {}; stops.filter(s => !s.skipped).forEach(s => { (byB[s.loc.building] = byB[s.loc.building] || []).push(s); });
   const order = S.config.routeOrder.slice(); Object.keys(byB).forEach(b => { if (!order.includes(b)) order.push(b); });
   const groups = {}; order.forEach(b => { const g = seriesOf(b); (groups[g] = groups[g] || []).push(b); });
   const gnames = Object.keys(groups).sort((a, b) => (a === '상가·기타') - (b === '상가·기타'));
@@ -1096,34 +1195,208 @@ function renderMap(date, stops, doneMap, autoSel) {
   let html = gnames.map(g => `<div class="mapsec"><h3>${esc(g)} <span class="num">${groups[g].reduce((s, b) => s + (byB[b]?.length || 0), 0)}곳</span></h3><div class="tiles">${groups[g].map(b => {
     const l = byB[b] || []; const dn = l.filter(s => doneMap[s.key]).length;
     const cls = !l.length ? 'none' : dn === l.length ? 'full' : 'pend';
-    return `<button class="tile ${cls}" data-act="mapB" data-b="${esc(b)}" aria-pressed="${sel === b}" ${l.length ? '' : 'tabindex="-1"'}><span class="bn ${isNumB(b) ? '' : 'txt'}">${esc(b)}</span><span class="cnt">${l.length ? `${dn}/${l.length}` : '—'}</span></button>`;
+    let inner;
+    if (isNumB(b)) {
+      const buckets = new Map();
+      l.forEach(s => { const u = parseUnit(s.loc.unit); const key = (u.floor != null && u.floor < 0) || !u.line ? 'B' : entIndex(b, u.line); if (!buckets.has(key)) buckets.set(key, []); buckets.get(key).push(s); });
+      const cells = entrancesOf(b).map((_, i) => ({ key: i, label: entLines(b, i).join('·') }));
+      if (buckets.has('B')) cells.unshift({ key: 'B', label: 'B' });
+      inner = `<span class="ents">${cells.map(cl => { const ls = buckets.get(cl.key) || []; const d = ls.filter(s => doneMap[s.key]).length; return `<i class="${!ls.length ? '' : d === ls.length ? 'full' : 'pend'}">${cl.label}<b>${ls.length ? d + '/' + ls.length : '·'}</b></i>`; }).join('')}</span>`;
+    } else inner = `<span class="cnt">${l.length ? `${dn}/${l.length}` : '—'}</span>`;
+    return `<button class="tile ${cls}" data-act="mapB" data-b="${esc(b)}" aria-pressed="${sel === b}" ${l.length ? '' : 'tabindex="-1"'}><span class="bn ${isNumB(b) ? '' : 'txt'}">${esc(b)}</span>${inner}</button>`;
   }).join('')}</div></div>`).join('');
   if (sel) html += renderFloorplan(sel, byB[sel], doneMap, date);
-  else html += `<p class="hint">파란 칸을 누르면 그 동의 층·라인 배치가 보여요. 칸 안에서 바로 완료 체크할 수 있어요.</p>`;
+  else html += `<p class="hint">칸마다 왼쪽은 1·2호, 오른쪽은 3·4호(5호까지 있으면 3·4·5호) 입구예요. 파란 칸을 누르면 층별 배치가 보여요.</p>`;
   return html;
 }
 function renderFloorplan(b, list, doneMap, date) {
   const numeric = [], other = [];
   list.forEach(s => { const u = parseUnit(s.loc.unit); if (u.floor != null && u.floor > 0 && u.line) numeric.push({ s, ...u }); else other.push(s); });
-  const ents = {}; numeric.forEach(x => { const e = Math.ceil(x.line / 2); (ents[e] = ents[e] || []).push(x); });
-  const entHtml = Object.keys(ents).sort((a, b2) => a - b2).map(e => {
-    const xs = ents[e]; const lines = [e * 2 - 1, e * 2];
-    const floors = [...new Set(xs.map(x => x.floor))].sort((a, b2) => S.config.floorDir === 'desc' ? b2 - a : a - b2);
-    let prev = null; let rows = '';
+  const ents = {}; numeric.forEach(x => { const e = entIndex(b, x.line); (ents[e] = ents[e] || []).push(x); });
+  const cell = s => { const dn = !!doneMap[s.key]; return `<button class="cell has ${dn ? 'done' : ''}" data-act="toggleDone" data-key="${esc(s.key)}" data-date="${date}" aria-pressed="${dn}"><span class="u">${esc(s.loc.unit || '—')}${dn ? ' ✓' : ''}</span><span class="nm">${esc(s.name)}</span></button>`; };
+  const entHtml = Object.keys(ents).map(Number).sort((a, c) => a - c).map(e => {
+    const xs = ents[e];
+    const lines = [...new Set([...entLines(b, e), ...xs.map(x => x.line)])].sort((a, c) => a - c);
+    const floors = [...new Set(xs.map(x => x.floor))].sort((a, c) => S.config.floorDir === 'desc' ? c - a : a - c);
+    let prev = null, rows = '';
     floors.forEach(f => {
       if (prev != null && Math.abs(prev - f) > 1) rows += `<div class="gap">⋮ ${Math.abs(prev - f) - 1}개 층</div>`;
       prev = f;
-      rows += `<div class="fl" style="--cols:${lines.length}"><span class="fn">${f}F</span>${lines.map(l => {
-        const x = xs.find(y => y.floor === f && y.line === l);
-        if (!x) return `<span class="cell"></span>`;
-        const dn = !!doneMap[x.s.key];
-        return `<button class="cell has ${dn ? 'done' : ''}" data-act="toggleDone" data-key="${esc(x.s.key)}" data-date="${date}" aria-pressed="${dn}"><span class="u">${esc(x.s.loc.unit)}${dn ? ' ✓' : ''}</span><span class="nm">${esc(x.s.name)}</span></button>`;
-      }).join('')}</div>`;
+      rows += `<div class="fl" style="--cols:${lines.length}"><span class="fn">${f}F</span>${lines.map(l => { const x = xs.find(y => y.floor === f && y.line === l); return x ? cell(x.s) : '<span class="cell"></span>'; }).join('')}</div>`;
     });
-    return `<div class="ent"><h4>${lines.map(l => l + '호').join('·')} 라인 출입구</h4><div class="floors">${rows}</div></div>`;
+    return `<div class="ent"><h4>${entName(b, e)} 출입구</h4><div class="fl" style="--cols:${lines.length}"><span></span>${lines.map(l => `<span class="lh">${l}호</span>`).join('')}</div><div class="floors">${rows}</div></div>`;
   }).join('');
-  const oth = other.length ? `<div class="ent"><h4>지하·기타</h4><div class="floors">${other.map(s => { const dn = !!doneMap[s.key]; return `<button class="cell has ${dn ? 'done' : ''}" data-act="toggleDone" data-key="${esc(s.key)}" data-date="${date}" aria-pressed="${dn}"><span class="u">${esc(s.loc.unit || '—')}${dn ? ' ✓' : ''}</span><span class="nm">${esc(s.name)} ${esc(s.loc.label || '')}</span></button>`; }).join('')}</div></div>` : '';
+  const oth = other.length ? `<div class="ent"><h4>지하·기타</h4><div class="floors">${other.map(cell).join('')}</div></div>` : '';
   return `<div class="card fplan"><div class="sec-h"><h2>${esc(bldName(b))}</h2><span class="muted num">${list.filter(s => doneMap[s.key]).length}/${list.length} 완료</span></div><div class="ents">${oth}${entHtml}</div></div>`;
+}
+
+/* ================= stop editor (one tap from the route) ================= */
+let SF = null;
+function aggList(list) { const m = new Map(); list.forEach(i => m.set(i.pid, (m.get(i.pid) || 0) + i.qty)); return [...m].map(([pid, qty]) => ({ pid, qty })); }
+function regularFor(c, date) { const w = dow(date); return aggList(c.regular.filter(r => r.qty > 0 && r.days.includes(w) && onCycle(r, date)).map(r => ({ pid: r.productId, qty: r.qty }))); }
+function openStop(date, key) {
+  const st = orderedStops(date).find(s => s.key === key); if (!st) return;
+  const c = st.cust; const w = dow(date);
+  const ov = c ? S.days[date]?.ov?.[c.id] : null;
+  SF = {
+    date, key, cid: c?.id || null, name: st.name, loc: st.loc, mode: 'day',
+    day: c ? (ov ? aggList((ov.items || []).map(i => ({ ...i }))) : aggList(st.items.filter(i => i.type === 'regular').map(i => ({ pid: i.pid, qty: i.qty })))) : [],
+    week: c ? aggList(c.regular.filter(r => r.every !== 2 && r.days.includes(w)).map(r => ({ pid: r.productId, qty: r.qty }))) : [],
+    bi: c ? c.regular.filter(r => r.every === 2 && r.days.includes(w)) : [],
+    skip: !!ov?.skip, dayDirty: false, weekDirty: false, skipDirty: false,
+    orders: clone(st.orders), notes: c ? c.notes : '',
+  };
+  openSheet(`<div id="sf" style="display:grid;gap:14px"></div>`, () => { SF = null; });
+  renderSF();
+}
+function renderSF() {
+  const el = $('#sf'); if (!el || !SF) return;
+  const c = SF.cid ? custById(SF.cid) : null; const w = dow(SF.date);
+  const list = SF.mode === 'day' ? SF.day : SF.week;
+  const u = parseUnit(SF.loc.unit); const ei = entIndex(SF.loc.building, u.line);
+  el.innerHTML = `${sheetHead(esc(SF.name))}
+  <div class="row">${plate(SF.loc)}${ei >= 0 ? `<span class="ent">${entName(SF.loc.building, ei)} 입구</span>` : ''}<span class="muted">${esc(SF.loc.label || '')}</span></div>
+  ${c?.phone ? `<div class="row"><span class="muted">연락처</span><b class="num" style="user-select:all">${esc(c.phone)}</b></div>` : ''}
+  ${c ? `<div class="field"><span class="lbl">정기 품목</span>
+    <div class="seg"><button aria-pressed="${SF.mode === 'day'}" data-act="sfMode" data-m="day">${fmt(SF.date)} 하루만</button><button aria-pressed="${SF.mode === 'week'}" data-act="sfMode" data-m="week">매주 ${DL[w]}요일</button></div>
+    ${SF.mode === 'day' && SF.skip ? `<div class="warnbox" style="margin-top:8px">이날은 정기 배달을 뺐어요. 아래 “이날 빼기 취소”로 되돌려요.</div>` : `
+    <div class="ritems" style="margin-top:8px">${list.map((it, i) => `<div class="ritem ${it.qty ? '' : 'zero'}"><span class="pdot" style="--h:${pHue(it.pid)}"></span><span class="pn">${esc(pName(it.pid))}</span><span class="stepper"><button data-act="sfQty" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b>${it.qty}</b><button data-act="sfQty" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span></div>`).join('') || '<span class="hint">품목 없음</span>'}</div>
+    <div class="row" style="margin-top:8px;flex-wrap:nowrap"><select id="sfAdd" aria-label="추가할 제품" style="flex:1;min-width:0">${S.config.products.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select><button class="btn sm" data-act="sfAddItem">+ 추가</button></div>`}
+    ${SF.bi.length ? `<p class="hint" style="margin-top:6px">격주 품목(${SF.bi.map(r => esc(pName(r.productId)) + ' ' + r.qty).join(', ')})은 고객 정보에서 고쳐요.</p>` : ''}
+    <p class="hint" style="margin-top:6px">${SF.mode === 'day' ? '이 날짜에만 바뀌고, 발주표에도 바로 반영돼요.' : `앞으로 매주 ${DL[w]}요일 수량이 바뀌어요.`}</p></div>` : ''}
+  ${SF.orders.length ? `<div class="field"><span class="lbl">이날 주문</span><div style="display:grid;gap:8px">${SF.orders.map((o, oi) => `<div class="card" style="padding:10px;display:grid;gap:6px;${o.status === 'cancelled' ? 'opacity:.5' : ''}">
+      <div class="row" style="justify-content:space-between"><span class="badge t-${o.type}">${TYPE_NAME[o.type]}</span><button class="btn sm ghost" data-act="sfOCancel" data-o="${oi}">${o.status === 'cancelled' ? '되살리기' : '주문 취소'}</button></div>
+      ${o.items.map((it, ii) => `<div class="ritem"><span class="pdot" style="--h:${pHue(it.productId)}"></span><span class="pn">${esc(pName(it.productId))}</span><span class="stepper"><button data-act="sfOQty" data-o="${oi}" data-i="${ii}" data-d="-1" aria-label="줄이기">−</button><b>${it.qty}</b><button data-act="sfOQty" data-o="${oi}" data-i="${ii}" data-d="1" aria-label="늘리기">+</button></span></div>`).join('')}
+      <input type="text" value="${esc(o.note)}" placeholder="주문 메모" data-inp="sfONote" data-o="${oi}" aria-label="주문 메모"></div>`).join('')}</div></div>` : ''}
+  ${c ? `<div class="field"><label class="lbl" for="sfNotes">고객 메모 (배달할 때 보여요)</label><textarea id="sfNotes">${esc(SF.notes)}</textarea></div>` : ''}
+  <div class="sact">${c ? `<button class="btn" data-act="sfSkip">${SF.skip ? '이날 빼기 취소' : '이날 빼기'}</button><button class="btn" data-act="sfFull">고객 정보 전체</button>` : ''}<button class="btn pri" data-act="sfSave">저장</button></div>`;
+}
+function applyWeek(c, w, list) {
+  const want = Object.fromEntries(list.map(i => [i.pid, i.qty]));
+  const pids = new Set([...c.regular.filter(r => r.every !== 2 && r.days.includes(w)).map(r => r.productId), ...Object.keys(want)]);
+  for (const pid of pids) {
+    const cur = c.regular.filter(r => r.every !== 2 && r.productId === pid && r.days.includes(w)).reduce((s, r) => s + r.qty, 0);
+    const nq = want[pid] || 0; if (cur === nq) continue;
+    c.regular.forEach(r => { if (r.every !== 2 && r.productId === pid && r.days.includes(w)) r.days = r.days.filter(d => d !== w); });
+    c.regular = c.regular.filter(r => r.days.length);
+    if (nq > 0) { const same = c.regular.find(r => r.every !== 2 && r.productId === pid && r.qty === nq); if (same) same.days = [...same.days, w].sort(); else c.regular.push({ productId: pid, qty: nq, days: [w], every: 1, anchor: '' }); }
+  }
+}
+function saveSF() {
+  const touched = new Set(); const c = SF.cid ? custById(SF.cid) : null;
+  if (c) {
+    const notes = $('#sfNotes')?.value ?? SF.notes;
+    if (c.notes !== notes) { c.notes = notes; touched.add('customers'); }
+    if (SF.weekDirty) { applyWeek(c, dow(SF.date), SF.week); touched.add('customers'); }
+    if (SF.dayDirty || SF.skipDirty) {
+      const rec = dayRec(SF.date); rec.ov = rec.ov || {};
+      const items = SF.day.filter(i => i.qty > 0);
+      if (!SF.skip && stable(items) === stable(regularFor(c, SF.date))) delete rec.ov[c.id];
+      else rec.ov[c.id] = { items, skip: SF.skip };
+      touched.add('days');
+    }
+  }
+  for (const o of SF.orders) {
+    const i = S.orders.findIndex(x => x.id === o.id); if (i < 0) continue;
+    const no = normOrder(o); if (!no.items.length) no.status = 'cancelled';
+    if (stable(S.orders[i]) !== stable(no)) { S.orders[i] = no; touched.add('orders'); }
+  }
+  closeSheet();
+  if (touched.size) { save(...touched); render(); toast('저장했어요. 동선과 발주표에 반영돼요.'); }
+}
+
+/* ================= route list as a picture ================= */
+function wrapText(x, t, w) {
+  const words = String(t || '').split(' '); const lines = []; let cur = '';
+  for (const wd of words) {
+    const test = cur ? cur + ' ' + wd : wd;
+    if (x.measureText(test).width <= w) { cur = test; continue; }
+    if (cur) lines.push(cur);
+    if (x.measureText(wd).width <= w) { cur = wd; continue; }
+    let part = ''; for (const ch of wd) { if (x.measureText(part + ch).width > w && part) { lines.push(part); part = ch; } else part += ch; } cur = part;
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [''];
+}
+async function routeImageBlob(date) {
+  try { await Promise.all([document.fonts.load('400 22px "IBM Plex Sans KR"'), document.fonts.load('700 22px "IBM Plex Sans KR"'), document.fonts.load('400 36px "Do Hyeon"')]); } catch (e) { }
+  const FF = '"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+  const stops = orderedStops(date).filter(s => !s.skipped); const done = S.days[date]?.done || {};
+  const W = 1080, P = 32, LH = 30, SC = 2;
+  const cols = [{ k: 'n', w: 70 }, { k: 'loc', w: 180 }, { k: 'name', w: 170 }, { k: 'items', w: 330 }];
+  cols.push({ k: 'note', w: W - P * 2 - cols.reduce((s, c) => s + c.w, 0) });
+  const cv = document.createElement('canvas'); const x = cv.getContext('2d');
+  const rows = []; let prevG = null; let n = 0;
+  for (const st of stops) {
+    const g = groupKey(st.loc); if (g !== prevG) { rows.push({ g: groupLabel(st.loc) }); prevG = g; }
+    n++;
+    const its = itemAgg(st).map(i => `${pShort(i.pid)} ${i.q}`).join(', ');
+    const types = [...new Set(st.orders.map(o => o.type))].map(t => '[' + TYPE_NAME[t] + (t === 'sample' ? '·지점 수령' : '') + ']').join('');
+    const flags = [types, st.cust?.ice ? '아이스팩' : '', st.cust?.bag ? '주머니' : ''].filter(Boolean);
+    const note = [flags.join(' '), stopNotes(st)].filter(Boolean).join(' / ');
+    rows.push({ n, done: !!done[st.key], loc: `${st.loc.building || '—'}${st.loc.unit ? '-' + st.loc.unit : ''}`, sub: st.loc.label && !isNumB(st.loc.building) ? st.loc.label : '', name: st.name, items: its, note, added: st.orders.length > 0 });
+  }
+  x.font = `400 21px ${FF}`;
+  rows.forEach(r => {
+    if (r.g) { r.h = 40; return; }
+    r.L = { name: wrapText(x, r.name, cols[2].w - 14), items: wrapText(x, r.items, cols[3].w - 14), note: wrapText(x, r.note, cols[4].w - 14), sub: r.sub ? wrapText(x, r.sub, cols[1].w - 14) : [] };
+    r.h = Math.max(1 + r.L.sub.length, r.L.name.length, r.L.items.length, r.L.note.length) * LH + 18;
+  });
+  const top = 128, th = 42;
+  const H = top + th + rows.reduce((s, r) => s + r.h, 0) + 56;
+  cv.width = W * SC; cv.height = H * SC; x.scale(SC, SC);
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
+  const live = stops.length, dn = stops.filter(s => done[s.key]).length, qty = stops.reduce((s, st) => s + st.items.reduce((a, i) => a + i.qty, 0), 0);
+  x.fillStyle = '#121823'; x.font = `400 38px "Do Hyeon",${FF}`; x.textBaseline = 'alphabetic';
+  x.fillText(`${fmt(date)} 배달 동선`, P, 62);
+  x.font = `400 20px ${FF}`; x.fillStyle = '#596377';
+  x.fillText(`${live}곳 · 제품 ${qty}개 · 완료 ${dn}/${live} · ${new Date().toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 저장`, P, 98);
+  let y = top;
+  x.fillStyle = '#E7EBF2'; x.fillRect(P, y, W - P * 2, th);
+  x.fillStyle = '#3a4456'; x.font = `700 18px ${FF}`; x.textBaseline = 'middle';
+  let cx = P; ['번호', '동-호', '이름', '제품', '메모'].forEach((t, i) => { x.fillText(t, cx + 10, y + th / 2); cx += cols[i].w; });
+  y += th;
+  for (const r of rows) {
+    if (r.g) {
+      x.fillStyle = '#F1F3F7'; x.fillRect(P, y, W - P * 2, r.h);
+      x.fillStyle = '#2F54EB'; x.font = `700 19px ${FF}`; x.textBaseline = 'middle'; x.fillText(r.g, P + 10, y + r.h / 2);
+      y += r.h; continue;
+    }
+    if (r.added) { x.fillStyle = '#F4F6FF'; x.fillRect(P, y, W - P * 2, r.h); }
+    x.textBaseline = 'top'; cx = P;
+    // number + done mark
+    if (r.done) { x.fillStyle = '#1C8248'; x.beginPath(); x.arc(cx + 22, y + 9 + LH / 2, 13, 0, Math.PI * 2); x.fill(); x.fillStyle = '#fff'; x.font = `700 17px ${FF}`; x.textAlign = 'center'; x.fillText('✓', cx + 22, y + 9 + 4); x.textAlign = 'left'; x.fillStyle = '#596377'; x.font = `600 18px ${FF}`; x.fillText(String(r.n), cx + 40, y + 13); }
+    else { x.fillStyle = '#121823'; x.font = `700 21px ${FF}`; x.fillText(String(r.n), cx + 10, y + 9); }
+    cx += cols[0].w;
+    x.fillStyle = '#121823'; x.font = `700 21px ${FF}`; x.fillText(r.loc, cx + 8, y + 9);
+    x.fillStyle = '#596377'; x.font = `400 17px ${FF}`; r.L.sub.forEach((l, i) => x.fillText(l, cx + 8, y + 9 + LH * (i + 1)));
+    cx += cols[1].w;
+    x.fillStyle = '#121823'; x.font = `400 21px ${FF}`; r.L.name.forEach((l, i) => x.fillText(l, cx + 8, y + 9 + LH * i));
+    cx += cols[2].w;
+    x.fillStyle = '#121823'; x.font = `600 21px ${FF}`; r.L.items.forEach((l, i) => x.fillText(l, cx + 8, y + 9 + LH * i));
+    cx += cols[3].w;
+    x.fillStyle = '#9E5E00'; x.font = `400 19px ${FF}`; r.L.note.forEach((l, i) => x.fillText(l, cx + 8, y + 10 + LH * i));
+    y += r.h;
+    x.fillStyle = '#D9DFE8'; x.fillRect(P, y - 1, W - P * 2, 1);
+  }
+  x.fillStyle = '#8a93a5'; x.font = `400 16px ${FF}`; x.textBaseline = 'alphabetic';
+  x.fillText('헬리오 배달수첩 · 파란 줄 = 추가·Fredit·샘플 주문이 있는 곳', P, H - 22);
+  return await new Promise(res => cv.toBlob(res, 'image/png'));
+}
+async function saveRouteImage(date) {
+  toast('사진을 만드는 중이에요');
+  let blob; try { blob = await routeImageBlob(date); } catch (e) { blob = null; }
+  if (!blob) { toast('사진을 만들지 못했어요. 다시 눌러 주세요.'); return; }
+  const url = URL.createObjectURL(blob);
+  openSheet(`${sheetHead(`${fmt(date)} 동선 사진`)}
+    <img src="${url}" alt="${fmt(date)} 배달 동선 리스트" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff">
+    <p class="hint">iPad·iPhone에서는 사진을 길게 누르면 “사진 앱에 저장”이 나와요.</p>
+    <div class="sact"><button class="btn" data-act="closeSheet">닫기</button>${downloadsNs ? '<button class="btn pri" id="imgSave">파일로 저장</button>' : ''}</div>`, () => URL.revokeObjectURL(url));
+  const b = $('#imgSave');
+  if (b) b.onclick = async () => {
+    try { await downloadsNs.save({ filename: `배달동선_${date}.png`, data: blob }); toast('저장했어요'); }
+    catch (e) { if (e?.code !== 'declined') toast('파일로 저장하지 못했어요. 사진을 길게 눌러 저장해 보세요.'); }
+  };
 }
 
 /* ================= render: settings ================= */
@@ -1158,6 +1431,10 @@ function renderSettings() {
     <div class="slist">${C.routeOrder.map((b, i) => `<div class="it"><span class="seq" style="display:grid;place-items:center">${i + 1}</span><div class="t"><b>${esc(bldName(b))}</b>${isNumB(b) ? '' : ` <span class="muted" style="font-size:12px">${esc(b)}</span>`}</div><button class="btn sm ghost" data-act="rMove" data-i="${i}" data-d="-1" aria-label="위로" ${i ? '' : 'disabled'}>▲</button><button class="btn sm ghost" data-act="rMove" data-i="${i}" data-d="1" aria-label="아래로" ${i < C.routeOrder.length - 1 ? '' : 'disabled'}>▼</button><button class="btn sm ghost" data-act="rDel" data-i="${i}" aria-label="삭제">✕</button></div>`).join('')}</div>
     <div style="padding:10px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:8px"><input type="text" id="rNew" placeholder="동 번호나 장소 (예: 206, 상가A)" aria-label="추가할 동"><button class="btn" data-act="rAdd">추가</button></div>
   </div><p class="hint">고객 위치의 “동” 값과 같은 이름으로 맞춰요. 목록에 없는 동은 가까운 번호 옆에 자동으로 들어가요. 매일 순서는 배달 화면에서 끌어서 바꿀 수 있어요.${C.baseSeq ? ` <button class="btn sm" data-act="clearBase">저장한 기본 동선 지우기</button>` : ''}</p></div>
+  <div class="sec"><div class="sec-h"><h2>출입구 나누기</h2></div><div class="card">
+    <div class="slist">${Object.keys(C.entrances).length ? Object.entries(C.entrances).map(([b, g]) => `<div class="it"><div class="t"><b>${esc(bldName(b))}</b> ${g.map(x => x.join('·') + '호').join(' / ')}</div><button class="btn sm ghost" data-act="delEnt" data-b="${esc(b)}">삭제</button></div>`).join('') : '<div class="it muted">따로 정한 동이 없어요. 모든 동을 1·2호 / 3·4호 입구로 나누고, 5호 이상이 있으면 3·4·5호로 묶어요.</div>'}</div>
+    <div style="padding:10px;border-top:1px solid var(--line);display:grid;grid-template-columns:96px 1fr auto;gap:8px"><input type="text" id="eB" placeholder="동 (209)" aria-label="동"><input type="text" id="eG" placeholder="1,2,3 / 4,5,6" aria-label="호 묶음"><button class="btn" data-act="addEnt">저장</button></div>
+  </div><p class="hint">“/”로 입구를 나눠요. 입구가 하나뿐인 동은 “1,2,3,4”처럼 한 묶음으로 적어요.</p></div>
   <div class="sec"><div class="sec-h"><h2>제품</h2><span class="muted" style="font-size:12.5px">배달표 이름 · 줄임말 · 출고신청 이름</span></div><div class="card">
     ${C.products.map((p, i) => `<div class="prodedit"><input type="text" value="${esc(p.name)}" data-chg="prod" data-i="${i}" data-f="name" aria-label="배달표 이름"><input type="text" value="${esc(p.short)}" data-chg="prod" data-i="${i}" data-f="short" aria-label="줄임말"><input class="on" type="text" value="${esc(p.orderName)}" data-chg="prod" data-i="${i}" data-f="orderName" aria-label="출고신청 이름"><button class="btn sm ghost" data-act="delProd" data-i="${i}" aria-label="${esc(p.name)} 삭제">✕</button></div>`).join('')}
     <div style="padding:10px;border-top:1px solid var(--line)"><button class="btn" data-act="addProd">+ 제품 추가</button></div>
@@ -1559,7 +1836,7 @@ document.addEventListener('pointermove', e => {
   if (!drag || e.pointerId !== drag.id) return;
   e.preventDefault();
   const y = e.clientY; if (Math.abs(y - drag.startY) > 4) drag.moved = true;
-  const rows = [...drag.list.children].filter(r => r !== drag.row);
+  const rows = [...drag.list.querySelectorAll('.rrow')].filter(r => r !== drag.row);
   let before = null;
   for (const r of rows) { const b = r.getBoundingClientRect(); if (y < b.top + b.height / 2) { before = r; break; } }
   if (before !== drag.row.nextElementSibling) drag.list.insertBefore(drag.row, before);
@@ -1569,7 +1846,7 @@ function endDrag(e) {
   if (!drag || (e && e.pointerId !== drag.id)) return;
   const { row, list, date, moved } = drag; drag = null; row.classList.remove('dragging');
   if (!moved) return;
-  const visible = [...list.children].map(r => r.dataset.key);
+  const visible = [...list.querySelectorAll('.rrow')].map(r => r.dataset.key);
   const all = orderedStops(date).map(s => s.key);
   // keep hidden (done) rows at their relative place
   const hidden = all.filter(k => !visible.includes(k));
@@ -1616,6 +1893,19 @@ const ACT = {
   // route
   routeDate: a => { const cur = UI.routeDate || routeDefaultDate(); UI.routeDate = +a.dataset.d > 0 ? nextDeliveryDay(cur) : prevDeliveryDay(cur); UI.mapB = null; render(); },
   routeMode: a => { UI.routeMode = a.dataset.m; saveUI(); render(); },
+  routeDense: () => { UI.routeDense = UI.routeDense === false; saveUI(); render(); },
+  routeImage: a => saveRouteImage(a.dataset.date),
+  openStop: a => { if (mqSplit.matches && UI.mapB !== a.dataset.b) { UI.mapB = a.dataset.b; render(); } openStop(a.dataset.date, a.dataset.key); },
+  sfMode: a => { SF.mode = a.dataset.m; renderSF(); },
+  sfQty: a => { const L = SF.mode === 'day' ? SF.day : SF.week; const it = L[+a.dataset.i]; it.qty = Math.max(0, it.qty + (+a.dataset.d)); SF[SF.mode + 'Dirty'] = true; renderSF(); },
+  sfAddItem: () => { const pid = $('#sfAdd').value; const L = SF.mode === 'day' ? SF.day : SF.week; const ex = L.find(i => i.pid === pid); if (ex) ex.qty++; else L.push({ pid, qty: 1 }); SF[SF.mode + 'Dirty'] = true; renderSF(); },
+  sfOQty: a => { const it = SF.orders[+a.dataset.o].items[+a.dataset.i]; it.qty = Math.max(0, it.qty + (+a.dataset.d)); renderSF(); },
+  sfOCancel: a => { const o = SF.orders[+a.dataset.o]; o.status = o.status === 'cancelled' ? 'open' : 'cancelled'; renderSF(); },
+  sfSkip: () => { SF.skip = !SF.skip; SF.skipDirty = true; SF.mode = 'day'; if (!SF.skip && !SF.day.length) SF.day = regularFor(custById(SF.cid), SF.date); renderSF(); },
+  sfFull: () => { const id = SF.cid; const notes = $('#sfNotes')?.value; closeSheet(); if (notes != null) { const c = custById(id); if (c && c.notes !== notes) { c.notes = notes; save('customers'); } } openCustSheet(id); },
+  sfSave: () => saveSF(),
+  addEnt: () => { const b = $('#eB').value.trim().replace(/동$/, ''); const raw = $('#eG').value.trim(); if (!b || !raw) { toast('동과 호 묶음을 입력해 주세요. 예: 209 / 1,2,3 / 4,5,6'); return; } const groups = raw.split('/').map(g => g.split(/[,·\s]+/).flatMap(t => { const m = t.match(/^(\d+)-(\d+)$/); if (m) { const out = []; for (let i = +m[1]; i <= +m[2]; i++) out.push(i); return out; } return [+t]; }).filter(n => n > 0)).filter(g => g.length); if (!groups.length) { toast('호 묶음을 읽지 못했어요. 예: 1,2 / 3,4,5'); return; } S.config.entrances[b] = groups; save('config'); render(); toast(`${bldName(b)} 출입구: ${groups.map(g => g.join('·') + '호').join(' / ')}`); },
+  delEnt: a => { delete S.config.entrances[a.dataset.b]; save('config'); render(); },
   hideDone: () => { UI.hideDone = !UI.hideDone; saveUI(); render(); },
   toggleDone: a => toggleDone(a.dataset.date, a.dataset.key),
   moveTo: a => moveToSheet(a.dataset.date, a.dataset.key),
@@ -1711,6 +2001,7 @@ const INP = {
   custq: el => { UI.custQ = el.value; renderCustList(); },
   ofq: el => { F.q = el.value; renderOFRes(); },
   ofnote: el => { F.note = el.value; },
+  sfONote: el => { if (SF) SF.orders[+el.dataset.o].note = el.value; },
   ofnl: el => { F.nl[el.dataset.f] = el.value; const i = $('#ofimp'); if (i) i.innerHTML = ofImpact(); },
 };
 document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && INP[el.dataset.inp]) INP[el.dataset.inp](el); });
