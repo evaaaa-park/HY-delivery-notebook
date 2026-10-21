@@ -9,7 +9,7 @@
   --bg:#F1F3F7; --surface:#FFFFFF; --sunk:#E7EBF2; --ink:#121823; --muted:#596377; --line:#D9DFE8;
   --accent:#2F54EB; --accent-ink:#FFFFFF; --accent-soft:#E4EAFF;
   --ok:#1C8248; --ok-soft:#DFF2E6; --warn:#9E5E00; --warn-soft:#FFEFD2; --bad:#C2362C; --bad-soft:#FCE5E2;
-  --plate:#EBEFF5; --plate-ink:#1B2433; --fredit:#7A3FCF;
+  --plate:#EBEFF5; --plate-ink:#1B2433; --fredit:#7A3FCF; --blk0:#2F54EB; --blk1:#0E8C86;
   --shadow:0 1px 2px rgba(18,24,35,.06),0 6px 18px rgba(18,24,35,.07);
   --f-display:"Do Hyeon","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
@@ -20,12 +20,12 @@
   --bg:#0E121A; --surface:#161B25; --sunk:#1D2330; --ink:#E7EBF3; --muted:#97A1B4; --line:#2A3241;
   --accent:#819BFF; --accent-ink:#0A0F1F; --accent-soft:#1E2847;
   --ok:#52C483; --ok-soft:#143021; --warn:#F2B24C; --warn-soft:#33260E; --bad:#FF7D71; --bad-soft:#3A1917;
-  --plate:#222A38; --plate-ink:#E2E8F2; --fredit:#B48CFF; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}}
+  --plate:#222A38; --plate-ink:#E2E8F2; --fredit:#B48CFF; --blk0:#819BFF; --blk1:#3CC7BE; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}}
 :root[data-theme="dark"]:not([data-app-theme="light"]),:root[data-app-theme="dark"]{
   --bg:#0E121A; --surface:#161B25; --sunk:#1D2330; --ink:#E7EBF3; --muted:#97A1B4; --line:#2A3241;
   --accent:#819BFF; --accent-ink:#0A0F1F; --accent-soft:#1E2847;
   --ok:#52C483; --ok-soft:#143021; --warn:#F2B24C; --warn-soft:#33260E; --bad:#FF7D71; --bad-soft:#3A1917;
-  --plate:#222A38; --plate-ink:#E2E8F2; --fredit:#B48CFF; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}
+  --plate:#222A38; --plate-ink:#E2E8F2; --fredit:#B48CFF; --blk0:#819BFF; --blk1:#3CC7BE; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}
 
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
@@ -56,7 +56,7 @@ main{padding-block:16px calc(var(--nav-h) + 96px + env(safe-area-inset-bottom,0p
 
 /* bottom nav */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-.nav .wrap{display:grid;grid-template-columns:repeat(4,1fr);height:var(--nav-h)}
+.nav .wrap{display:grid;grid-template-columns:repeat(5,1fr);height:var(--nav-h)}
 .nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;color:var(--muted);position:relative}
 .nav button svg{width:22px;height:22px}
 .nav button[aria-current="page"]{color:var(--accent);font-weight:600}
@@ -292,6 +292,49 @@ table.ot{width:100%;border-collapse:collapse;font-size:14px}
 .tile .ents i.full{background:var(--ok);color:#fff}
 .tile.pend,.tile.full{background:var(--surface)}
 .fl .lh{font-size:11px;color:var(--muted);text-align:center;font-family:var(--f-mono)}
+/* route: 동 blocks */
+.bk0{--bc:var(--blk0)} .bk1{--bc:var(--blk1)}
+.rgb{list-style:none;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;color:var(--ink);padding:16px 2px 2px}
+.rgb::before{content:"";width:5px;height:18px;border-radius:3px;background:var(--bc);flex:none}
+.rgb .cnt{font-size:11.5px;font-weight:700;color:#fff;background:var(--bc);border-radius:99px;padding:1px 8px}
+.rge{list-style:none;font-size:12px;font-weight:600;color:var(--muted);padding:6px 2px 0 15px}
+.rlist .rrow.bk0,.rlist .rrow.bk1{border-left:5px solid var(--bc)}
+.rlist.dense .rgb{background:color-mix(in srgb,var(--bc) 12%,var(--surface));padding:8px 10px;border-top:1px solid var(--line)}
+.rlist.dense .rgb:first-child{border-top:0}
+.rlist.dense .rge{background:var(--surface);padding:5px 10px 1px 16px;border-top:1px solid var(--line)}
+.rlist.dense .rge + .rrow,.rlist.dense .rgb + .rrow{border-top:0}
+.rlist.dense .rrow.next{box-shadow:none;background:var(--accent-soft)}
+/* records */
+.perflist{display:grid}
+.pr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border:0;border-top:1px solid var(--line);background:none;text-align:left;width:100%}
+.pr:first-child{border-top:0}
+.pr .nm{font-weight:700;min-width:5em}
+.pr .its{flex:1;min-width:0}
+.pr .tot{font-size:13px;color:var(--muted);white-space:nowrap}
+.pr .tot b{color:var(--ink);font-size:15px}
+.perfbig{padding:6px 14px}
+.pb{display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:17px}
+.pb:first-child{border-top:0}
+.pb b{font-family:var(--f-display);font-weight:400;font-size:28px;color:var(--accent)}
+.pb.tot b{color:var(--ink)}
+.pb.tot .pn{font-weight:700}
+.loglist{display:grid}
+.logday{font-size:12px;font-weight:700;color:var(--muted);background:var(--sunk);padding:6px 12px}
+.logit{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:start;padding:10px 12px;border:0;border-top:1px solid var(--line);background:none;text-align:left;width:100%}
+.logday + .logit{border-top:0}
+.logit .lw{font-size:13px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.logit .lt{display:grid;gap:3px;min-width:0}
+.logit .tx{font-size:14px;overflow-wrap:anywhere}
+.logit .lat{font-size:12px;color:var(--muted)}
+@media (max-width:480px){.logit{grid-template-columns:78px 1fr}.logit .lat{display:none}}
+/* assistant */
+.chat{display:grid;gap:10px;align-content:start}
+.msgs{display:grid;gap:10px;align-content:start;min-height:200px}
+.msg{max-width:88%;padding:10px 12px;border-radius:14px;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.me{justify-self:end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px}
+.msg.ai{justify-self:start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px;display:grid;gap:6px}
+.msg .acts{margin:0;padding-left:18px;font-size:13px;color:var(--ok)}
+.composer{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom,0px));background:var(--bg);padding-block:8px;display:grid;gap:6px;margin-bottom:-10px}
 /* settings */
 .slist{display:grid}
 .slist .it{display:flex;gap:8px;align-items:center;padding:8px 10px;border-top:1px solid var(--line)}
@@ -407,6 +450,7 @@ button,.chip,.check,.seq,.tile,.cell{touch-action:manipulation}
   <div class="brand">헬리오 배달수첩<small id="hdate"></small></div>
   <div class="sp"></div>
   <button class="sync" id="sync" data-act="syncInfo" aria-label="저장 상태 보기"><i></i><span>불러오는 중</span></button>
+  <button class="iconbtn" id="aiBtn" data-act="assistant" aria-label="AI 도우미" title="AI 도우미" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9z"/><path d="M18.5 15.5l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8z"/></svg></button>
   <button class="iconbtn theme-btn" id="themeBtn" data-act="theme" aria-label="화면 모드"></button>
   <button class="iconbtn phone-only" data-act="tab" data-tab="settings" aria-label="설정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div></header>
@@ -422,6 +466,7 @@ button,.chip,.check,.seq,.tile,.cell{touch-action:manipulation}
   <button data-act="tab" data-tab="customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/></svg>고객</button>
   <button data-act="tab" data-tab="order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>발주<span class="dot" id="orderDot" hidden></span></button>
   <button data-act="tab" data-tab="route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8"/></svg>배달</button>
+  <button data-act="tab" data-tab="records"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17.5" rx="2"/><path d="M9 3.5V2.8h6v.7M8.5 9.5h7M8.5 13h7M8.5 16.5h4"/></svg>실적</button>
   <button class="rail-only railset" data-act="tab" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>설정</button>
 </div></nav>
 
@@ -520,9 +565,14 @@ const TYPES = ['regular', 'adhoc', 'sample', 'fredit'];
 const TYPE_NAME = { regular: '정기', adhoc: '추가', sample: '샘플', fredit: 'Fredit' };
 const PAY = { card: '카드자동이체', account: '계좌자동이체', cash: '현금' };
 const LOC_TYPES = { apt: '아파트 세대', office: '관리·미화실', security: '보안실', store: '상가', community: '주민센터·경로당' };
+const STATUS_NAME = { active: '배달 중', waiting: '시작 대기', stopped: '중단', ended: '해지', moved: '이사' };
+// regular deliveries happen while active, or until the stop date when 해지·중단·이사 is set ahead
+const isOn = (c, d) => c.status === 'active' || (c.status !== 'waiting' && !!c.endDate && d < c.endDate);
+const statusBadge = c => c.status === 'active' ? '' : `${STATUS_NAME[c.status]}${c.endDate ? (c.endDate > TODAY() ? ' 예정 ' : ' ') + fmtShort(c.endDate) : ''}`;
+const inCollection = c => c.status === 'active' || isOn(c, TODAY()) || (c.endDate && c.endDate >= addDays(TODAY(), -62));
 
 /* ================= state ================= */
-let S = { customers: [], orders: [], config: clone(DEFAULT_CONFIG), days: {} };
+let S = { customers: [], orders: [], config: clone(DEFAULT_CONFIG), days: {}, log: [], perf: { days: {} } };
 const UI = {
   tab: 'home', custQ: '', custF: 'all', selected: new Set(),
   routeDate: null, routeMode: 'list', hideDone: false, mapB: null,
@@ -530,20 +580,22 @@ const UI = {
 };
 const LS_KEY = 'helio-delivery-v1';
 const LS_UI = 'helio-delivery-ui';
-const DOCS = ['customers', 'orders', 'config', 'days'];
+const DOCS = ['customers', 'orders', 'config', 'days', 'log', 'perf'];
 const store = { db: null, mode: 'loading', refs: {}, dirty: {}, timers: {}, writing: {}, again: {}, last: {}, loaded: {}, localHad: {} };
 let sampleFn = null, sampleImages = false, downloadsNs = null;
 
 function normCust(c) {
   c = c || {};
+  const st = STATUS_NAME[c.status] ? c.status : (c.active === false ? 'stopped' : 'active');
   return {
+    status: st, endDate: st === 'active' ? '' : (c.endDate || ''), statusNote: c.statusNote || '',
     id: c.id || uid('c_'), name: c.name || '', contractNo: c.contractNo || '', phone: c.phone || '',
     loc: { type: c.loc?.type || 'apt', building: String(c.loc?.building ?? ''), unit: String(c.loc?.unit ?? ''), label: c.loc?.label || '' },
     course: c.course ?? null, slot: c.slot || '',
     regular: (c.regular || []).filter(r => r && r.productId).map(r => ({ productId: r.productId, qty: Math.max(0, +r.qty || 0), days: (r.days && r.days.length ? r.days : [1, 2, 3, 4, 5]).map(Number), every: +r.every === 2 ? 2 : 1, anchor: r.anchor || '' })),
     payment: c.payment || 'card', member: !!c.member, bill: c.bill || 'mobile', ice: !!c.ice, bag: !!c.bag,
     notes: c.notes || '', pauses: (c.pauses || []).filter(p => p && p.from && p.to).map(p => ({ id: p.id || uid('p_'), from: p.from, to: p.to, reason: p.reason || '', ack: !!p.ack, days: Array.isArray(p.days) ? p.days.map(Number) : [] })),
-    paidMonth: c.paidMonth || '', tags: Array.isArray(c.tags) ? c.tags : [], active: c.active !== false, createdAt: c.createdAt || Date.now(),
+    paidMonth: c.paidMonth || '', tags: Array.isArray(c.tags) ? c.tags : [], active: st === 'active', createdAt: c.createdAt || Date.now(),
   };
 }
 function normOrder(o) {
@@ -575,7 +627,7 @@ const pHue = id => prodById(id)?.hue ?? 210;
 /* ================= persistence ================= */
 const LS_META = 'helio-delivery-meta';
 const META = { t: {}, pending: {}, syncedAt: 0, err: '' };
-const DOC_NAME = { customers: '고객', orders: '주문', config: '설정·재고', days: '배달 체크·순서' };
+const DOC_NAME = { customers: '고객', orders: '주문', config: '설정·재고', days: '배달 체크·순서', log: '변경 기록', perf: '실적' };
 function loadMeta() { try { const m = JSON.parse(localStorage.getItem(LS_META) || '{}'); META.t = m.t || {}; META.pending = m.pending || {}; META.syncedAt = m.syncedAt || 0; } catch (e) { } }
 function saveMeta() { try { localStorage.setItem(LS_META, JSON.stringify(META)); } catch (e) { } }
 // every saved document carries _t = when it was last edited on any device; newer edit wins
@@ -584,12 +636,16 @@ function bodyOf(n) {
   if (n === 'customers') return { list: S.customers, _t };
   if (n === 'orders') return { list: S.orders, _t };
   if (n === 'days') return { map: S.days, _t };
+  if (n === 'log') return { list: S.log, _t };
+  if (n === 'perf') return { days: S.perf.days, since: S.perf.since || '', _t };
   return { ...S.config, _t };
 }
 function applyBody(n, b) {
   if (n === 'customers') S.customers = (b.list || []).map(normCust);
   else if (n === 'orders') S.orders = (b.list || []).map(normOrder);
   else if (n === 'days') S.days = b.map || {};
+  else if (n === 'log') S.log = Array.isArray(b.list) ? b.list : [];
+  else if (n === 'perf') S.perf = { days: b.days || {}, since: b.since || '' };
   else { const c = { ...b }; delete c._t; S.config = normConfig(c); }
 }
 function stable(v) { return JSON.stringify(v, (k, x) => (x && typeof x === 'object' && !Array.isArray(x)) ? Object.keys(x).sort().reduce((o, kk) => (o[kk] = x[kk], o), {}) : x); }
@@ -603,10 +659,12 @@ function loadLocal() {
     if (o.orders) { S.orders = o.orders.map(normOrder); store.localHad.orders = S.orders.length > 0; }
     if (o.config) { S.config = normConfig(o.config); store.localHad.config = true; }
     if (o.days) { S.days = o.days; store.localHad.days = Object.keys(o.days).length > 0; }
+    if (Array.isArray(o.log)) { S.log = o.log; store.localHad.log = o.log.length > 0; }
+    if (o.perf && o.perf.days) { S.perf = { days: o.perf.days, since: o.perf.since || '' }; store.localHad.perf = Object.keys(o.perf.days).length > 0; }
   } catch (e) { }
-  try { const u = JSON.parse(localStorage.getItem(LS_UI) || '{}'); if (u.tab) UI.tab = u.tab; if (u.routeMode) UI.routeMode = u.routeMode; UI.hideDone = !!u.hideDone; UI.routeDense = u.routeDense !== false; } catch (e) { }
+  try { const u = JSON.parse(localStorage.getItem(LS_UI) || '{}'); if (u.tab) UI.tab = u.tab; if (u.routeMode) UI.routeMode = u.routeMode; UI.hideDone = !!u.hideDone; UI.routeDense = u.routeDense !== false; if (u.recMode) UI.recMode = u.recMode; } catch (e) { }
 }
-function saveUI() { try { localStorage.setItem(LS_UI, JSON.stringify({ tab: UI.tab, routeMode: UI.routeMode, hideDone: UI.hideDone, routeDense: UI.routeDense !== false })); } catch (e) { } }
+function saveUI() { try { localStorage.setItem(LS_UI, JSON.stringify({ tab: UI.tab, routeMode: UI.routeMode, hideDone: UI.hideDone, routeDense: UI.routeDense !== false, recMode: UI.recMode || 'perf' })); } catch (e) { } }
 function save(...names) {
   prune();
   const now = Date.now();
@@ -670,7 +728,7 @@ function subscribe(n) {
     // edits made here while offline are newer than the server copy: send them up instead of overwriting
     if (META.pending[n] && (META.t[n] || 0) >= serverT) { flush(n); return; }
     store.last[n] = key; META.t[n] = serverT; META.pending[n] = false; saveMeta();
-    applyBody(n, clone(body)); cacheLocal(); scheduleRender();
+    applyBody(n, clone(body)); cacheLocal(); scheduleRender(); setTimeout(maybeFreeze, 800);
   }, err => {
     store.live[n] = false;
     const code = err && err.code;
@@ -684,8 +742,8 @@ async function initRuntime() {
     window.claude.use('db').catch(() => null), window.claude.use('user').catch(() => null),
     window.claude.use('sample').catch(() => null), window.claude.use('downloads').catch(() => null),
   ]);
-  downloadsNs = dl; sampleFn = smp;
-  if (smp && smp.limits) { try { const l = await smp.limits(); sampleImages = !!l.images; } catch (e) { sampleImages = false; } }
+  downloadsNs = dl; sampleFn = smp; { const ab = document.getElementById('aiBtn'); if (ab) ab.hidden = !smp; }
+  if (smp && smp.limits) { try { const l = await smp.limits(); sampleImages = !!l.images; if (l.tools && l.tools.maxCount) aiToolMax = l.tools.maxCount; } catch (e) { sampleImages = false; } }
   let owner = true; try { if (user && typeof user.isOwner === 'function') owner = (await user.isOwner()) !== false; } catch (e) { }
   if (!db || !owner) { store.mode = owner ? 'local' : 'guest'; renderSync(); render(); return; }
   store.db = db; store.mode = 'db'; store.unsub = {}; store.live = {};
@@ -697,6 +755,8 @@ function prune() {
   S.orders = S.orders.filter(o => o.date >= cut);
   for (const d of Object.keys(S.days)) if (d < cut) delete S.days[d];
   for (const c of S.customers) c.pauses = c.pauses.filter(p => p.to >= cut);
+  const lcut = Date.now() - 200 * 86400000; S.log = S.log.filter(e => e.at >= lcut).slice(0, 900);
+  const pcut = addDays(TODAY(), -100); for (const d of Object.keys(S.perf.days)) if (d < pcut) delete S.perf.days[d];
 }
 function renderSync() {
   const el = $('#sync'); if (!el) return;
@@ -823,7 +883,7 @@ function stopsFor(date) {
   for (const c of S.customers) {
     const ov = ovs[c.id];
     if (ov) { map.set(c.id, { key: c.id, cust: c, items: ov.skip ? [] : (ov.items || []).filter(i => i.qty > 0).map(i => ({ pid: i.pid, qty: i.qty, type: 'regular' })), orders: [], ov: true }); continue; }
-    if (!regularDay || !c.active || pauseOn(c, date)) continue;
+    if (!regularDay || !isOn(c, date) || pauseOn(c, date)) continue;
     const items = c.regular.filter(r => r.qty > 0 && r.days.includes(w) && onCycle(r, date));
     if (items.length) map.set(c.id, { key: c.id, cust: c, items: items.map(r => ({ pid: r.productId, qty: r.qty, type: 'regular' })), orders: [] });
   }
@@ -876,7 +936,8 @@ function confirmDiff(date, rows) {
 function buildAlerts() {
   const t = TODAY(); const out = [];
   for (const c of S.customers) {
-    if (!c.active) continue;
+    if (c.status !== 'active' && c.endDate) { const de = daysBetween(t, c.endDate); if (de >= 0 && de <= 3) out.push({ kind: 'info', html: `<b>${esc(c.name)}</b> ${fmt(c.endDate)}부터 ${STATUS_NAME[c.status]}`, sub: `${esc(locShort(c.loc))}${c.statusNote ? ' · ' + esc(c.statusNote) : ''} · 전날까지 배달해요` }); }
+    if (!isOn(c, t)) continue;
     for (const p of c.pauses) {
       if (p.ack) continue;
       const resume = nextDeliveryDay(p.to);
@@ -900,7 +961,7 @@ function buildAlerts() {
     if (n.length) out.push({ kind: 'info', html: `<b>지점에서 샘플 받아오기</b> ${fmt(d)} 배달분 ${n.length}건`, sub: n.map(o => o.items.map(i => `${pShort(i.productId)}×${i.qty}`).join(' ')).join(' / ') });
   }
   for (const d of [dd]) if (isHoliday(d)) out.push({ kind: 'info', html: `<b>${fmt(d)} ${esc(holidayName(d))}</b>`, sub: '정기 배달 없음' });
-  const unpaid = S.customers.filter(c => c.active && c.payment === 'cash' && c.paidMonth !== MONTH());
+  const unpaid = S.customers.filter(c => inCollection(c) && c.payment === 'cash' && c.paidMonth !== MONTH());
   if (unpaid.length) out.push({ kind: 'warn', html: `<b>현금 수금 남은 고객 ${unpaid.length}명</b>`, sub: unpaid.slice(0, 6).map(c => esc(c.name)).join(', ') + (unpaid.length > 6 ? ' 외' : ''), act: `<button class="btn sm" data-act="filterCash">보기</button>` });
   return out;
 }
@@ -915,12 +976,22 @@ function render() {
   else if (UI.tab === 'order') v.innerHTML = renderOrder();
   else if (UI.tab === 'route') v.innerHTML = renderRoute();
   else if (UI.tab === 'settings') v.innerHTML = renderSettings();
+  else if (UI.tab === 'records') v.innerHTML = renderRecords();
   $('#fab').hidden = UI.tab === 'settings' || (UI.tab === 'customers' && UI.selected.size > 0);
   setRheadH();
+  if (UI.tab === 'records' && (UI.recMode || 'perf') === 'log') renderLogList();
+  if (UI.scrollB) { const b = UI.scrollB; UI.scrollB = null; requestAnimationFrame(() => scrollToBuilding(b)); }
   renderBulk();
   const tgt = orderTarget(); const diffs = [TODAY(), tgt].map(d => confirmDiff(d, sheetFor(d))).filter(x => x && x.length).length;
   const dot = $('#orderDot'); dot.hidden = !diffs; dot.textContent = diffs;
   renderSync();
+}
+function scrollToBuilding(b) {
+  let el = [...document.querySelectorAll('.rgb')].find(x => x.dataset.b === b);
+  if (!el || !el.offsetParent) el = $('.fplan');
+  if (!el) return;
+  const off = 61 + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rhead-h')) || 120) + 10;
+  window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - off), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 function setRheadH() { const rh = $('.rhead'); if (rh) document.documentElement.style.setProperty('--rhead-h', rh.offsetHeight + 'px'); }
 function storageBanner() {
@@ -973,8 +1044,8 @@ function custFilters() {
   sers.forEach(s => defs.push(['s:' + s, s, c => seriesOf(c.loc.building) === s]));
   defs.push(['next', fmtShort(t) + ' 배달', c => has.has(c.id)]);
   defs.push(['paused', '중지·예정', c => c.pauses.some(p => p.to >= TODAY())]);
-  defs.push(['off', '배달 안 함', c => !c.active]);
-  defs.push(['cash', '현금 미수', c => c.payment === 'cash' && c.paidMonth !== MONTH()]);
+  defs.push(['off', '해지·중단·이사', c => c.status !== 'active']);
+  defs.push(['cash', '현금 미수', c => inCollection(c) && c.payment === 'cash' && c.paidMonth !== MONTH()]);
   if (S.customers.some(c => c.tags.includes('예시'))) defs.push(['ex', '예시', c => c.tags.includes('예시')]);
   return defs;
 }
@@ -1003,12 +1074,12 @@ function custCard(c) {
   const pause = c.pauses.filter(p => p.to >= t).sort((a, b) => a.from.localeCompare(b.from))[0];
   const badges = [];
   if (pause) badges.push(`<span class="badge warn">${pause.from <= t ? '중지 중' : '중지 예정'} ${fmtShort(pause.from)}–${fmtShort(pause.to)}${pauseDays(pause)}</span>`);
-  if (!c.active) badges.push(`<span class="badge">배달 안 함</span>`);
+  if (c.status !== 'active') badges.push(`<span class="badge ${['ended', 'moved'].includes(c.status) ? 'bad' : 'warn'}">${esc(statusBadge(c))}</span>`);
   if (c.tags.includes('예시')) badges.push(`<span class="badge">예시</span>`);
   const upcoming = S.orders.filter(o => o.customerId === c.id && o.status === 'open' && o.date >= t);
   if (upcoming.length) badges.push(`<span class="badge acc">주문 ${upcoming.length}건</span>`);
   const pay = c.payment === 'cash' ? `<button class="badge ${c.paidMonth === MONTH() ? 'ok' : 'bad'}" style="border:0" data-act="togglePaid" data-id="${c.id}">현금 · ${c.paidMonth === MONTH() ? '이번 달 수금 완료' : '이번 달 미수'}</button>` : `<span class="badge">${PAY[c.payment]}</span>`;
-  return `<article class="ccard ${sel ? 'sel' : ''} ${pNow ? 'paused' : ''} ${c.active ? '' : 'inactive'}">
+  return `<article class="ccard ${sel ? 'sel' : ''} ${pNow ? 'paused' : ''} ${isOn(c, t) ? '' : 'inactive'}">
     <label class="pick" aria-label="${esc(c.name)} 선택"><input type="checkbox" data-chg="pick" data-id="${c.id}" ${sel ? 'checked' : ''}></label>
     <div class="cbody">
       <div class="chead"><button class="cname" data-act="editCust" data-id="${c.id}">${esc(c.name || '이름 없음')}</button>${badges.join('')}</div>
@@ -1028,7 +1099,7 @@ function renderBulk() {
   const el = $('#bulk');
   if (UI.tab !== 'customers' || !UI.selected.size) { el.innerHTML = ''; return; }
   el.innerHTML = `<div class="bulkbar"><div class="wrap"><span class="n">${UI.selected.size}명</span><div class="acts">
-    <button data-act="bulk" data-k="pause">배달 중지</button><button data-act="bulk" data-k="resume">중지 해제</button><button data-act="bulk" data-k="qty">수량 변경</button><button data-act="bulk" data-k="order">주문 추가</button><button data-act="bulk" data-k="note">메모</button><button data-act="bulk" data-k="pay">수금</button><button data-act="bulk" data-k="delete">삭제</button></div>
+    <button data-act="bulk" data-k="pause">배달 중지</button><button data-act="bulk" data-k="resume">중지 해제</button><button data-act="bulk" data-k="qty">수량 변경</button><button data-act="bulk" data-k="order">주문 추가</button><button data-act="bulk" data-k="note">메모</button><button data-act="bulk" data-k="pay">수금</button><button data-act="bulk" data-k="status">상태</button></div>
     <button class="x" data-act="clearSel" aria-label="선택 해제">✕</button></div></div>`;
 }
 
@@ -1045,7 +1116,7 @@ function renderOrder() {
   if (date === tgt) status = od === t ? `<span class="badge acc">오늘 발주할 날짜</span>` : `<span class="badge acc">다음 발주일 ${fmt(od)}</span>`;
   else if (odFor < t) status = `<span class="badge warn">발주일 ${fmt(odFor)} 지남</span>`;
   else status = `<span class="badge">발주일 ${fmt(odFor)}</span>`;
-  const resumes = S.customers.filter(c => c.active && c.pauses.some(p => nextDeliveryDay(p.to) === date) && !pauseOn(c, date));
+  const resumes = S.customers.filter(c => isOn(c, date) && c.pauses.some(p => nextDeliveryDay(p.to) === date) && !pauseOn(c, date));
   const samples = S.orders.filter(o => o.date === date && o.type === 'sample' && o.status === 'open');
   const fredit = S.orders.filter(o => o.date === date && o.type === 'fredit' && o.status === 'open');
   const totalBuy = show.reduce((s, r) => s + r.buy, 0);
@@ -1113,7 +1184,14 @@ function entLines(b, idx) {
   const max = Math.max(...used, g[Math.min(1, g.length - 1)]);
   return g.filter(l => l <= max);
 }
-const entName = (b, idx) => idx < 0 ? '' : entLines(b, idx).join('·') + '호';
+const singleEnt = b => entrancesOf(b).length <= 1;
+const entName = (b, idx) => idx < 0 || singleEnt(b) ? '' : entLines(b, idx).join('·') + '호';
+function subLabel(loc) {
+  const b = loc?.building || ''; const u = parseUnit(loc?.unit);
+  if (u.floor != null && u.floor < 0) return '지하';
+  const i = entIndex(b, u.line); const n = entName(b, i);
+  return n ? n + ' 입구' : '';
+}
 function groupKey(loc) {
   const b = loc?.building || ''; const u = parseUnit(loc?.unit);
   if (u.floor != null && u.floor < 0) return b + '|B';
@@ -1123,7 +1201,8 @@ function groupLabel(loc) {
   const b = loc?.building || ''; const u = parseUnit(loc?.unit);
   if (u.floor != null && u.floor < 0) return bldName(b) + ' · 지하';
   const i = entIndex(b, u.line);
-  return bldName(b) + (i >= 0 ? ' · ' + entName(b, i) + ' 입구' : '');
+  const n = entName(b, i);
+  return bldName(b) + (n ? ' · ' + n + ' 입구' : '');
 }
 function itemAgg(st) {
   const agg = new Map();
@@ -1159,22 +1238,25 @@ function renderRoute() {
   const focusB = split ? ((UI.mapB && stops.some(s => s.loc.building === UI.mapB)) ? UI.mapB : (nextStop || stops[0])?.loc.building) : null;
   const num = new Map(); let k = 0; stops.forEach(s => { if (!s.skipped) num.set(s.key, ++k); });
   const vis = stops.filter(s => !(UI.hideDone && doneMap[s.key]));
-  let prevG = null;
-  const rows = vis.map(st => {
+  // consecutive stops in the same 동 form one block; entrance sub-headers appear only inside two-entrance 동
+  const runLen = new Map(); { let i = 0; while (i < vis.length) { let j = i; while (j + 1 < vis.length && vis[j + 1].loc.building === vis[i].loc.building) j++; runLen.set(i, j - i + 1); i = j + 1; } }
+  let prevB = null, prevG = null, blk = -1;
+  const rows = vis.map((st, idx) => {
     const isDone = !!doneMap[st.key]; const c = st.cust;
     const g = groupKey(st.loc); let gh = '';
-    if (g !== prevG) { gh = `<li class="rgh" aria-hidden="true">${esc(groupLabel(st.loc))}</li>`; prevG = g; }
+    if (idx === 0 || st.loc.building !== prevB) { blk++; const n = runLen.get(idx) || 1; gh = `<li class="rgb bk${blk % 2}" data-b="${esc(st.loc.building)}" aria-hidden="true"><span>${esc(bldName(st.loc.building))}</span>${n > 1 ? `<span class="cnt">${n}곳</span>` : ''}</li>`; prevB = st.loc.building; prevG = null; }
+    if (g !== prevG) { const sub = subLabel(st.loc); if (sub) gh += `<li class="rge bk${blk % 2}" aria-hidden="true">${esc(sub)}</li>`; prevG = g; }
     const u = parseUnit(st.loc.unit); const ei = entIndex(st.loc.building, u.line);
     const its = itemAgg(st).map(x => `<span class="ic ${x.ty === 'regular' ? '' : x.ty}"><span class="pdot" style="--h:${pHue(x.pid)}"></span>${esc(pShort(x.pid))}<b>${x.q}</b></span>`).join('');
     const notes = stopNotes(st);
     const tags = [...new Set(st.orders.map(o => o.type))].map(t => `<span class="badge xs t-${t}">${TYPE_NAME[t]}${t === 'sample' && !dense ? ' · 지점 수령' : ''}</span>`).join('')
       + (st.skipped ? '<span class="badge xs">이날 빠짐</span>' : st.ov ? '<span class="badge xs acc">이날 변경</span>' : '');
     const flags = dense ? '' : [c?.ice ? '아이스팩' : '', c?.bag ? '주머니' : '', c?.payment === 'cash' && c.paidMonth !== MONTH() ? '현금 미수' : ''].filter(Boolean).map(f => `<span class="badge xs ${f === '현금 미수' ? 'bad' : ''}">${f}</span>`).join('');
-    return gh + `<li class="rrow ${isDone ? 'done' : ''} ${st.key === nextKey ? 'next' : ''} ${st.skipped ? 'skip' : ''} ${split && st.loc.building === focusB ? 'focus' : ''}" data-key="${esc(st.key)}">
+    return gh + `<li class="rrow bk${blk % 2} ${isDone ? 'done' : ''} ${st.key === nextKey ? 'next' : ''} ${st.skipped ? 'skip' : ''} ${split && st.loc.building === focusB ? 'focus' : ''}" data-key="${esc(st.key)}">
       <button class="handle" aria-label="끌어서 순서 바꾸기">${ICON.grip}</button>
       <button class="seq" data-act="moveTo" data-key="${esc(st.key)}" data-date="${date}" aria-label="${num.get(st.key) || ''}번, 순서 옮기기">${num.get(st.key) || '–'}</button>
       <div class="rmain" data-act="openStop" data-key="${esc(st.key)}" data-date="${date}" data-b="${esc(st.loc.building)}" role="button" tabindex="0" aria-label="${esc(st.name)} 수량·메모 고치기">
-        <span class="who"><span class="plate sm">${esc(st.loc.building || '—')}${st.loc.unit ? '<i>-</i>' + esc(st.loc.unit) : ''}</span>${!dense && ei >= 0 ? `<span class="ent">${entName(st.loc.building, ei)}</span>` : ''}<span class="nm">${esc(st.name)}</span>${tags}${dense && notes ? '<span class="mk" title="메모 있음"></span>' : ''}</span>
+        <span class="who"><span class="plate sm">${esc(st.loc.building || '—')}${st.loc.unit ? '<i>-</i>' + esc(st.loc.unit) : ''}</span>${!dense && entName(st.loc.building, ei) ? `<span class="ent">${entName(st.loc.building, ei)}</span>` : ''}<span class="nm">${esc(st.name)}</span>${tags}${dense && notes ? '<span class="mk" title="메모 있음"></span>' : ''}</span>
         <span class="its">${its || '<span class="muted">제품 없음</span>'}</span>
         ${!dense && (flags || st.loc.label) ? `<span class="rflags">${st.loc.label ? `<span class="muted" style="font-size:12.5px">${esc(st.loc.label)}</span>` : ''}${flags}</span>` : ''}
         ${!dense && notes ? `<span class="rnote">${esc(notes)}</span>` : ''}
@@ -1196,7 +1278,7 @@ function renderMap(date, stops, doneMap, autoSel) {
     const l = byB[b] || []; const dn = l.filter(s => doneMap[s.key]).length;
     const cls = !l.length ? 'none' : dn === l.length ? 'full' : 'pend';
     let inner;
-    if (isNumB(b)) {
+    if (isNumB(b) && !singleEnt(b)) {
       const buckets = new Map();
       l.forEach(s => { const u = parseUnit(s.loc.unit); const key = (u.floor != null && u.floor < 0) || !u.line ? 'B' : entIndex(b, u.line); if (!buckets.has(key)) buckets.set(key, []); buckets.get(key).push(s); });
       const cells = entrancesOf(b).map((_, i) => ({ key: i, label: entLines(b, i).join('·') }));
@@ -1224,7 +1306,7 @@ function renderFloorplan(b, list, doneMap, date) {
       prev = f;
       rows += `<div class="fl" style="--cols:${lines.length}"><span class="fn">${f}F</span>${lines.map(l => { const x = xs.find(y => y.floor === f && y.line === l); return x ? cell(x.s) : '<span class="cell"></span>'; }).join('')}</div>`;
     });
-    return `<div class="ent"><h4>${entName(b, e)} 출입구</h4><div class="fl" style="--cols:${lines.length}"><span></span>${lines.map(l => `<span class="lh">${l}호</span>`).join('')}</div><div class="floors">${rows}</div></div>`;
+    return `<div class="ent"><h4>${singleEnt(b) ? '세대' : entName(b, e) + ' 출입구'}</h4><div class="fl" style="--cols:${lines.length}"><span></span>${lines.map(l => `<span class="lh">${l}호</span>`).join('')}</div><div class="floors">${rows}</div></div>`;
   }).join('');
   const oth = other.length ? `<div class="ent"><h4>지하·기타</h4><div class="floors">${other.map(cell).join('')}</div></div>` : '';
   return `<div class="card fplan"><div class="sec-h"><h2>${esc(bldName(b))}</h2><span class="muted num">${list.filter(s => doneMap[s.key]).length}/${list.length} 완료</span></div><div class="ents">${oth}${entHtml}</div></div>`;
@@ -1255,7 +1337,7 @@ function renderSF() {
   const list = SF.mode === 'day' ? SF.day : SF.week;
   const u = parseUnit(SF.loc.unit); const ei = entIndex(SF.loc.building, u.line);
   el.innerHTML = `${sheetHead(esc(SF.name))}
-  <div class="row">${plate(SF.loc)}${ei >= 0 ? `<span class="ent">${entName(SF.loc.building, ei)} 입구</span>` : ''}<span class="muted">${esc(SF.loc.label || '')}</span></div>
+  <div class="row">${plate(SF.loc)}${entName(SF.loc.building, ei) ? `<span class="ent">${entName(SF.loc.building, ei)} 입구</span>` : ''}<span class="muted">${esc(SF.loc.label || '')}</span></div>
   ${c?.phone ? `<div class="row"><span class="muted">연락처</span><b class="num" style="user-select:all">${esc(c.phone)}</b></div>` : ''}
   ${c ? `<div class="field"><span class="lbl">정기 품목</span>
     <div class="seg"><button aria-pressed="${SF.mode === 'day'}" data-act="sfMode" data-m="day">${fmt(SF.date)} 하루만</button><button aria-pressed="${SF.mode === 'week'}" data-act="sfMode" data-m="week">매주 ${DL[w]}요일</button></div>
@@ -1286,21 +1368,23 @@ function saveSF() {
   const touched = new Set(); const c = SF.cid ? custById(SF.cid) : null;
   if (c) {
     const notes = $('#sfNotes')?.value ?? SF.notes;
-    if (c.notes !== notes) { c.notes = notes; touched.add('customers'); }
-    if (SF.weekDirty) { applyWeek(c, dow(SF.date), SF.week); touched.add('customers'); }
+    if (c.notes !== notes) { c.notes = notes; touched.add('customers'); logChange({ cid: c.id, kind: '메모', text: `메모: ${notes || '(지움)'}` }); }
+    if (SF.weekDirty) { const was = regularText(c); applyWeek(c, dow(SF.date), SF.week); if (was !== regularText(c)) logChange({ cid: c.id, from: SF.date, to: '', kind: '정기 변경', text: `매주 ${DL[dow(SF.date)]}: ${SF.week.filter(i => i.qty > 0).map(i => pShort(i.pid) + ' ' + i.qty).join(', ') || '없음'} (이전 정기: ${was})` }); touched.add('customers'); }
     if (SF.dayDirty || SF.skipDirty) {
       const rec = dayRec(SF.date); rec.ov = rec.ov || {};
       const items = SF.day.filter(i => i.qty > 0);
-      if (!SF.skip && stable(items) === stable(regularFor(c, SF.date))) delete rec.ov[c.id];
-      else rec.ov[c.id] = { items, skip: SF.skip };
+      if (!SF.skip && stable(items) === stable(regularFor(c, SF.date))) { delete rec.ov[c.id]; logChange({ cid: c.id, from: SF.date, kind: '하루 변경', text: '이날 변경 취소 (정기대로)' }); }
+      else { rec.ov[c.id] = { items, skip: SF.skip }; logChange({ cid: c.id, from: SF.date, kind: SF.skip ? '미전달' : '하루 변경', text: SF.skip ? '이날 정기 배달 뺌' : `이날만 ${items.map(i => pShort(i.pid) + ' ' + i.qty).join(', ') || '정기 없음'}` }); }
       touched.add('days');
     }
   }
   for (const o of SF.orders) {
     const i = S.orders.findIndex(x => x.id === o.id); if (i < 0) continue;
     const no = normOrder(o); if (!no.items.length) no.status = 'cancelled';
-    if (stable(S.orders[i]) !== stable(no)) { S.orders[i] = no; touched.add('orders'); }
+    if (stable(S.orders[i]) !== stable(no)) { const was = S.orders[i]; S.orders[i] = no; touched.add('orders'); const oc = no.customerId ? custById(no.customerId) : null; logChange({ cid: no.customerId, name: oc ? '' : no.name, loc: oc ? '' : locShort(no.loc), from: no.date, kind: '주문', text: no.status === 'cancelled' ? `주문 취소 ${itemsText(was.items)}` : `주문 수정 ${itemsText(no.items)}${no.note ? ' · ' + no.note : ''}` }); }
   }
+  if (touched.size) touched.add('log');
+  if ((touched.has('days') || touched.has('orders')) && refreshPerfKey(SF.date, SF.key)) touched.add('perf');
   closeSheet();
   if (touched.size) { save(...touched); render(); toast('저장했어요. 동선과 발주표에 반영돼요.'); }
 }
@@ -1328,7 +1412,7 @@ async function routeImageBlob(date) {
   const cv = document.createElement('canvas'); const x = cv.getContext('2d');
   const rows = []; let prevG = null; let n = 0;
   for (const st of stops) {
-    const g = groupKey(st.loc); if (g !== prevG) { rows.push({ g: groupLabel(st.loc) }); prevG = g; }
+    const g = groupKey(st.loc); if (g !== prevG) { rows.push({ g: groupLabel(st.loc) + (subLabel(st.loc) === '지하' && !groupLabel(st.loc).includes('지하') ? ' · 지하' : '') }); prevG = g; }
     n++;
     const its = itemAgg(st).map(i => `${pShort(i.pid)} ${i.q}`).join(', ');
     const types = [...new Set(st.orders.map(o => o.type))].map(t => '[' + TYPE_NAME[t] + (t === 'sample' ? '·지점 수령' : '') + ']').join('');
@@ -1397,6 +1481,412 @@ async function saveRouteImage(date) {
     try { await downloadsNs.save({ filename: `배달동선_${date}.png`, data: blob }); toast('저장했어요'); }
     catch (e) { if (e?.code !== 'declined') toast('파일로 저장하지 못했어요. 사진을 길게 눌러 저장해 보세요.'); }
   };
+}
+
+/* ================= change log ================= */
+const LOG_KINDS = ['주문', '정기 변경', '하루 변경', '중지', '상태', '수금', '미전달', '메모', '고객 정보', '기타'];
+const locShort = loc => loc ? `${loc.building || ''}${loc.unit ? '-' + loc.unit : ''}` : '';
+const itemsText = items => (items || []).map(i => `${pShort(i.productId || i.pid)} ${i.qty}`).join(', ');
+// one entry per request: when it was recorded (at), which delivery dates it is about (from–to; to '' = ongoing)
+function logChange(e) {
+  const c = e.cid ? custById(e.cid) : null;
+  const now = Date.now();
+  if (e.merge) { const last = S.log[0]; if (last && last.merge === e.merge && now - last.at < 120000) { last.text = e.text; last.at = now; return last.id; } }
+  const entry = { id: uid('l_'), at: now, cid: e.cid || null, name: e.name || c?.name || '', loc: e.loc || (c ? locShort(c.loc) : ''), from: e.from || '', to: e.to === undefined ? (e.from || '') : e.to, kind: e.kind || '기타', text: e.text || '', by: e.by || '직접' };
+  if (e.merge) entry.merge = e.merge;
+  S.log.unshift(entry);
+  return entry.id;
+}
+const logMark = () => S.log[0]?.id || null;
+function dropLogsSince(mark) { const i = mark ? S.log.findIndex(e => e.id === mark) : S.log.length; S.log = S.log.slice(i < 0 ? 0 : i); }
+function whenText(e) {
+  if (!e.from) return '날짜 없음';
+  if (!e.to || e.to >= '2099') return fmt(e.from) + '부터';
+  if (e.to === e.from) return fmt(e.from);
+  return `${fmtShort(e.from)}–${fmtShort(e.to)}`;
+}
+function regularText(c) {
+  const parts = c.regular.filter(r => r.qty > 0).map(r => `${r.every === 2 ? '격주 ' : ''}${daysText(r.days)} ${pShort(r.productId)} ${r.qty}`);
+  return parts.join(', ') || '없음';
+}
+// what changed between two versions of a customer, as log lines
+function custDiff(a, b) {
+  const out = []; const t = TODAY();
+  if (regularText(a) !== regularText(b)) out.push({ kind: '정기 변경', from: t, to: '', text: `정기 품목: ${regularText(b)} (이전: ${regularText(a)})` });
+  if (a.status !== b.status || a.endDate !== b.endDate) out.push({ kind: '상태', from: b.endDate || t, to: '', text: `${STATUS_NAME[b.status]}${b.endDate ? ' · ' + fmt(b.endDate) + '부터' : ''}${b.statusNote ? ' · ' + b.statusNote : ''} (이전: ${STATUS_NAME[a.status]})` });
+  const pa = new Set(a.pauses.map(p => p.id));
+  b.pauses.filter(p => !pa.has(p.id)).forEach(p => out.push({ kind: '중지', from: p.from, to: p.to, text: `배달 중지${pauseDays(p)}${p.reason ? ' · ' + p.reason : ''}` }));
+  const pb = new Set(b.pauses.map(p => p.id));
+  a.pauses.filter(p => !pb.has(p.id)).forEach(p => out.push({ kind: '중지', from: p.from, to: p.to, text: `중지 취소${pauseDays(p)}` }));
+  if ((a.notes || '') !== (b.notes || '')) out.push({ kind: '메모', from: '', to: '', text: `메모: ${b.notes || '(지움)'}` });
+  const info = [];
+  if (a.name !== b.name) info.push(`이름 ${a.name} → ${b.name}`);
+  if (a.phone !== b.phone) info.push(`연락처 ${b.phone}`);
+  if (locShort(a.loc) !== locShort(b.loc) || a.loc.label !== b.loc.label) info.push(`위치 ${locShort(b.loc)} ${b.loc.label || ''}`.trim());
+  if (a.payment !== b.payment) info.push(`수금 ${PAY[b.payment]}`);
+  if (info.length) out.push({ kind: '고객 정보', from: '', to: '', text: info.join(' · ') });
+  return out;
+}
+
+/* ================= performance (실적) ================= */
+const TY_CODE = { regular: 'r', adhoc: 'a', sample: 's', fredit: 'f' };
+const CODE_TY = { r: 'regular', a: 'adhoc', s: 'sample', f: 'fredit' };
+function liveDay(date) {
+  return stopsFor(date).filter(s => !s.skipped).map(s => ({ key: s.key, name: s.name, loc: locShort(s.loc), items: s.items.map(i => ({ pid: i.pid, qty: i.qty, ty: i.type })) }));
+}
+function encodeDay(date) {
+  const day = { s: {}, n: {}, at: Date.now() };
+  liveDay(date).forEach(e => {
+    const agg = new Map(); e.items.forEach(i => { const k = i.pid + '*' + TY_CODE[i.ty]; agg.set(k, (agg.get(k) || 0) + i.qty); });
+    day.s[e.key] = [...agg].map(([k, q]) => { const [p, t] = k.split('*'); return `${p}*${q}*${t}`; }).join(';');
+    if (e.key.startsWith('o:')) day.n[e.key] = `${e.name}|${e.loc}`;
+  });
+  if (daysBetween(date, ymd(new Date())) > 1) day.e = 1; // frozen after the fact: estimated from the list at that time
+  return day;
+}
+function decodeDay(day) {
+  return Object.entries(day.s || {}).map(([key, str]) => {
+    const c = key.startsWith('o:') ? null : custById(key);
+    const nn = (day.n && day.n[key] || '').split('|');
+    return { key, name: c ? c.name : (nn[0] || '주문'), loc: c ? locShort(c.loc) : (nn[1] || ''), items: str ? str.split(';').map(x => { const [pid, q, t] = x.split('*'); return { pid, qty: +q, ty: CODE_TY[t] || 'regular' }; }) : [] };
+  });
+}
+// past delivery days get a fixed copy so later changes do not rewrite what was delivered
+function maybeFreeze() {
+  if (store.mode === 'loading') return;
+  if (store.db && !DOCS.every(n => store.loaded[n])) return;
+  if (!S.customers.length) return;
+  const t = TODAY();
+  if (!S.perf.since) S.perf.since = t.slice(0, 8) + '01';
+  let changed = false;
+  for (let d = S.perf.since; d < t; d = addDays(d, 1)) {
+    if (S.perf.days[d]) continue;
+    if (!isDeliveryDay(d) && !S.orders.some(o => o.date === d && o.status === 'open')) continue;
+    S.perf.days[d] = encodeDay(d); changed = true;
+  }
+  if (changed) save('perf');
+}
+function refreshPerfKey(date, key) {
+  const day = S.perf.days[date]; if (!day) return false;
+  const fresh = encodeDay(date);
+  if (fresh.s[key] != null) { day.s[key] = fresh.s[key]; if (fresh.n[key]) day.n[key] = fresh.n[key]; } else delete day.s[key];
+  return true;
+}
+function refreshPerfFrom(key, from) {
+  if (!from || from >= TODAY()) return false; let any = false;
+  Object.keys(S.perf.days).forEach(d => { if (d >= from && refreshPerfKey(d, key)) any = true; });
+  return any;
+}
+function perfData(month, withFuture) {
+  const [y, m] = month.split('-').map(Number); const n = new Date(y, m, 0).getDate();
+  const t = TODAY(); const res = new Map();
+  for (let d = 1; d <= n; d++) {
+    const date = `${month}-${pad(d)}`;
+    let entries, est = false;
+    if (S.perf.days[date]) { entries = decodeDay(S.perf.days[date]); est = !!S.perf.days[date].e; }
+    else if (date <= t || withFuture) { if (!isDeliveryDay(date) && !S.orders.some(o => o.date === date && o.status === 'open')) continue; entries = liveDay(date); est = date > t ? 'plan' : false; }
+    else continue;
+    entries.forEach(e => {
+      let r = res.get(e.key);
+      if (!r) { r = { key: e.key, name: e.name, loc: e.loc, prod: {}, dates: [], total: 0 }; res.set(e.key, r); }
+      e.items.forEach(i => { r.prod[i.pid] = (r.prod[i.pid] || 0) + i.qty; r.total += i.qty; });
+      r.dates.push({ date, items: e.items, est });
+    });
+  }
+  return res;
+}
+function perfOrder(list) {
+  const idx = new Map((S.config.baseSeq || []).map((k, i) => [k, i]));
+  return list.sort((a, b) => (idx.has(a.key) ? idx.get(a.key) : 9999) - (idx.has(b.key) ? idx.get(b.key) : 9999) || a.loc.localeCompare(b.loc));
+}
+const prodOrderIdx = pid => { const i = S.config.products.findIndex(p => p.id === pid); return i < 0 ? 999 : i; };
+
+/* ================= render: records tab ================= */
+function renderRecords() {
+  const mode = UI.recMode || 'perf';
+  return storageBanner() + `<div class="sec-h" style="margin-bottom:12px;flex-wrap:wrap"><h2 style="font-family:var(--f-display);font-weight:400;font-size:24px">${mode === 'perf' ? '실적' : '변경 기록'}</h2>
+    <div class="seg" style="flex:none"><button aria-pressed="${mode === 'perf'}" data-act="recMode" data-m="perf">실적</button><button aria-pressed="${mode === 'log'}" data-act="recMode" data-m="log">변경 기록</button></div></div>`
+    + (mode === 'perf' ? renderPerf() : renderLog());
+}
+function renderPerf() {
+  const month = UI.perfMonth || MONTH(); const fut = !!UI.perfFuture;
+  const data = perfData(month, fut);
+  const list = perfOrder([...data.values()].filter(r => r.total > 0));
+  const totals = {}; list.forEach(r => Object.entries(r.prod).forEach(([p, q]) => totals[p] = (totals[p] || 0) + q));
+  const sum = Object.values(totals).reduce((s, q) => s + q, 0);
+  const [y, m] = month.split('-').map(Number);
+  const est = [...data.values()].some(r => r.dates.some(d => d.est === 1));
+  const q = (UI.perfQ || '').replace(/\s+/g, '').toLowerCase();
+  const shown = q ? list.filter(r => (r.name + r.loc).replace(/\s+/g, '').toLowerCase().includes(q)) : list;
+  return `<div class="ohead">
+    <div class="datenav"><button class="iconbtn" data-act="perfMonth" data-d="-1" aria-label="이전 달">${ICON.left}</button><div class="d">${y}년 ${m}월<small>${fut ? '월말까지 예정 포함' : '오늘까지 배달한 것'} · 고객 ${list.length}명 · 제품 ${sum}개</small></div><button class="iconbtn" data-act="perfMonth" data-d="1" aria-label="다음 달">${ICON.right}</button></div>
+    <div class="row"><input type="search" id="perfq" placeholder="이름·동-호 검색" value="${esc(UI.perfQ || '')}" data-inp="perfq" style="flex:1;min-width:0"><button class="chip" aria-pressed="${fut}" data-act="perfFuture">월말까지 예정 포함</button></div>
+    ${est ? `<p class="hint">앱을 쓰기 전 날짜(10/1~10/20)는 그때 명단을 지금 기준으로 다시 계산한 추정치예요. 날짜별 내역에 “추정”으로 표시돼요.</p>` : ''}
+  </div>
+  <details class="card" style="padding:0;margin-bottom:12px"><summary style="padding:12px 14px;cursor:pointer;font-weight:600">제품별 합계 <span class="muted num">${Object.keys(totals).length}종 · ${sum}개</span></summary>
+    <div class="tblwrap"><table class="ot"><tbody>${Object.entries(totals).sort((a, b) => prodOrderIdx(a[0]) - prodOrderIdx(b[0])).map(([p, n]) => `<tr><td><div class="pname"><span class="pdot" style="--h:${pHue(p)}"></span>${esc(pName(p))}</div></td><td><b class="num">${n}</b></td></tr>`).join('')}</tbody></table></div></details>
+  <div class="card perflist" id="perflist">${shown.map(r => `<button class="pr" data-act="perfCust" data-key="${esc(r.key)}"><span class="plate sm">${esc(r.loc || '—')}</span><span class="nm">${esc(r.name)}</span><span class="its">${Object.entries(r.prod).sort((a, b) => prodOrderIdx(a[0]) - prodOrderIdx(b[0])).map(([p, n]) => `<span class="ic"><span class="pdot" style="--h:${pHue(p)}"></span>${esc(pShort(p))}<b>${n}</b></span>`).join('')}</span><span class="tot num">${r.dates.length}회 · <b>${r.total}</b>개</span></button>`).join('') || '<div class="empty"><p>이 달 실적이 없어요.</p></div>'}</div>`;
+}
+function perfSheet(key) {
+  const month = UI.perfMonth || MONTH(); const r = perfData(month, !!UI.perfFuture).get(key); if (!r) return;
+  const [y, m] = month.split('-').map(Number); const c = key.startsWith('o:') ? null : custById(key);
+  const rows = Object.entries(r.prod).sort((a, b) => prodOrderIdx(a[0]) - prodOrderIdx(b[0]));
+  openSheet(`${sheetHead(esc(r.name))}
+    <div class="row"><span class="plate">${esc(r.loc || '—')}</span><span class="muted">${y}년 ${m}월 · ${UI.perfFuture ? '월말 예정 포함' : '오늘까지'} · 배달 ${r.dates.length}회</span>${c && c.status !== 'active' ? `<span class="badge bad">${esc(statusBadge(c))}</span>` : ''}</div>
+    <div class="card perfbig">${rows.map(([p, n]) => `<div class="pb"><span class="pdot" style="--h:${pHue(p)}"></span><span class="pn">${esc(pName(p))}</span><b class="num">${n}</b></div>`).join('')}<div class="pb tot"><span></span><span class="pn">합계</span><b class="num">${r.total}</b></div></div>
+    <div class="field"><span class="lbl">날짜별</span><div class="brk">${r.dates.map(d => `<div><span class="num" style="min-width:74px">${fmt(d.date)}</span><span>${d.items.map(i => `${esc(pShort(i.pid))} ${i.qty}${i.ty === 'regular' ? '' : '(' + TYPE_NAME[i.ty] + ')'}`).join(', ')}</span>${d.est === 1 ? '<span class="badge xs">추정</span>' : d.est === 'plan' ? '<span class="badge xs acc">예정</span>' : ''}</div>`).join('')}</div></div>
+    <div class="sact"><button class="btn" data-act="logFor" data-name="${esc(r.name)}">변경 기록 보기</button>${c ? `<button class="btn" data-act="editCustFromPerf" data-id="${c.id}">고객 정보</button>` : ''}<button class="btn pri" data-act="closeSheet">닫기</button></div>`);
+}
+function renderLog() {
+  return `<div class="ohead"><div class="row"><input type="search" id="logq" placeholder="이름·동-호·내용 검색" value="${esc(UI.logQ || '')}" data-inp="logq" style="flex:1;min-width:0"><button class="btn sm pri" data-act="newLog">+ 기록</button></div>
+    <div class="chips">${[['all', '전체'], ['upcoming', '앞으로 해당'], ['month', '이번 달']].map(([k, n]) => `<button class="chip" aria-pressed="${(UI.logF || 'all') === k}" data-act="logF" data-f="${k}">${n}</button>`).join('')}</div>
+    <p class="hint">앱에서 바꾼 내용은 자동으로 남아요. 왼쪽은 해당 날짜, 오른쪽 위는 기록한 날이에요.</p></div>
+  <div id="loglist"></div>`;
+}
+function renderLogList() {
+  const el = $('#loglist'); if (!el) return;
+  const q = (UI.logQ || '').replace(/\s+/g, '').toLowerCase(); const f = UI.logF || 'all';
+  const t = TODAY(); const ms = t.slice(0, 8) + '01';
+  let L = S.log.slice().sort((a, b) => b.at - a.at);
+  if (f === 'upcoming') L = L.filter(e => !e.to || e.to >= t || (e.from && e.from >= t));
+  if (f === 'month') L = L.filter(e => (e.from && e.from >= ms) || ymd(new Date(e.at)) >= ms);
+  if (q) L = L.filter(e => (e.name + e.loc + e.text + e.kind).replace(/\s+/g, '').toLowerCase().includes(q));
+  let prev = null; let html = '';
+  L.slice(0, 400).forEach(e => {
+    const day = ymd(new Date(e.at));
+    if (day !== prev) { html += `<div class="logday">${fmt(day)} 기록</div>`; prev = day; }
+    html += `<button class="logit" data-act="editLog" data-id="${e.id}"><span class="lw">${whenText(e)}</span><span class="lt"><span class="row" style="gap:6px"><b>${esc(e.name || '—')}</b>${e.loc ? `<span class="plate sm">${esc(e.loc)}</span>` : ''}<span class="badge xs">${esc(e.kind)}</span>${e.by === 'AI' ? '<span class="badge xs acc">AI</span>' : ''}</span><span class="tx">${esc(e.text)}</span></span><span class="lat num">${new Date(e.at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span></button>`;
+  });
+  el.innerHTML = html ? `<div class="card loglist">${html}</div>` : `<div class="card empty"><p>기록이 없어요.</p></div>`;
+}
+let LF = null;
+function openLogSheet(id) {
+  const e = id ? S.log.find(x => x.id === id) : null;
+  LF = e ? clone(e) : { id: null, cid: null, name: '', loc: '', from: TODAY(), to: TODAY(), kind: '기타', text: '' };
+  const opts = S.customers.slice().sort((a, b) => a.name.localeCompare(b.name, 'ko')).map(c => `<option value="${c.id}" ${LF.cid === c.id ? 'selected' : ''}>${esc(c.name)} ${esc(locShort(c.loc))}</option>`).join('');
+  openSheet(`${sheetHead(e ? '기록 고치기' : '기록 추가')}
+    <div class="field"><label class="lbl" for="lfC">고객</label><select id="lfC"><option value="">고객 목록에 없음 (직접 입력)</option>${opts}</select></div>
+    <div class="grid2"><input type="text" id="lfN" placeholder="이름 (목록에 없을 때)" value="${esc(LF.cid ? '' : LF.name)}" aria-label="이름"><input type="text" id="lfL" placeholder="동-호" value="${esc(LF.cid ? '' : LF.loc)}" aria-label="동-호"></div>
+    <div class="grid2"><div class="field"><label class="lbl" for="lfF">해당 날짜 (시작)</label><input type="date" id="lfF" value="${esc(LF.from)}"></div><div class="field"><label class="lbl" for="lfT">끝 (비우면 계속)</label><input type="date" id="lfT" value="${esc(LF.to && LF.to < '2099' ? LF.to : '')}"></div></div>
+    <div class="field"><label class="lbl" for="lfK">종류</label><select id="lfK">${LOG_KINDS.map(k => `<option ${LF.kind === k ? 'selected' : ''}>${k}</option>`).join('')}</select></div>
+    <div class="field"><label class="lbl" for="lfX">내용</label><textarea id="lfX" placeholder="예: 10/14, 10/16 그릭드링크 미전달">${esc(LF.text)}</textarea></div>
+    ${e ? `<p class="hint">기록한 때: ${new Date(e.at).toLocaleString('ko-KR')}${e.by === 'AI' ? ' · AI가 기록' : ''}</p>` : ''}
+    <div class="sact">${e ? '<button class="btn danger" data-act="delLog">삭제</button>' : ''}<button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="saveLog">저장</button></div>`, () => { LF = null; });
+}
+function saveLogSheet() {
+  const cid = $('#lfC').value || null; const c = cid ? custById(cid) : null;
+  const text = $('#lfX').value.trim(); if (!text) { toast('내용을 입력해 주세요.'); return; }
+  const fields = { cid, name: c ? c.name : $('#lfN').value.trim(), loc: c ? locShort(c.loc) : $('#lfL').value.trim(), from: $('#lfF').value, to: $('#lfT').value, kind: $('#lfK').value, text };
+  if (LF.id) { const e = S.log.find(x => x.id === LF.id); if (e) Object.assign(e, fields); }
+  else logChange({ ...fields, to: fields.to });
+  save('log'); closeSheet(); render(); toast('기록했어요');
+}
+
+/* ================= AI assistant ================= */
+const LS_CHAT = 'helio-chat';
+let CHAT = (() => { try { return JSON.parse(localStorage.getItem(LS_CHAT) || '[]'); } catch (e) { return []; } })();
+let aiCtl = null, AI_PICS = [], aiToolMax = 20;
+const AI_UNDO = new Map();
+function saveChat() { try { localStorage.setItem(LS_CHAT, JSON.stringify(CHAT.slice(-40).map(m => ({ id: m.id, role: m.role, text: m.text, actions: m.actions || [], err: m.err || '', undone: !!m.undone })))); } catch (e) { } }
+function custLine(c) {
+  const t = TODAY();
+  const ps = c.pauses.filter(p => p.to >= t).map(p => `중지 ${p.from}~${p.to >= '2099' ? '계속' : p.to}${pauseDays(p)}`).join(', ');
+  return `${c.id} | ${c.name} | ${locShort(c.loc)}${c.loc.label ? ' (' + c.loc.label + ')' : ''} | ${STATUS_NAME[c.status]}${c.endDate ? ' ' + c.endDate + '부터' : ''} | ${regularText(c)}${ps ? ' | ' + ps : ''}`;
+}
+function aiContext() {
+  const t = TODAY(); const tgt = orderTarget();
+  const up = S.orders.filter(o => o.status === 'open' && o.date >= t && o.date <= addDays(t, 14)).map(o => { const c = o.customerId ? custById(o.customerId) : null; return `${o.id} | ${o.date} | ${TYPE_NAME[o.type]} | ${c ? c.name + ' ' + locShort(c.loc) : o.name + ' ' + locShort(o.loc)} | ${itemsText(o.items)}${o.note ? ' | ' + o.note : ''}`; }).join('\n');
+  return `너는 '헬리오 배달수첩' 앱 안의 도우미야. 사용자는 hy(한국야쿠르트) 송파 헬리오시티 배달 매니저야. 한국어로 짧고 분명하게 답해.
+오늘: ${t}(${DL[dow(t)]}). 다음 배달일: ${routeDefaultDate()}. 오늘 기준 발주할 배달일: ${tgt}. 배달 요일: ${S.config.deliveryDays.map(d => DL[d]).join('')}. 요일 번호: 1=월 2=화 3=수 4=목 5=금 6=토.
+규칙:
+- 사용자가 변경·주문·중지·해지 같은 걸 말하면 도구로 바로 반영하고, 무엇을 바꿨는지 한두 줄로 알려 줘. 앱에서 되돌리기 버튼을 줄 거야.
+- "그날만/이번만/하루만"은 set_day_items 또는 skip_day. "앞으로/매주/계속"은 set_regular.
+- 기간 동안 쉬는 건 add_pause(끝나면 자동 재개). 해지·이사·중단은 set_status(명단에서 지우지 않아).
+- 지난 날짜에 대한 요청(미전달, 그날 바꿔 드림 등)도 해당 날짜로 반영하고, 데이터에 넣을 게 없으면 add_log로 기록만 남겨.
+- 바꾸는 도구는 자동으로 변경 기록이 남으니 add_log를 또 부르지 마.
+- 고객이 애매하면 바꾸기 전에 물어봐. 동-호(예: 411-1501)로 찾아.
+- 질문에는 get_ 도구로 확인하고 답해. 모르는 건 지어내지 마.
+- 추가주문 채팅·알림톡으로 들어온 주문(추가·Fredit)은 자동 발주라 발주표에 안 들어가.
+제품 (id | 배달표 이름 | 출고신청 이름):
+${S.config.products.map(p => `${p.id} | ${p.name} | ${p.orderName}`).join('\n')}
+고객 (id | 이름 | 동-호 | 상태 | 정기 | 중지):
+${S.customers.map(custLine).join('\n')}
+앞으로 2주 주문 (id | 날짜 | 종류 | 받는 곳 | 제품 | 메모):
+${up || '없음'}`;
+}
+function aiTools(changed, am) {
+  const T = (name, description, properties, required, fn) => ({ name, description, inputSchema: { type: 'object', properties, required }, execute: async (input) => fn(input || {}) });
+  const S_ = { type: 'string' }, N_ = { type: 'number' }, B_ = { type: 'boolean' };
+  const ITEMS = { type: 'array', items: { type: 'object', properties: { product_id: S_, qty: N_ }, required: ['product_id', 'qty'] } };
+  const cust = id => { const c = custById(String(id || '')); if (!c) throw new Error('그 id의 고객이 없어요: ' + id); return c; };
+  const pid = p => { if (!prodById(String(p))) throw new Error('제품 id가 없어요: ' + p); return String(p); };
+  const day = d => { d = String(d || ''); if (!/^\d{4}-\d\d-\d\d$/.test(d)) throw new Error('날짜는 YYYY-MM-DD 형식이어야 해요: ' + d); return d; };
+  const done = (txt, ...docs) => { docs.forEach(x => changed.add(x)); changed.add('log'); am.actions.push(txt); updateBubble(am); return { ok: true, done: txt }; };
+  const L = (e) => logChange({ ...e, by: 'AI' });
+  const tools = [
+    T('add_order', '추가·샘플·Fredit 주문 넣기. 고객 목록에 있으면 customer_id, 없으면 name·building·unit.', { customer_id: S_, name: S_, building: S_, unit: S_, date: S_, type: { type: 'string', enum: ['adhoc', 'sample', 'fredit'] }, items: ITEMS, note: S_ }, ['date', 'type', 'items'], i => {
+      const c = i.customer_id ? cust(i.customer_id) : null; const items = (i.items || []).map(x => ({ productId: pid(x.product_id), qty: Math.max(1, Math.round(+x.qty || 1)) }));
+      const o = normOrder({ type: i.type, customerId: c?.id || null, name: c ? '' : (i.name || ''), loc: c ? null : { type: 'apt', building: String(i.building || ''), unit: String(i.unit || ''), label: '' }, date: day(i.date), items, note: i.note || '' });
+      S.orders.push(o); L({ cid: o.customerId, name: c ? '' : o.name, loc: c ? '' : locShort(o.loc), from: o.date, kind: '주문', text: `${TYPE_NAME[o.type]} 주문 ${itemsText(o.items)}${o.note ? ' · ' + o.note : ''}` });
+      if (o.date < TODAY()) refreshPerfKey(o.date, c ? c.id : 'o:' + o.id) && changed.add('perf');
+      return done(`${fmt(o.date)} ${c ? c.name : o.name} ${TYPE_NAME[o.type]} 주문 ${itemsText(o.items)}`, 'orders');
+    }),
+    T('cancel_order', '주문 취소 (order_id는 주문 목록의 id).', { order_id: S_ }, ['order_id'], i => {
+      const o = S.orders.find(x => x.id === i.order_id); if (!o) throw new Error('주문이 없어요: ' + i.order_id);
+      o.status = 'cancelled'; const c = o.customerId ? custById(o.customerId) : null;
+      L({ cid: o.customerId, name: c ? '' : o.name, loc: c ? '' : locShort(o.loc), from: o.date, kind: '주문', text: `주문 취소 ${itemsText(o.items)}` });
+      return done(`${fmt(o.date)} ${c ? c.name : o.name} 주문 취소`, 'orders');
+    }),
+    T('set_regular', '앞으로 매주 특정 요일 정기 수량 정하기. qty 0이면 그 요일 그 제품 뺌.', { customer_id: S_, product_id: S_, weekday: N_, qty: N_ }, ['customer_id', 'product_id', 'weekday', 'qty'], i => {
+      const c = cust(i.customer_id); const p = pid(i.product_id); const w = Math.round(+i.weekday); if (w < 1 || w > 6) throw new Error('weekday는 1~6');
+      const cur = c.regular.filter(r => r.every !== 2 && r.days.includes(w)).map(r => ({ pid: r.productId, qty: r.qty }));
+      const list = aggList(cur).filter(x => x.pid !== p); const q = Math.max(0, Math.round(+i.qty)); if (q) list.push({ pid: p, qty: q });
+      const before = regularText(c); applyWeek(c, w, list);
+      L({ cid: c.id, from: TODAY(), to: '', kind: '정기 변경', text: `매주 ${DL[w]} ${pName(p)} ${q}개 (이전 정기: ${before})` });
+      return done(`${c.name} 매주 ${DL[w]}요일 ${pName(p)} ${q}개`, 'customers');
+    }),
+    T('set_day_items', '특정 날짜 하루만 이 고객의 정기 품목을 이 목록으로 바꾸기. 다른 날은 그대로. 빈 배열이면 그날 정기 없음.', { customer_id: S_, date: S_, items: ITEMS }, ['customer_id', 'date', 'items'], i => {
+      const c = cust(i.customer_id); const d = day(i.date); const items = aggList((i.items || []).map(x => ({ pid: pid(x.product_id), qty: Math.max(0, Math.round(+x.qty)) }))).filter(x => x.qty > 0);
+      const rec = dayRec(d); rec.ov = rec.ov || {};
+      if (stable(items) === stable(regularFor(c, d))) delete rec.ov[c.id]; else rec.ov[c.id] = { items, skip: false };
+      if (refreshPerfKey(d, c.id)) changed.add('perf');
+      L({ cid: c.id, from: d, kind: '하루 변경', text: `이날만 ${items.map(x => pShort(x.pid) + ' ' + x.qty).join(', ') || '정기 없음'}` });
+      return done(`${fmt(d)} ${c.name} 하루만 ${items.map(x => pShort(x.pid) + ' ' + x.qty).join(', ') || '정기 없음'}`, 'days');
+    }),
+    T('skip_day', '특정 날짜 하루만 정기 배달 빼기(skip=true) 또는 되돌리기(skip=false).', { customer_id: S_, date: S_, skip: B_ }, ['customer_id', 'date', 'skip'], i => {
+      const c = cust(i.customer_id); const d = day(i.date); const rec = dayRec(d); rec.ov = rec.ov || {};
+      if (i.skip) rec.ov[c.id] = { items: [], skip: true }; else delete rec.ov[c.id];
+      if (refreshPerfKey(d, c.id)) changed.add('perf');
+      L({ cid: c.id, from: d, kind: i.skip ? '미전달' : '하루 변경', text: i.skip ? '이날 정기 배달 뺌' : '이날 빼기 취소' });
+      return done(`${fmt(d)} ${c.name} ${i.skip ? '정기 배달 뺌' : '빼기 취소'}`, 'days');
+    }),
+    T('add_pause', '기간 동안 배달 중지 (끝나면 자동 재개). weekdays를 주면 그 요일만 쉼.', { customer_id: S_, from: S_, to: S_, weekdays: { type: 'array', items: N_ }, reason: S_ }, ['customer_id', 'from', 'to'], i => {
+      const c = cust(i.customer_id); const f = day(i.from), t = day(i.to); if (t < f) throw new Error('끝 날짜가 시작보다 빨라요');
+      const p = { id: uid('p_'), from: f, to: t, reason: i.reason || '', ack: false, days: (i.weekdays || []).map(Number).filter(x => x >= 1 && x <= 6) };
+      c.pauses.push(p); L({ cid: c.id, from: f, to: t, kind: '중지', text: `배달 중지${pauseDays(p)}${p.reason ? ' · ' + p.reason : ''}` });
+      if (refreshPerfFrom(c.id, f)) changed.add('perf');
+      return done(`${c.name} ${fmtShort(f)}–${fmtShort(t)} 중지${pauseDays(p)}`, 'customers');
+    }),
+    T('remove_pause', '중지 기간 삭제 (pause_id는 get_customer로 확인).', { customer_id: S_, pause_id: S_ }, ['customer_id', 'pause_id'], i => {
+      const c = cust(i.customer_id); const p = c.pauses.find(x => x.id === i.pause_id); if (!p) throw new Error('중지 기간이 없어요');
+      c.pauses = c.pauses.filter(x => x.id !== p.id); L({ cid: c.id, from: p.from, to: p.to, kind: '중지', text: '중지 취소' });
+      return done(`${c.name} ${fmtShort(p.from)}–${fmtShort(p.to)} 중지 취소`, 'customers');
+    }),
+    T('set_status', '계약 상태: active(배달 중), waiting(시작 대기), stopped(중단), ended(해지), moved(이사). date는 적용 시작일(그 전날까지 배달). 명단에서 지우지 않음.', { customer_id: S_, status: { type: 'string', enum: Object.keys(STATUS_NAME) }, date: S_, note: S_ }, ['customer_id', 'status'], i => {
+      const c = cust(i.customer_id); const st = STATUS_NAME[i.status] ? i.status : null; if (!st) throw new Error('상태 값이 틀려요');
+      const prev = STATUS_NAME[c.status]; c.status = st; c.active = st === 'active'; c.endDate = st === 'active' ? '' : (i.date ? day(i.date) : ''); if (i.note) c.statusNote = i.note;
+      if (c.endDate && refreshPerfFrom(c.id, c.endDate)) changed.add('perf');
+      L({ cid: c.id, from: c.endDate || TODAY(), to: '', kind: '상태', text: `${STATUS_NAME[st]}${c.endDate ? ' · ' + fmt(c.endDate) + '부터' : ''}${i.note ? ' · ' + i.note : ''} (이전: ${prev})` });
+      return done(`${c.name} ${STATUS_NAME[st]}${c.endDate ? ' ' + fmtShort(c.endDate) + '부터' : ''}`, 'customers');
+    }),
+    T('update_customer', '고객 정보 고치기. 바꿀 것만 넣어: name, phone, building, unit, label, payment(card|account|cash), notes_append, notes_replace, paid_this_month(true/false).', { customer_id: S_, name: S_, phone: S_, building: S_, unit: S_, label: S_, payment: S_, notes_append: S_, notes_replace: S_, paid_this_month: B_ }, ['customer_id'], i => {
+      const c = cust(i.customer_id); const a = clone(c);
+      if (i.name) c.name = i.name; if (i.phone) c.phone = i.phone; if (i.building) c.loc.building = String(i.building); if (i.unit) c.loc.unit = String(i.unit); if (i.label != null) c.loc.label = i.label;
+      if (PAY[i.payment]) c.payment = i.payment;
+      if (i.notes_replace != null) c.notes = i.notes_replace; else if (i.notes_append) c.notes = (c.notes ? c.notes + ' / ' : '') + i.notes_append;
+      if (i.paid_this_month != null) { c.paidMonth = i.paid_this_month ? MONTH() : ''; L({ cid: c.id, from: TODAY(), kind: '수금', text: `${MONTH().slice(5)}월 현금 ${i.paid_this_month ? '수금 완료' : '미수'}` }); }
+      custDiff(a, c).forEach(d => L({ cid: c.id, ...d }));
+      return done(`${c.name} 정보 수정`, 'customers');
+    }),
+    T('add_customer', '새 정기 고객 추가.', { name: S_, building: S_, unit: S_, label: S_, phone: S_, payment: S_, notes: S_, regular: { type: 'array', items: { type: 'object', properties: { product_id: S_, qty: N_, weekdays: { type: 'array', items: N_ } }, required: ['product_id', 'qty', 'weekdays'] } } }, ['name', 'building'], i => {
+      const c = normCust({ name: i.name, phone: i.phone || '', loc: { type: isNumB(i.building) ? 'apt' : 'store', building: String(i.building), unit: String(i.unit || ''), label: i.label || '' }, payment: PAY[i.payment] ? i.payment : 'card', notes: i.notes || '', regular: (i.regular || []).map(r => ({ productId: pid(r.product_id), qty: Math.max(1, Math.round(+r.qty)), days: (r.weekdays || []).map(Number) })) });
+      S.customers.push(c); ensureRouteOrder();
+      L({ cid: c.id, from: TODAY(), to: '', kind: '고객 정보', text: `새 고객 · 정기 ${regularText(c)}` });
+      return done(`새 고객 ${c.name} ${locShort(c.loc)}`, 'customers', 'config');
+    }),
+    T('add_log', '데이터는 그대로 두고 기록만 남기기 (지난 날짜 미전달, 고객 요청 메모 등). to 비우면 계속.', { customer_id: S_, name: S_, loc: S_, from: S_, to: S_, kind: { type: 'string', enum: LOG_KINDS }, text: S_ }, ['text'], i => {
+      const c = i.customer_id ? cust(i.customer_id) : null;
+      L({ cid: c?.id || null, name: c ? '' : (i.name || ''), loc: c ? '' : (i.loc || ''), from: i.from ? day(i.from) : '', to: i.to ? day(i.to) : (i.from ? day(i.from) : ''), kind: i.kind || '기타', text: i.text });
+      return done(`기록: ${c ? c.name + ' ' : ''}${i.text}`);
+    }),
+    T('find_customers', '이름·동-호·메모로 고객 찾기.', { query: S_ }, ['query'], i => {
+      const q = String(i.query || '').replace(/\s+/g, '').toLowerCase();
+      return S.customers.filter(c => (c.name + locShort(c.loc) + c.loc.building + c.loc.unit + c.loc.label + c.notes).replace(/\s+/g, '').toLowerCase().includes(q)).slice(0, 12).map(c => ({ id: c.id, name: c.name, loc: locShort(c.loc), status: STATUS_NAME[c.status] }));
+    }),
+    T('get_customer', '고객 한 명의 전체 정보: 정기 품목, 중지 기간(id 포함), 상태, 메모, 앞으로 주문, 최근 변경 기록.', { customer_id: S_ }, ['customer_id'], i => {
+      const c = cust(i.customer_id);
+      return { id: c.id, name: c.name, loc: locShort(c.loc), label: c.loc.label, phone: c.phone, status: STATUS_NAME[c.status], endDate: c.endDate, payment: PAY[c.payment], paidThisMonth: c.paidMonth === MONTH(), notes: c.notes, regular: c.regular.map(r => ({ product: pName(r.productId), qty: r.qty, days: r.days.map(d => DL[d]).join(''), every: r.every === 2 ? '격주' : '매주', anchor: r.anchor })), pauses: c.pauses, orders: S.orders.filter(o => o.customerId === c.id && o.date >= addDays(TODAY(), -14)).map(o => ({ id: o.id, date: o.date, type: TYPE_NAME[o.type], items: itemsText(o.items), status: o.status })), recentLog: S.log.filter(e => e.cid === c.id).slice(0, 10).map(e => `${whenText(e)} ${e.kind}: ${e.text}`) };
+    }),
+    T('get_day', '특정 날짜 배달 목록 (순서, 동-호, 이름, 제품, 메모, 완료 여부).', { date: S_ }, ['date'], i => {
+      const d = day(i.date); const done = S.days[d]?.done || {};
+      const st = orderedStops(d).filter(s => !s.skipped);
+      return { date: d, count: st.length, stops: st.map((s, k) => `${k + 1}. ${locShort(s.loc)} ${s.name}: ${itemAgg(s).map(x => pShort(x.pid) + ' ' + x.q + (x.ty === 'regular' ? '' : '(' + TYPE_NAME[x.ty] + ')')).join(', ')}${done[s.key] ? ' ✓' : ''}${stopNotes(s) ? ' / ' + stopNotes(s) : ''}`) };
+    }),
+    T('get_order_sheet', '특정 배달일 발주표: 출고신청 이름별 필요·재고·발주 수량.', { date: S_ }, ['date'], i => {
+      const d = day(i.date); return { date: d, orderDay: orderDayFor(d), rows: sheetFor(d).filter(r => r.need || r.excl).map(r => ({ name: r.p.orderName || r.p.name, need: r.need, stock: r.stock, buy: r.buy, excluded: r.excl })) };
+    }),
+    T('get_performance', '월 실적. month=YYYY-MM. customer_id 주면 그 고객의 제품별 수량과 날짜별 내역.', { month: S_, customer_id: S_ }, ['month'], i => {
+      const m = String(i.month || MONTH()).slice(0, 7); const data = perfData(m, false);
+      if (i.customer_id) { const r = data.get(String(i.customer_id)); if (!r) return { month: m, none: true }; return { month: m, name: r.name, products: Object.fromEntries(Object.entries(r.prod).map(([p, n]) => [pName(p), n])), total: r.total, days: r.dates.map(d => `${d.date} ${d.items.map(x => pShort(x.pid) + ' ' + x.qty).join(', ')}`) }; }
+      return { month: m, customers: [...data.values()].map(r => `${r.name} ${r.loc}: ${r.total}개`) };
+    }),
+    T('get_log', '변경 기록 검색 (최근 순).', { query: S_, limit: N_ }, [], i => {
+      const q = String(i.query || '').replace(/\s+/g, '').toLowerCase();
+      return S.log.filter(e => !q || (e.name + e.loc + e.text + e.kind).replace(/\s+/g, '').toLowerCase().includes(q)).slice(0, Math.min(40, +i.limit || 20)).map(e => `[기록 ${ymd(new Date(e.at))}] ${whenText(e)} ${e.name} ${e.loc} ${e.kind}: ${e.text}`);
+    }),
+  ];
+  return tools.slice(0, aiToolMax);
+}
+function chatMsgHtml(m) {
+  if (m.role === 'user') return `<div class="msg me">${esc(m.text)}</div>`;
+  const undo = AI_UNDO.has(m.id) && !m.undone;
+  return `<div class="msg ai" data-mid="${m.id}"><div class="mt">${m.text ? esc(m.text) : (m.pending ? '<span class="muted">생각하는 중…</span>' : '')}</div>
+    ${m.actions && m.actions.length ? `<ul class="acts">${m.actions.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}
+    ${m.err ? `<div class="warnbox" style="margin-top:6px">${esc(m.err)}</div>` : ''}
+    ${undo ? `<button class="btn sm" data-act="aiUndo" data-mid="${m.id}">되돌리기</button>` : m.undone ? '<span class="hint">되돌렸어요</span>' : ''}</div>`;
+}
+function renderChat() {
+  const el = $('#msgs'); if (!el) return;
+  el.innerHTML = CHAT.length ? CHAT.map(chatMsgHtml).join('') : `<div class="hint" style="display:grid;gap:8px"><span>변경 사항을 말하면 바로 반영하고, 궁금한 건 데이터를 보고 답해요.</span>
+    <div class="chips" style="flex-wrap:wrap">${['내일 배달 몇 곳이야?', '402-903 이번 주 금요일만 엠프로 2개로 바꿔줘', '이번 주 발주할 거 알려줘', '이번 달 실적 알려줘'].map(s => `<button class="chip" data-act="aiSuggest" data-t="${esc(s)}">${esc(s)}</button>`).join('')}</div></div>`;
+  el.scrollTop = el.scrollHeight;
+}
+function updateBubble(m) { const el = document.querySelector(`.msg[data-mid="${m.id}"]`); if (el) { el.outerHTML = chatMsgHtml(m); const box = $('#msgs'); if (box) box.scrollTop = box.scrollHeight; } }
+function openAssistant() {
+  openSheet(`<div class="chat">${sheetHead('AI 도우미')}
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <div class="composer"><div class="hint" id="aiPicN"></div>
+      <textarea id="aiIn" rows="2" placeholder="예: 411-1501 금요일만 우유 2개로 / 내일 몇 곳이야?"></textarea>
+      <div class="row">${sampleImages ? '<label class="btn sm" style="cursor:pointer">사진<input type="file" id="aiPic" accept="image/*" multiple hidden data-chg="aiPic"></label>' : ''}${CHAT.length ? '<button class="btn sm ghost" data-act="aiClear">대화 지우기</button>' : ''}<span style="flex:1"></span><button class="btn sm" id="aiStop" data-act="aiStop" hidden>멈추기</button><button class="btn pri" id="aiSend" data-act="aiSend">보내기</button></div></div></div>`);
+  renderChat();
+  const ta = $('#aiIn'); ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendAssistant(); } });
+}
+async function sendAssistant() {
+  if (aiCtl) return;
+  const ta = $('#aiIn'); const text = (ta?.value || '').trim(); const files = AI_PICS;
+  if (!text && !files.length) return;
+  if (!sampleFn) { toast('지금은 AI를 쓸 수 없어요.'); return; }
+  CHAT.push({ id: uid('m_'), role: 'user', text: text || `(사진 ${files.length}장)` });
+  const am = { id: uid('m_'), role: 'assistant', text: '', actions: [], pending: true };
+  CHAT.push(am); if (ta) ta.value = ''; AI_PICS = []; const pn = $('#aiPicN'); if (pn) pn.textContent = '';
+  renderChat();
+  const snapshot = clone({ customers: S.customers, orders: S.orders, days: S.days, config: S.config, log: S.log, perf: S.perf });
+  const changed = new Set();
+  aiCtl = new AbortController(); const stopB = $('#aiStop'), sendB = $('#aiSend'); if (stopB) stopB.hidden = false; if (sendB) sendB.disabled = true;
+  const history = CHAT.slice(0, -2).filter(m => m.text && !m.pending).slice(-10).map(m => ({ role: m.role, content: m.text + (m.actions && m.actions.length ? '\n[반영함: ' + m.actions.join(' / ') + ']' : '') }));
+  const turns = [{ role: 'user', content: aiContext() }, ...history, { role: 'user', content: text || '이 사진의 주문·변경 사항을 반영해 줘.' }];
+  try {
+    const opts = { tools: aiTools(changed, am), signal: aiCtl.signal, onText: ({ text: t }) => { am.text = t; updateBubble(am); } };
+    if (files.length && sampleImages) opts.images = files;
+    const r = await sampleFn(turns, opts);
+    am.text = r.text;
+  } catch (e) {
+    am.text = e?.text || am.text || '';
+    const code = e?.code;
+    am.err = { cancelled: '멈췄어요.', not_granted: 'AI 사용이 허용되지 않았어요.', rate_limited: '요청이 많아요. 잠시 뒤에 다시 보내 주세요.', refused: '이 요청은 처리하지 못했어요.', tools_unavailable: '이 화면에서는 AI가 앱 데이터를 바꿀 수 없어요.' }[code] || (code ? '연결 문제로 끝까지 답하지 못했어요. 다시 보내 주세요.' : '');
+    if (code === 'not_granted' || code === 'sampling_disabled') { sampleFn = null; const b = $('#aiBtn'); if (b) b.hidden = true; }
+  } finally {
+    am.pending = false; aiCtl = null;
+    if (changed.size) { AI_UNDO.set(am.id, snapshot); ensureRouteOrder(); save(...changed, 'config'); render(); }
+    saveChat(); renderChat();
+    const s2 = $('#aiStop'), b2 = $('#aiSend'); if (s2) s2.hidden = true; if (b2) b2.disabled = false;
+  }
+}
+function undoAssistant(mid) {
+  const snap = AI_UNDO.get(mid); if (!snap) return;
+  S.customers = snap.customers.map(normCust); S.orders = snap.orders.map(normOrder); S.days = snap.days; S.config = normConfig(snap.config); S.log = snap.log; S.perf = snap.perf;
+  AI_UNDO.delete(mid); const m = CHAT.find(x => x.id === mid); if (m) m.undone = true;
+  save(...DOCS); render(); saveChat(); renderChat(); toast('AI가 바꾼 내용을 되돌렸어요');
 }
 
 /* ================= render: settings ================= */
@@ -1533,11 +2023,13 @@ function saveOF() {
   const made = [];
   F.ids.forEach(id => made.push(normOrder({ type: F.type, customerId: id, date: F.date, items: clone(items), note: F.note })));
   if (F.useNew) made.push(normOrder({ type: F.type, customerId: null, name: F.nl.name, loc: { type: isNumB(F.nl.building) ? 'apt' : 'store', ...F.nl }, date: F.date, items: clone(items), note: F.note }));
+  const mark = logMark();
   S.orders.push(...made);
+  made.forEach(o => { const c = o.customerId ? custById(o.customerId) : null; logChange({ cid: o.customerId, name: c ? '' : o.name, loc: c ? '' : locShort(o.loc), from: o.date, kind: '주문', text: `${TYPE_NAME[o.type]} 주문 ${itemsText(o.items)}${o.note ? ' · ' + o.note : ''}` }); if (o.date < TODAY() && refreshPerfKey(o.date, c ? c.id : 'o:' + o.id)) save('perf'); });
   ensureRouteOrder();
   const ids = made.map(o => o.id); const date = F.date;
-  save('orders', 'config'); closeSheet(); render();
-  toast(`${fmt(date)} 동선·발주표에 ${made.length}건 반영했어요`, () => { S.orders = S.orders.filter(o => !ids.includes(o.id)); save('orders'); render(); });
+  save('orders', 'config', 'log'); closeSheet(); render();
+  toast(`${fmt(date)} 동선·발주표에 ${made.length}건 반영했어요`, () => { S.orders = S.orders.filter(o => !ids.includes(o.id)); dropLogsSince(mark); save('orders', 'log'); render(); });
 }
 
 /* ================= customer edit sheet ================= */
@@ -1556,7 +2048,8 @@ function readCF() {
   CF.loc.type = v('cfType') || 'apt'; CF.loc.building = v('cfB').trim(); CF.loc.unit = v('cfU').trim(); CF.loc.label = v('cfLabel').trim();
   const course = v('cfCourse').trim(); CF.course = course === '' ? null : (isNaN(+course) ? course : +course);
   CF.payment = v('cfPay') || 'card'; CF.bill = v('cfBill') || 'mobile';
-  CF.member = !!$('#cfMember')?.checked; CF.ice = !!$('#cfIce')?.checked; CF.bag = !!$('#cfBag')?.checked; CF.active = !!$('#cfActive')?.checked;
+  CF.member = !!$('#cfMember')?.checked; CF.ice = !!$('#cfIce')?.checked; CF.bag = !!$('#cfBag')?.checked;
+  CF.status = v('cfStatus') || 'active'; CF.endDate = CF.status === 'active' ? '' : v('cfEnd'); CF.statusNote = v('cfStatusNote').trim(); CF.active = CF.status === 'active';
   CF.notes = v('cfNotes');
 }
 function renderCF() {
@@ -1580,21 +2073,29 @@ function renderCF() {
     <button class="btn sm" style="justify-self:start" data-act="cfAddReg">+ 품목 추가</button></div></div>
   <div class="grid2"><div class="field"><label class="lbl" for="cfPay">수금 구분</label><select id="cfPay">${Object.entries(PAY).map(([k, n]) => `<option value="${k}" ${CF.payment === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
   <div class="field"><label class="lbl" for="cfBill">청구서</label><select id="cfBill"><option value="mobile" ${CF.bill === 'mobile' ? 'selected' : ''}>모바일</option><option value="paper" ${CF.bill === 'paper' ? 'selected' : ''}>종이</option></select></div></div>
-  <div class="row" style="gap:16px">${[['cfIce', 'ice', '아이스팩'], ['cfBag', 'bag', '전달주머니'], ['cfMember', 'member', '회원'], ['cfActive', 'active', '배달 중']].map(([id, k, n]) => `<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="${id}" ${CF[k] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)">${n}</label>`).join('')}</div>
+  <div class="row" style="gap:16px">${[['cfIce', 'ice', '아이스팩'], ['cfBag', 'bag', '전달주머니'], ['cfMember', 'member', '회원']].map(([id, k, n]) => `<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="${id}" ${CF[k] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)">${n}</label>`).join('')}</div>
   <div class="field"><label class="lbl" for="cfNotes">메모 (배달할 때 보여요)</label><textarea id="cfNotes">${esc(CF.notes)}</textarea></div>
+  <div class="field"><span class="lbl">계약 상태</span><div class="grid3"><select id="cfStatus" aria-label="계약 상태">${Object.entries(STATUS_NAME).map(([k, n]) => `<option value="${k}" ${CF.status === k ? 'selected' : ''}>${n}</option>`).join('')}</select><input type="date" id="cfEnd" value="${esc(CF.endDate)}" aria-label="적용 날짜"><input type="text" id="cfStatusNote" value="${esc(CF.statusNote)}" placeholder="사유" aria-label="상태 사유"></div>
+    <p class="hint" style="margin-top:6px">해지·중단·이사로 바꿔도 명단과 실적, 수금에는 남아요. 날짜를 넣으면 그 전날까지 배달해요.</p></div>
   <div class="field"><span class="lbl">배달 중지 기간</span>
     <div style="display:grid;gap:6px">${CF.pauses.slice().sort((a, b) => a.from.localeCompare(b.from)).map(p => `<div class="row" style="justify-content:space-between;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)"><span><b>${fmt(p.from)} – ${fmt(p.to)}</b>${pauseDays(p)} ${p.to < t ? '<span class="badge">지남</span>' : p.from <= t ? '<span class="badge warn">중지 중</span>' : '<span class="badge warn">예정</span>'} <span class="muted">${esc(p.reason)}</span></span><button class="btn sm ghost" data-act="cfDelPause" data-p="${p.id}">삭제</button></div>`).join('') || '<span class="hint">없음</span>'}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input type="date" id="cfPF" aria-label="시작일" value="${defaultOrderDate()}"><input type="date" id="cfPT" aria-label="종료일" value="${defaultOrderDate()}"></div>
     <div class="row" style="gap:8px"><span class="hint">특정 요일만 쉴 때 고르기 (안 고르면 전부)</span><div class="daypick" id="cfPD">${[1, 2, 3, 4, 5, 6].map(d => `<button aria-pressed="false" data-act="togglePress">${DL[d]}</button>`).join('')}</div></div>
     <div style="display:grid;grid-template-columns:1fr auto;gap:6px"><input type="text" id="cfPR" placeholder="사유 (예: 여행)" aria-label="사유"><button class="btn" data-act="cfAddPause">중지 추가</button></div></div></div>
-  <div class="sact">${CF._new ? '' : '<button class="btn danger" data-act="cfDelete">삭제</button>'}<button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="cfSave">저장</button></div>`;
+  <div class="sact">${CF._new ? '' : '<button class="btn danger ghost" data-act="cfDelete">완전 삭제</button>'}<button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="cfSave">저장</button></div>`;
 }
 function saveCF() {
   readCF();
   if (!CF.name && !CF.loc.building) { toast('이름이나 동을 입력해 주세요.'); return; }
-  const c = normCust(CF); const isNew = CF._new;
-  if (isNew) S.customers.push(c); else S.customers = S.customers.map(x => x.id === c.id ? c : x);
-  ensureRouteOrder(); save('customers', 'config'); closeSheet(); render();
+  const c = normCust(CF); const isNew = CF._new; const old = isNew ? null : custById(c.id);
+  if (isNew) { S.customers.push(c); logChange({ cid: c.id, from: TODAY(), to: '', kind: '고객 정보', text: `새 고객 · 정기 ${regularText(c)}` }); }
+  else {
+    const diffs = custDiff(old, c); diffs.forEach(d => logChange({ cid: c.id, name: c.name, loc: locShort(c.loc), ...d }));
+    S.customers = S.customers.map(x => x.id === c.id ? c : x);
+    const past = diffs.filter(d => (d.kind === '상태' || d.kind === '중지') && d.from && d.from < TODAY()).map(d => d.from).sort()[0];
+    if (past && refreshPerfFrom(c.id, past)) save('perf');
+  }
+  ensureRouteOrder(); save('customers', 'config', 'log'); closeSheet(); render();
   toast(isNew ? `${c.name || '고객'} 추가했어요. 동선과 발주표에 반영돼요.` : '저장했어요. 동선과 발주표에 반영돼요.');
 }
 
@@ -1617,18 +2118,20 @@ function bulkPause() {
 function bulkPauseSave() {
   const from = $('#bpF').value, to = $('#bpT').value, reason = $('#bpR').value.trim();
   if (!from || !to || to < from) { toast('시작일과 끝나는 날을 확인해 주세요.'); return; }
-  const before = clone(S.customers);
-  selectedCustomers().forEach(c => c.pauses.push({ id: uid('p_'), from, to, reason, ack: false }));
-  const n = UI.selected.size; save('customers'); closeSheet(); render();
-  toast(`${n}명 ${fmtShort(from)}–${fmtShort(to)} 중지했어요`, () => { S.customers = before.map(normCust); save('customers'); render(); });
+  const before = clone(S.customers); const mark = logMark();
+  selectedCustomers().forEach(c => { c.pauses.push({ id: uid('p_'), from, to, reason, ack: false }); logChange({ cid: c.id, from, to, kind: '중지', text: `배달 중지${reason ? ' · ' + reason : ''}` }); });
+  if (from < TODAY() && selectedCustomers().map(c => refreshPerfFrom(c.id, from)).some(Boolean)) save('perf');
+  const n = UI.selected.size; save('customers', 'log'); closeSheet(); render();
+  toast(`${n}명 ${fmtShort(from)}–${fmtShort(to)} 중지했어요`, () => { S.customers = before.map(normCust); dropLogsSince(mark); save('customers', 'log'); render(); });
 }
 function bulkResume() {
-  const t = TODAY(); const before = clone(S.customers);
+  const t = TODAY(); const before = clone(S.customers); const mark = logMark();
   selectedCustomers().forEach(c => {
+    if (c.pauses.some(p => p.to >= t)) logChange({ cid: c.id, from: t, to: '', kind: '중지', text: '오늘 이후 중지 해제' });
     c.pauses = c.pauses.filter(p => p.from < t).map(p => (p.to >= t ? { ...p, to: addDays(t, -1), ack: true } : p));
   });
-  save('customers'); render();
-  toast(`선택한 고객의 오늘 이후 중지를 풀었어요`, () => { S.customers = before.map(normCust); save('customers'); render(); });
+  save('customers', 'log'); render();
+  toast(`선택한 고객의 오늘 이후 중지를 풀었어요`, () => { S.customers = before.map(normCust); dropLogsSince(mark); save('customers', 'log'); render(); });
 }
 function bulkNote() {
   openSheet(`${sheetHead(`${UI.selected.size}명 메모`)}
@@ -1640,9 +2143,9 @@ function bulkNote() {
 function bulkNoteSave() {
   const txt = $('#bnT').value.trim(); if (!txt) { toast('메모를 입력해 주세요.'); return; }
   const mode = $('[data-g="nm"][aria-pressed="true"]').dataset.v; const line = ($('#bnD').checked ? fmtShort(TODAY()) + ' ' : '') + txt;
-  const before = clone(S.customers);
-  selectedCustomers().forEach(c => { c.notes = mode === 'replace' || !c.notes ? line : c.notes + '\n' + line; });
-  save('customers'); closeSheet(); render(); toast('메모를 넣었어요', () => { S.customers = before.map(normCust); save('customers'); render(); });
+  const before = clone(S.customers); const mark = logMark();
+  selectedCustomers().forEach(c => { c.notes = mode === 'replace' || !c.notes ? line : c.notes + '\n' + line; logChange({ cid: c.id, kind: '메모', text: txt }); });
+  save('customers', 'log'); closeSheet(); render(); toast('메모를 넣었어요', () => { S.customers = before.map(normCust); dropLogsSince(mark); save('customers', 'log'); render(); });
 }
 function bulkQty() {
   openSheet(`${sheetHead(`${UI.selected.size}명 정기 수량 변경`)}
@@ -1656,13 +2159,15 @@ function bulkQty() {
 function bulkQtySave() {
   const pid = $('#bqP').value; const v = Math.round(+$('#bqV').value || 0); const mode = $('[data-g="qm"][aria-pressed="true"]').dataset.v;
   const days = $$('#bqD button').map((b, i) => b.getAttribute('aria-pressed') === 'true' ? i + 1 : 0).filter(Boolean);
-  const before = clone(S.customers); let n = 0;
+  const before = clone(S.customers); let n = 0; const mark = logMark();
   selectedCustomers().forEach(c => {
+    const was = regularText(c);
     const items = c.regular.filter(r => r.productId === pid);
     if (items.length) { items.forEach(r => { r.qty = Math.max(0, mode === 'set' ? v : r.qty + v); }); n++; }
-    else if (v > 0) { c.regular.push({ productId: pid, qty: v, days: days.length ? days : [1, 2, 3, 4, 5] }); n++; }
+    else if (v > 0) { c.regular.push({ productId: pid, qty: v, days: days.length ? days : [1, 2, 3, 4, 5], every: 1, anchor: '' }); n++; }
+    if (was !== regularText(c)) logChange({ cid: c.id, from: TODAY(), to: '', kind: '정기 변경', text: `정기 품목: ${regularText(c)} (이전: ${was})` });
   });
-  save('customers'); closeSheet(); render(); toast(`${n}명 ${pName(pid)} 수량을 바꿨어요`, () => { S.customers = before.map(normCust); save('customers'); render(); });
+  save('customers', 'log'); closeSheet(); render(); toast(`${n}명 ${pName(pid)} 수량을 바꿨어요`, () => { S.customers = before.map(normCust); dropLogsSince(mark); save('customers', 'log'); render(); });
 }
 function bulkPay() {
   openSheet(`${sheetHead(`${UI.selected.size}명 수금`)}
@@ -1673,9 +2178,24 @@ function bulkPay() {
 function bulkPaySave() {
   const pm = $('[data-g="pm"][aria-pressed="true"]')?.dataset.v; const pp = $('[data-g="pp"][aria-pressed="true"]')?.dataset.v;
   if (!pm && !pp) { toast('바꿀 항목을 골라 주세요.'); return; }
-  const before = clone(S.customers);
-  selectedCustomers().forEach(c => { if (pm) c.payment = pm; if (pp) c.paidMonth = pp === 'paid' ? MONTH() : ''; });
-  save('customers'); closeSheet(); render(); toast('수금 정보를 바꿨어요', () => { S.customers = before.map(normCust); save('customers'); render(); });
+  const before = clone(S.customers); const mark = logMark();
+  selectedCustomers().forEach(c => { if (pm) c.payment = pm; if (pp) c.paidMonth = pp === 'paid' ? MONTH() : ''; logChange({ cid: c.id, from: TODAY(), kind: '수금', text: [pm ? `수금 구분 ${PAY[pm]}` : '', pp ? `${MONTH().slice(5)}월 현금 ${pp === 'paid' ? '수금 완료' : '미수'}` : ''].filter(Boolean).join(' · ') }); });
+  save('customers', 'log'); closeSheet(); render(); toast('수금 정보를 바꿨어요', () => { S.customers = before.map(normCust); dropLogsSince(mark); save('customers', 'log'); render(); });
+}
+function bulkStatus() {
+  openSheet(`${sheetHead(`${UI.selected.size}명 계약 상태`)}
+  <div class="seg" style="flex-wrap:wrap">${Object.entries(STATUS_NAME).map(([k, n]) => `<button aria-pressed="${k === 'ended'}" data-act="segPick" data-g="bs" data-v="${k}">${n}</button>`).join('')}</div>
+  <div class="grid2"><div class="field"><label class="lbl" for="bsD">적용 날짜 (이날부터)</label><input type="date" id="bsD" value="${defaultOrderDate()}"></div><div class="field"><label class="lbl" for="bsN">사유</label><input type="text" id="bsN" placeholder="예: 이사, 10월 말 확인"></div></div>
+  <p class="hint">명단에서 지우지 않아요. 실적과 수금 기록은 그대로 남고, 적용 날짜 전날까지 배달해요.</p>
+  <div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="bulkStatusSave">적용</button></div>`);
+}
+function bulkStatusSave() {
+  const st = $('[data-g="bs"][aria-pressed="true"]')?.dataset.v || 'ended'; const d = $('#bsD').value; const note = $('#bsN').value.trim();
+  const before = clone(S.customers); const mark = logMark();
+  selectedCustomers().forEach(c => { const prev = STATUS_NAME[c.status]; c.status = st; c.active = st === 'active'; c.endDate = st === 'active' ? '' : d; if (note) c.statusNote = note; logChange({ cid: c.id, from: c.endDate || TODAY(), to: '', kind: '상태', text: `${STATUS_NAME[st]}${c.endDate ? ' · ' + fmt(c.endDate) + '부터' : ''}${note ? ' · ' + note : ''} (이전: ${prev})` }); });
+  if (d && d < TODAY() && selectedCustomers().map(c => refreshPerfFrom(c.id, d)).some(Boolean)) save('perf');
+  const n = UI.selected.size; save('customers', 'log'); closeSheet(); render();
+  toast(`${n}명 ${STATUS_NAME[st]}로 바꿨어요`, () => { S.customers = before.map(normCust); dropLogsSince(mark); save('customers', 'log'); render(); });
 }
 function bulkDelete() {
   const n = UI.selected.size;
@@ -1860,6 +2380,23 @@ document.addEventListener('pointercancel', endDrag);
 const ACT = {
   tab: a => { UI.tab = a.dataset.tab; if (UI.tab !== 'customers') UI.selected.clear(); saveUI(); render(); window.scrollTo(0, 0); },
   closeSheet: () => closeSheet(),
+  recMode: a => { UI.recMode = a.dataset.m; saveUI(); render(); },
+  perfMonth: a => { const [y, m] = (UI.perfMonth || MONTH()).split('-').map(Number); const d = new Date(y, m - 1 + (+a.dataset.d), 1); UI.perfMonth = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; render(); },
+  perfFuture: () => { UI.perfFuture = !UI.perfFuture; render(); },
+  perfCust: a => perfSheet(a.dataset.key),
+  editCustFromPerf: a => { closeSheet(); openCustSheet(a.dataset.id); },
+  logFor: a => { closeSheet(); UI.recMode = 'log'; UI.logQ = a.dataset.name; UI.logF = 'all'; render(); },
+  logF: a => { UI.logF = a.dataset.f; render(); },
+  newLog: () => openLogSheet(null),
+  editLog: a => openLogSheet(a.dataset.id),
+  saveLog: () => saveLogSheet(),
+  delLog: () => { const id = LF.id; const e = S.log.find(x => x.id === id); S.log = S.log.filter(x => x.id !== id); save('log'); closeSheet(); render(); toast('기록을 지웠어요', () => { if (e) { S.log.push(e); S.log.sort((a, b) => b.at - a.at); save('log'); render(); } }); },
+  assistant: () => openAssistant(),
+  aiSend: () => sendAssistant(),
+  aiStop: () => { aiCtl?.abort(); },
+  aiUndo: a => undoAssistant(a.dataset.mid),
+  aiSuggest: a => { const ta = $('#aiIn'); if (ta) { ta.value = a.dataset.t; ta.focus(); } },
+  aiClear: () => { CHAT = []; AI_UNDO.clear(); saveChat(); closeSheet(); openAssistant(); },
   syncInfo: () => syncSheet(),
   syncNow: () => { store.fails = 0; clearTimeout(retryT); retryT = null; flushPending(); closeSheet(); toast('서버에 다시 저장하는 중이에요'); },
   theme: () => { const order = ['auto', 'light', 'dark']; const m = order[(order.indexOf(getTheme()) + 1) % 3]; applyTheme(m); toast(`화면: ${THEME_NAME[m]}${m === 'auto' ? ' (기기 설정 따라감)' : ''}`); if (UI.tab === 'settings') render(); },
@@ -1872,16 +2409,16 @@ const ACT = {
   gotoOrder: a => { UI.orderDate = a.dataset.date; UI.tab = 'order'; saveUI(); render(); window.scrollTo(0, 0); },
   filterCash: () => { UI.tab = 'customers'; UI.custF = 'cash'; saveUI(); render(); },
   ackPause: a => { const c = custById(a.dataset.id); const p = c?.pauses.find(x => x.id === a.dataset.p); if (p) { p.ack = true; save('customers'); render(); } },
-  cancelOrder: a => { const o = S.orders.find(x => x.id === a.dataset.id); if (!o) return; o.status = 'cancelled'; save('orders'); render(); toast(`${fmt(o.date)} 주문을 취소했어요. 발주표와 동선에서 빠져요.`, () => { o.status = 'open'; save('orders'); render(); }); },
-  restoreOrder: a => { const o = S.orders.find(x => x.id === a.dataset.id); if (o) { o.status = 'open'; save('orders'); render(); } },
+  cancelOrder: a => { const o = S.orders.find(x => x.id === a.dataset.id); if (!o) return; const mark = logMark(); o.status = 'cancelled'; const c = o.customerId ? custById(o.customerId) : null; logChange({ cid: o.customerId, name: c ? '' : o.name, loc: c ? '' : locShort(o.loc), from: o.date, kind: '주문', text: `주문 취소 ${itemsText(o.items)}` }); save('orders', 'log'); render(); toast(`${fmt(o.date)} 주문을 취소했어요. 발주표와 동선에서 빠져요.`, () => { o.status = 'open'; dropLogsSince(mark); save('orders', 'log'); render(); }); },
+  restoreOrder: a => { const o = S.orders.find(x => x.id === a.dataset.id); if (o) { o.status = 'open'; const c = o.customerId ? custById(o.customerId) : null; logChange({ cid: o.customerId, name: c ? '' : o.name, loc: c ? '' : locShort(o.loc), from: o.date, kind: '주문', text: `주문 되살림 ${itemsText(o.items)}` }); save('orders', 'log'); render(); } },
   // customers
   custF: a => { UI.custF = a.dataset.f; render(); },
-  qty: a => { const c = custById(a.dataset.id); const r = c?.regular[+a.dataset.i]; if (!r) return; r.qty = Math.max(0, r.qty + (+a.dataset.d)); save('customers'); renderCustList(); },
-  togglePaid: a => { const c = custById(a.dataset.id); if (!c) return; c.paidMonth = c.paidMonth === MONTH() ? '' : MONTH(); save('customers'); renderCustList(); },
+  qty: a => { const c = custById(a.dataset.id); const r = c?.regular[+a.dataset.i]; if (!r) return; const was = r.qty; r.qty = Math.max(0, r.qty + (+a.dataset.d)); if (r.qty !== was) { const m = logMark(); const first = S.log[0]?.merge === `q:${c.id}:${a.dataset.i}` ? S.log[0].text.match(/\(이전 (\d+)\)/) : null; logChange({ cid: c.id, from: TODAY(), to: '', kind: '정기 변경', text: `${pName(r.productId)} ${r.every === 2 ? '격주 ' : ''}${daysText(r.days)} ${r.qty}개 (이전 ${first ? first[1] : was})`, merge: `q:${c.id}:${a.dataset.i}` }); } save('customers', 'log'); renderCustList(); },
+  togglePaid: a => { const c = custById(a.dataset.id); if (!c) return; c.paidMonth = c.paidMonth === MONTH() ? '' : MONTH(); logChange({ cid: c.id, from: TODAY(), kind: '수금', text: `${MONTH().slice(5)}월 현금 ${c.paidMonth ? '수금 완료' : '미수로 되돌림'}` }); save('customers', 'log'); renderCustList(); },
   clearSel: () => { UI.selected.clear(); render(); },
-  bulk: a => ({ pause: bulkPause, resume: bulkResume, qty: bulkQty, note: bulkNote, pay: bulkPay, delete: bulkDelete, order: () => openOrderSheet({ customerIds: [...UI.selected] }) })[a.dataset.k](),
+  bulk: a => ({ pause: bulkPause, resume: bulkResume, qty: bulkQty, note: bulkNote, pay: bulkPay, status: bulkStatus, delete: bulkDelete, order: () => openOrderSheet({ customerIds: [...UI.selected] }) })[a.dataset.k](),
   pausePreset: a => { $('#bpF').value = a.dataset.f; $('#bpT').value = a.dataset.t; $('#bpT').dispatchEvent(new Event('change')); },
-  bulkPauseSave, bulkNoteSave, bulkQtySave, bulkPaySave,
+  bulkPauseSave, bulkNoteSave, bulkQtySave, bulkPaySave, bulkStatusSave,
   segPick: a => { $$(`[data-g="${a.dataset.g}"]`).forEach(b => b.setAttribute('aria-pressed', b === a ? 'true' : 'false')); },
   togglePress: a => a.setAttribute('aria-pressed', a.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'),
   // order sheet (T-2)
@@ -1913,7 +2450,7 @@ const ACT = {
   routeMore: a => routeMore(a.dataset.date),
   seqReset: a => { const d = S.days[a.dataset.date]; if (d) delete d.seq; save('days'); closeSheet(); render(); toast('자동 동선으로 되돌렸어요'); },
   seqBase: a => saveAsBase(a.dataset.date),
-  mapB: a => { UI.mapB = UI.mapB === a.dataset.b ? null : a.dataset.b; render(); },
+  mapB: a => { UI.mapB = UI.mapB === a.dataset.b ? null : a.dataset.b; UI.scrollB = UI.mapB; render(); },
   // order ingestion
   ofType: a => { F.type = a.dataset.t; renderOF(); },
   ofPick: a => { F.ids.push(a.dataset.id); F.q = ''; renderOF(); },
@@ -1934,7 +2471,7 @@ const ACT = {
   cfAddPause: () => { const f = $('#cfPF').value, t = $('#cfPT').value; if (!f || !t || t < f) { toast('중지 기간을 확인해 주세요.'); return; } const r = $('#cfPR').value.trim(); const pd = $$('#cfPD button').map((b, i) => b.getAttribute('aria-pressed') === 'true' ? i + 1 : 0).filter(Boolean); readCF(); CF.pauses.push({ id: uid('p_'), from: f, to: t, reason: r, ack: false, days: pd }); renderCF(); },
   cfDelPause: a => { readCF(); CF.pauses = CF.pauses.filter(p => p.id !== a.dataset.p); renderCF(); },
   cfSave: () => saveCF(),
-  cfDelete: () => { const id = CF.id, nm = CF.name; confirmSheet(`${nm} 삭제`, '이 고객과 앞으로 남은 주문이 지워져요.', '삭제', () => { const bc = clone(S.customers), bo = clone(S.orders); S.customers = S.customers.filter(c => c.id !== id); S.orders = S.orders.filter(o => !(o.customerId === id && o.date >= TODAY())); UI.selected.delete(id); save('customers', 'orders'); render(); toast(`${nm} 삭제했어요`, () => { S.customers = bc.map(normCust); S.orders = bo.map(normOrder); save('customers', 'orders'); render(); }); }); },
+  cfDelete: () => { const id = CF.id, nm = CF.name; confirmSheet(`${nm} 완전 삭제`, '명단·실적에서 사라지고 앞으로 남은 주문도 지워져요. 해지나 이사는 “계약 상태”로 바꾸면 기록이 남아요.', '완전 삭제', () => { const bc = clone(S.customers), bo = clone(S.orders); S.customers = S.customers.filter(c => c.id !== id); S.orders = S.orders.filter(o => !(o.customerId === id && o.date >= TODAY())); UI.selected.delete(id); save('customers', 'orders'); render(); toast(`${nm} 삭제했어요`, () => { S.customers = bc.map(normCust); S.orders = bo.map(normOrder); save('customers', 'orders'); render(); }); }); },
   // settings
   leadMode: a => { S.config.leadMode = a.dataset.m; save('config'); render(); },
   floorDir: a => { S.config.floorDir = a.dataset.m; save('config'); render(); },
@@ -1980,6 +2517,7 @@ const CHG = {
   leadDays: el => { S.config.leadDays = Math.max(0, Math.min(7, Math.round(+el.value || 0))); save('config'); render(); },
   purchase: el => { S.config.purchase[el.dataset.k] = el.checked; save('config'); render(); },
   prod: el => { const p = S.config.products[+el.dataset.i]; if (!p) return; p[el.dataset.f] = el.value.trim() || p[el.dataset.f]; save('config'); },
+  aiPic: el => { AI_PICS = [...(el.files || [])]; const n = $('#aiPicN'); if (n) n.textContent = AI_PICS.length ? `사진 ${AI_PICS.length}장 첨부` : ''; },
   aiFiles: el => { const n = el.files?.length || 0; const f = $('#aiFn'); if (f) f.textContent = n ? `사진 ${n}장` : ''; },
   restore: el => {
     const file = el.files?.[0]; if (!file) return;
@@ -2002,6 +2540,8 @@ const INP = {
   ofq: el => { F.q = el.value; renderOFRes(); },
   ofnote: el => { F.note = el.value; },
   sfONote: el => { if (SF) SF.orders[+el.dataset.o].note = el.value; },
+  logq: el => { UI.logQ = el.value; renderLogList(); },
+  perfq: el => { UI.perfQ = el.value; const keep = el.selectionStart; render(); const n = $('#perfq'); if (n) { n.focus(); try { n.setSelectionRange(keep, keep); } catch (e) { } } },
   ofnl: el => { F.nl[el.dataset.f] = el.value; const i = $('#ofimp'); if (i) i.innerHTML = ofImpact(); },
 };
 document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && INP[el.dataset.inp]) INP[el.dataset.inp](el); });
@@ -2009,7 +2549,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (!$('#sheet').hidden) closeSheet(); else if (UI.selected.size) { UI.selected.clear(); render(); } return; }
   if (e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
   if (e.target.closest('input,textarea,select,[contenteditable]') || !$('#sheet').hidden) return;
-  const tabs = { '1': 'home', '2': 'customers', '3': 'order', '4': 'route' };
+  const tabs = { '1': 'home', '2': 'customers', '3': 'order', '4': 'route', '5': 'records' };
   if (tabs[e.key]) { e.preventDefault(); ACT.tab({ dataset: { tab: tabs[e.key] } }); }
   else if (e.key === 'n' || e.key === 'N' || e.key === 'ㅜ') { e.preventDefault(); ACT.newOrder(); }
   else if (e.key === '/') { e.preventDefault(); if (UI.tab !== 'customers') ACT.tab({ dataset: { tab: 'customers' } }); $('#custq')?.focus(); }
@@ -2034,13 +2574,15 @@ render();
 initRuntime();
 // roll the date over if the page stays open past midnight
 let lastDay = TODAY();
-setInterval(() => { if (TODAY() !== lastDay) { lastDay = TODAY(); UI.routeDate = null; UI.orderDate = null; render(); } }, 60000);
+setInterval(() => { if (TODAY() !== lastDay) { lastDay = TODAY(); UI.routeDate = null; UI.orderDate = null; maybeFreeze(); render(); } }, 60000);
+setTimeout(() => { if (store.mode !== 'db') maybeFreeze(); }, 2500);
 // leaving the app (home button, app switch, closing the tab): keep the local copy and push pending edits right away
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') { cacheLocal(); flushNow(); return; }
   flushPending();
   if (store.db) DOCS.forEach(n => { if (!store.live[n]) subscribe(n); });
   if (TODAY() !== lastDay) { lastDay = TODAY(); UI.routeDate = null; UI.orderDate = null; }
+  maybeFreeze();
   render();
 });
 window.addEventListener('pagehide', () => { cacheLocal(); flushNow(); });
