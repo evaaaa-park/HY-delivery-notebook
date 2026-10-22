@@ -1008,7 +1008,9 @@ function renderHome() {
   const od = orderingDay(t); const tgt = targetFrom(od); const rows = sheetFor(tgt);
   const buy = rows.reduce((s, r) => s + r.buy, 0); const kinds = rows.filter(r => r.buy > 0).length;
   const alerts = buildAlerts();
-  const recent = S.orders.slice().sort((a, b) => b.createdAt - a.createdAt).slice(0, 6);
+  const pending = S.orders.filter(o => !isDelivered(o) && (o.status === 'open' ? o.date >= addDays(t, -2) : o.date >= t));
+  const recent = pending.slice().sort((a, b) => a.date.localeCompare(b.date) || b.createdAt - a.createdAt).slice(0, 8);
+  const deliveredCount = S.orders.filter(o => o.status === 'open' && isDelivered(o) && o.date >= addDays(t, -7)).length;
   if (!S.customers.length && !S.orders.length) {
     return storageBanner() + `<div class="hello"><h1>배달 준비</h1></div>
     <div class="card empty"><h3>아직 고객이 없어요</h3><p>정기 고객을 한 명씩 추가하거나, hy 고객관리 앱 화면을 캡처해서 한 번에 가져올 수 있어요. 고객이 생기면 동선과 발주표가 자동으로 만들어져요.</p>
@@ -1026,12 +1028,13 @@ function renderHome() {
   </div>
   ${alerts.length ? `<div class="sec"><div class="sec-h"><h2>알림</h2><span class="muted num" style="font-size:13px">${alerts.length}건</span></div><div class="alerts">${alerts.map(a => `<div class="alert ${a.kind}"><div class="t">${a.html}<small>${a.sub || ''}</small></div>${a.act || ''}</div>`).join('')}</div></div>` : ''}
   </div><div>
-  <div class="sec"><div class="sec-h"><h2>최근 들어온 주문</h2><button class="btn sm" data-act="newOrder">+ 주문</button></div>
+  <div class="sec"><div class="sec-h"><h2>최근 들어온 주문 <span class="muted num" style="font-size:14px">${pending.filter(o => o.status === 'open').length}건 남음</span></h2><button class="btn sm" data-act="newOrder">+ 주문</button></div>
     ${recent.length ? `<div class="card recent">${recent.map(o => {
       const c = o.customerId ? custById(o.customerId) : null; const nm = c ? c.name : o.name; const loc = c ? c.loc : o.loc;
       return `<div class="it"><span class="badge t-${o.type}">${TYPE_NAME[o.type]}</span><div class="t"><div><b>${esc(nm || '이름 없음')}</b> <span class="muted">${esc(locText(loc))}</span></div><div class="muted" style="font-size:13px">${fmt(o.date)} · ${o.items.map(i => `${esc(pShort(i.productId))}×${i.qty}`).join(' ')}${o.status === 'cancelled' ? ' · 취소됨' : ''}</div></div>
       ${o.status === 'cancelled' ? `<button class="btn sm" data-act="restoreOrder" data-id="${o.id}">되살리기</button>` : `<button class="btn sm ghost" data-act="cancelOrder" data-id="${o.id}">취소</button>`}</div>`;
-    }).join('')}</div>` : `<div class="card empty"><p>추가주문, 샘플, Fredit 주문을 넣으면 여기와 동선, 발주표에 바로 들어가요.</p></div>`}
+    }).join('')}</div>` : `<div class="card empty"><p>남은 주문이 없어요. 추가주문, 샘플, Fredit 주문을 넣으면 여기와 동선, 발주표에 바로 들어가요.</p></div>`}
+    ${deliveredCount ? `<button class="btn sm ghost" style="justify-self:start" data-act="goDone">최근 7일 전달 완료 ${deliveredCount}건 · 배달 완료 기록 보기</button>` : ''}
   </div></div></div>`;
 }
 
@@ -1484,7 +1487,7 @@ async function saveRouteImage(date) {
 }
 
 /* ================= change log ================= */
-const LOG_KINDS = ['주문', '정기 변경', '하루 변경', '중지', '상태', '수금', '미전달', '메모', '고객 정보', '기타'];
+const LOG_KINDS = ['주문', '정기 변경', '하루 변경', '중지', '상태', '수금', '미전달', '메모', '고객 정보', '배달 완료', '기타'];
 const locShort = loc => loc ? `${loc.building || ''}${loc.unit ? '-' + loc.unit : ''}` : '';
 const itemsText = items => (items || []).map(i => `${pShort(i.productId || i.pid)} ${i.qty}`).join(', ');
 // one entry per request: when it was recorded (at), which delivery dates it is about (from–to; to '' = ongoing)
@@ -1542,6 +1545,7 @@ function encodeDay(date) {
     if (e.key.startsWith('o:')) day.n[e.key] = `${e.name}|${e.loc}`;
   });
   if (daysBetween(date, ymd(new Date())) > 1) day.e = 1; // frozen after the fact: estimated from the list at that time
+  if (S.days[date]) { const info = doneInfo(date); day.dt = info.dt; day.cat = info.at; }
   return day;
 }
 function decodeDay(day) {
@@ -1560,10 +1564,20 @@ function maybeFreeze() {
   if (!S.perf.since) S.perf.since = t.slice(0, 8) + '01';
   let changed = false;
   for (let d = S.perf.since; d < t; d = addDays(d, 1)) {
-    if (S.perf.days[d]) continue;
+    if (S.perf.days[d]) { if (S.perf.days[d].dt === undefined && S.days[d] && stampDone(d)) changed = true; continue; }
     if (!isDeliveryDay(d) && !S.orders.some(o => o.date === d && o.status === 'open')) continue;
     S.perf.days[d] = encodeDay(d); changed = true;
   }
+  // days finished before completion records existed: stamp the time of the last check
+  let logged = false;
+  Object.keys(S.days).filter(d => d < t && S.days[d].done && !S.days[d].completedAt).forEach(d => {
+    const st = dayStatus(d); if (!st.n || st.d !== st.n) return;
+    const last = Math.max(...Object.values(S.days[d].done)); S.days[d].completedAt = last;
+    S.log = S.log.filter(e => e.merge !== 'done:' + d);
+    const e = { id: uid('l_'), at: last, cid: null, name: '하루 배달', loc: '', from: d, to: d, kind: '배달 완료', text: `${st.n}곳 모두 완료 · 제품 ${st.qty}개${st.orders ? ` · 주문 있는 곳 ${st.orders}` : ''} · ${hm(last)}`, by: '직접', merge: 'done:' + d };
+    S.log.push(e); S.log.sort((x, y) => y.at - x.at); stampDone(d); logged = true;
+  });
+  if (logged) save('days', 'log', 'perf');
   if (changed) save('perf');
 }
 function refreshPerfKey(date, key) {
@@ -1604,9 +1618,9 @@ const prodOrderIdx = pid => { const i = S.config.products.findIndex(p => p.id ==
 /* ================= render: records tab ================= */
 function renderRecords() {
   const mode = UI.recMode || 'perf';
-  return storageBanner() + `<div class="sec-h" style="margin-bottom:12px;flex-wrap:wrap"><h2 style="font-family:var(--f-display);font-weight:400;font-size:24px">${mode === 'perf' ? '실적' : '변경 기록'}</h2>
-    <div class="seg" style="flex:none"><button aria-pressed="${mode === 'perf'}" data-act="recMode" data-m="perf">실적</button><button aria-pressed="${mode === 'log'}" data-act="recMode" data-m="log">변경 기록</button></div></div>`
-    + (mode === 'perf' ? renderPerf() : renderLog());
+  return storageBanner() + `<div class="sec-h" style="margin-bottom:12px;flex-wrap:wrap"><h2 style="font-family:var(--f-display);font-weight:400;font-size:24px">${mode === 'perf' ? '실적' : mode === 'done' ? '배달 완료' : '변경 기록'}</h2>
+    <div class="seg" style="flex:none"><button aria-pressed="${mode === 'perf'}" data-act="recMode" data-m="perf">실적</button><button aria-pressed="${mode === 'log'}" data-act="recMode" data-m="log">변경 기록</button><button aria-pressed="${mode === 'done'}" data-act="recMode" data-m="done">배달 완료</button></div></div>`
+    + (mode === 'perf' ? renderPerf() : mode === 'done' ? renderDoneDays() : renderLog());
 }
 function renderPerf() {
   const month = UI.perfMonth || MONTH(); const fut = !!UI.perfFuture;
@@ -1887,6 +1901,66 @@ function undoAssistant(mid) {
   S.customers = snap.customers.map(normCust); S.orders = snap.orders.map(normOrder); S.days = snap.days; S.config = normConfig(snap.config); S.log = snap.log; S.perf = snap.perf;
   AI_UNDO.delete(mid); const m = CHAT.find(x => x.id === mid); if (m) m.undone = true;
   save(...DOCS); render(); saveChat(); renderChat(); toast('AI가 바꾼 내용을 되돌렸어요');
+}
+
+/* ================= daily completion record ================= */
+const isDelivered = o => { const c = o.customerId ? custById(o.customerId) : null; return !!S.days[o.date]?.done?.[c ? c.id : 'o:' + o.id]; };
+const hm = ts => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+// completion summary + per-stop check times, kept with the day's saved 실적 (lives ~100 days)
+function doneInfo(date) {
+  const done = S.days[date]?.done || {};
+  const keys = Object.keys(done);
+  const dt = {}; keys.forEach(k => { const d = new Date(done[k]); dt[k] = d.getHours() * 60 + d.getMinutes(); });
+  return { dt, at: S.days[date]?.completedAt || 0 };
+}
+function stampDone(date) {
+  const day = S.perf.days[date]; if (!day || !S.days[date]) return false;
+  const info = doneInfo(date); const was = stable({ dt: day.dt || {}, at: day.cat || 0 });
+  day.dt = info.dt; day.cat = info.at;
+  return was !== stable({ dt: day.dt, at: day.cat });
+}
+function dayStatus(date) {
+  const frozen = S.perf.days[date];
+  const entries = frozen ? decodeDay(frozen) : liveDay(date);
+  const doneMap = S.days[date]?.done;
+  const isDone = k => doneMap ? !!doneMap[k] : !!(frozen?.dt && frozen.dt[k] != null);
+  const timeOf = k => doneMap && doneMap[k] ? hm(doneMap[k]) : (frozen?.dt && frozen.dt[k] != null ? `${pad(Math.floor(frozen.dt[k] / 60))}:${pad(frozen.dt[k] % 60)}` : '');
+  const n = entries.length, d = entries.filter(e => isDone(e.key)).length;
+  const qty = entries.reduce((s, e) => s + e.items.reduce((a, i) => a + i.qty, 0), 0);
+  const orders = entries.filter(e => e.items.some(i => i.ty !== 'regular')).length;
+  const at = S.days[date]?.completedAt || frozen?.cat || 0;
+  const times = entries.map(e => timeOf(e.key)).filter(Boolean).sort();
+  return { entries, n, d, qty, orders, at, isDone, timeOf, first: times[0] || '', last: times[times.length - 1] || '' };
+}
+function renderDoneDays() {
+  const month = UI.doneMonth || MONTH(); const [y, m] = month.split('-').map(Number);
+  const t = TODAY(); const n = new Date(y, m, 0).getDate(); const rows = [];
+  for (let k = n; k >= 1; k--) {
+    const date = `${month}-${pad(k)}`; if (date > t) continue;
+    if (!S.perf.days[date] && !isDeliveryDay(date) && !S.orders.some(o => o.date === date && o.status === 'open')) continue;
+    const st = dayStatus(date); if (!st.n) continue;
+    const full = st.d === st.n;
+    rows.push(`<button class="pr" data-act="doneDay" data-date="${date}"><span class="num" style="min-width:76px;font-weight:700">${fmt(date)}</span>
+      <span class="badge ${full ? 'ok' : st.d ? 'warn' : ''}">${full ? '완료' : st.d ? '진행 중' : '체크 기록 없음'} ${st.d}/${st.n}</span>
+      <span class="its" style="color:var(--muted);font-size:13px">제품 ${st.qty}개${st.orders ? ` · 주문 있는 곳 ${st.orders}` : ''}${st.first ? ` · ${st.first}–${st.last}` : ''}</span>
+      <span class="tot">${full && st.at ? hm(st.at) + ' 완료' : ''}</span></button>`);
+  }
+  return `<div class="ohead"><div class="datenav"><button class="iconbtn" data-act="doneMonth" data-d="-1" aria-label="이전 달">${ICON.left}</button><div class="d">${y}년 ${m}월<small>날짜를 누르면 그날 배달한 곳과 체크 시간이 보여요</small></div><button class="iconbtn" data-act="doneMonth" data-d="1" aria-label="다음 달">${ICON.right}</button></div></div>
+  <div class="card perflist">${rows.join('') || '<div class="empty"><p>이 달 배달 기록이 없어요.</p></div>'}</div>
+  <p class="hint" style="margin-top:8px">하루 배달을 모두 체크하면 그 시각이 완료 시간으로 남고, 변경 기록에도 “배달 완료”로 남아요.</p>`;
+}
+function doneDaySheet(date) {
+  const st = dayStatus(date);
+  const seq = S.days[date]?.seq || S.config.baseSeq || [];
+  const idx = new Map(seq.map((k, i) => [k, i]));
+  const list = st.entries.slice().sort((a, b) => (idx.has(a.key) ? idx.get(a.key) : 9999) - (idx.has(b.key) ? idx.get(b.key) : 9999));
+  const full = st.d === st.n;
+  openSheet(`${sheetHead(`${fmt(date)} 배달 기록`)}
+    <div class="row"><span class="badge ${full ? 'ok' : 'warn'}">${full ? '모두 완료' : '미완료'} ${st.d}/${st.n}</span><span class="muted">제품 ${st.qty}개${st.at ? ' · ' + hm(st.at) + ' 완료' : ''}${st.first ? ` · 첫 체크 ${st.first}` : ''}</span></div>
+    <div class="card" style="display:grid">${list.map((e, i) => { const ok = st.isDone(e.key); return `<div class="ritem" style="padding:8px 12px;border-top:${i ? '1px solid var(--line)' : '0'};align-items:flex-start">
+      <span class="num" style="min-width:44px;font-size:13px;color:${ok ? 'var(--ok)' : 'var(--muted)'};font-weight:700">${ok ? '✓ ' + (st.timeOf(e.key) || '') : '—'}</span>
+      <span class="pn" style="white-space:normal"><span class="plate sm">${esc(e.loc || '—')}</span> <b>${esc(e.name)}</b><br><span style="font-size:13px">${e.items.map(x => `<span class="ic ${x.ty === 'regular' ? '' : x.ty}">${esc(pShort(x.pid))}<b>${x.qty}</b>${x.ty === 'regular' ? '' : '·' + TYPE_NAME[x.ty]}</span>`).join(' ')}</span></span></div>`; }).join('')}</div>
+    <div class="sact"><button class="btn" data-act="doneGoRoute" data-date="${date}">배달 화면에서 보기</button><button class="btn pri" data-act="closeSheet">닫기</button></div>`);
 }
 
 /* ================= render: settings ================= */
@@ -2312,7 +2386,22 @@ function dayRec(date) { return S.days[date] || (S.days[date] = {}); }
 function toggleDone(date, key) {
   const d = dayRec(date); d.done = d.done || {};
   if (d.done[key]) delete d.done[key]; else d.done[key] = Date.now();
-  save('days'); render();
+  const live = stopsFor(date).filter(s => !s.skipped);
+  const all = live.length > 0 && live.every(s => d.done[s.key]);
+  const docs = ['days'];
+  if (all && !d.completedAt) {
+    d.completedAt = Date.now();
+    const qty = live.reduce((s, st) => s + st.items.reduce((a, i) => a + i.qty, 0), 0);
+    const ord = live.filter(st => st.orders.length).length;
+    S.log = S.log.filter(e => e.merge !== 'done:' + date);
+    logChange({ name: '하루 배달', loc: '', from: date, kind: '배달 완료', text: `${live.length}곳 모두 완료 · 제품 ${qty}개${ord ? ` · 주문 있는 곳 ${ord}` : ''} · ${hm(d.completedAt)}`, merge: 'done:' + date });
+    docs.push('log');
+    toast(`${fmt(date)} 배달을 모두 마쳤어요. 기록에 남겼어요.`);
+  } else if (!all && d.completedAt) {
+    delete d.completedAt; S.log = S.log.filter(e => e.merge !== 'done:' + date); docs.push('log');
+  }
+  if (stampDone(date)) docs.push('perf');
+  save(...docs); render();
 }
 function setSeq(date, keys) { dayRec(date).seq = keys; save('days'); render(); }
 function routeMore(date) {
@@ -2381,6 +2470,10 @@ const ACT = {
   tab: a => { UI.tab = a.dataset.tab; if (UI.tab !== 'customers') UI.selected.clear(); saveUI(); render(); window.scrollTo(0, 0); },
   closeSheet: () => closeSheet(),
   recMode: a => { UI.recMode = a.dataset.m; saveUI(); render(); },
+  doneMonth: a => { const [y, m] = (UI.doneMonth || MONTH()).split('-').map(Number); const d = new Date(y, m - 1 + (+a.dataset.d), 1); UI.doneMonth = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; render(); },
+  doneDay: a => doneDaySheet(a.dataset.date),
+  doneGoRoute: a => { closeSheet(); UI.routeDate = a.dataset.date; UI.tab = 'route'; UI.routeMode = 'list'; saveUI(); render(); window.scrollTo(0, 0); },
+  goDone: () => { UI.tab = 'records'; UI.recMode = 'done'; saveUI(); render(); window.scrollTo(0, 0); },
   perfMonth: a => { const [y, m] = (UI.perfMonth || MONTH()).split('-').map(Number); const d = new Date(y, m - 1 + (+a.dataset.d), 1); UI.perfMonth = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; render(); },
   perfFuture: () => { UI.perfFuture = !UI.perfFuture; render(); },
   perfCust: a => perfSheet(a.dataset.key),
