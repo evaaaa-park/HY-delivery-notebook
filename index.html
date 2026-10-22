@@ -92,6 +92,8 @@ main{padding-block:16px calc(var(--nav-h) + 96px + env(safe-area-inset-bottom,0p
 .badge.t-adhoc{background:var(--accent-soft);color:var(--accent)}
 .badge.t-sample{background:var(--warn-soft);color:var(--warn)}
 .badge.t-fredit{background:color-mix(in srgb,#8A4FD8 16%,var(--surface));color:color-mix(in srgb,#8A4FD8 80%,var(--ink))}
+.badge.t-prepaid{background:color-mix(in srgb,#0E8C86 16%,var(--surface));color:color-mix(in srgb,#0E8C86 80%,var(--ink))}
+.badge.t-pickup{background:var(--bad-soft);color:var(--bad)}
 .plate{display:inline-flex;align-items:center;font-family:var(--f-mono);font-weight:600;font-size:13px;background:var(--plate);color:var(--plate-ink);border:1px solid var(--line);border-radius:5px;padding:1px 6px;letter-spacing:.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
 .plate i{font-style:normal;color:var(--muted);margin:0 2px}
 .pdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:hsl(var(--h,210) 60% 50%);flex:none}
@@ -262,7 +264,8 @@ table.ot{width:100%;border-collapse:collapse;font-size:14px}
 .its{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:14px}
 .ic{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .ic b{font-family:var(--f-mono);font-weight:600}
-.ic.adhoc{color:var(--accent)} .ic.sample{color:var(--warn)} .ic.fredit{color:var(--fredit)}
+.ic.adhoc{color:var(--accent)} .ic.sample{color:var(--warn)} .ic.fredit{color:var(--fredit)} .ic.prepaid{color:var(--blk1)} .ic.pickup{color:var(--bad)}
+.ic.pickup::before{content:"회수 ";font-weight:700}
 .rflags{display:flex;flex-wrap:wrap;gap:4px;width:100%}
 .rmain .rnote{width:100%}
 .ent{font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 5px;white-space:nowrap}
@@ -558,12 +561,24 @@ const DEFAULT_ROUTE = ['405', '403', '404', '411', '413', '418', '417', '414', '
 const DEFAULT_CONFIG = {
   products: DEFAULT_PRODUCTS, routeOrder: DEFAULT_ROUTE, leadDays: 2, leadMode: 'business',
   deliveryDays: [1, 2, 3, 4, 5], holidays: [], floorDir: 'desc',
-  purchase: { regular: true, adhoc: false, sample: false, fredit: false },
+  purchase: { regular: true, prepaid: false, fredit: false, sample: false, adhoc: false, pickup: false },
   stock: {}, baseSeq: null, v: 1,
 };
-const TYPES = ['regular', 'adhoc', 'sample', 'fredit'];
-const TYPE_NAME = { regular: '정기', adhoc: '추가', sample: '샘플', fredit: 'Fredit' };
-const PAY = { card: '카드자동이체', account: '계좌자동이체', cash: '현금' };
+// hy 주문구분 → app type: 후불정기=regular(고객 정기), (선불)정기=prepaid, 일반=fredit, 견본=sample,
+// hy 앱 밖에서 직접 받은 주문=adhoc, 반품·회수=pickup (가져올 것, 발주·실적 제외)
+const TYPES = ['regular', 'prepaid', 'fredit', 'sample', 'adhoc', 'pickup'];
+const ORDER_TYPES = ['fredit', 'sample', 'prepaid', 'adhoc', 'pickup'];
+const TYPE_NAME = { regular: '정기', prepaid: '선불정기', fredit: '일반', sample: '견본', adhoc: '추가', pickup: '회수' };
+const TYPE_LONG = { regular: '후불정기 (고객 정기)', prepaid: '(선불)정기 · 프레딧', fredit: '일반주문 · 프레딧', sample: '견본주문 (0원 샘플)', adhoc: '추가주문 (직접 받음)', pickup: '반품·회수' };
+const TYPE_HINT = {
+  fredit: 'hy 앱 “일반”. 고객이 프레딧에서 카드로 결제한 1회 배달이에요. 물건은 자동 발주돼요.',
+  sample: 'hy 앱 “견본”. 0원 샘플이에요. 지점에서 받아와서 배달해요.',
+  prepaid: 'hy 앱 “(선불)정기”의 한 회차예요. 매번 오는 고객이면 고객 정보에서 수금을 “선불정기”로 두고 정기 품목으로 넣으면 자동으로 들어가요.',
+  adhoc: 'hy 앱에 없는 주문이에요. 포스트잇·전화·문자로 직접 받은 추가 주문.',
+  pickup: '반품·빈 병 등 받아올 것이에요. 동선에는 뜨지만 발주와 실적에는 안 들어가요.',
+};
+const isSched = t => t === 'regular' || t === 'prepaid';
+const PAY = { card: '카드자동이체', account: '계좌자동이체', cash: '현금', prepaid: '선불정기 (프레딧)' };
 const LOC_TYPES = { apt: '아파트 세대', office: '관리·미화실', security: '보안실', store: '상가', community: '주민센터·경로당' };
 const STATUS_NAME = { active: '배달 중', waiting: '시작 대기', stopped: '중단', ended: '해지', moved: '이사' };
 // regular deliveries happen while active, or until the stop date when 해지·중단·이사 is set ahead
@@ -882,10 +897,10 @@ function stopsFor(date) {
   const ovs = S.days[date]?.ov || {};
   for (const c of S.customers) {
     const ov = ovs[c.id];
-    if (ov) { map.set(c.id, { key: c.id, cust: c, items: ov.skip ? [] : (ov.items || []).filter(i => i.qty > 0).map(i => ({ pid: i.pid, qty: i.qty, type: 'regular' })), orders: [], ov: true }); continue; }
+    if (ov) { map.set(c.id, { key: c.id, cust: c, items: ov.skip ? [] : (ov.items || []).filter(i => i.qty > 0).map(i => ({ pid: i.pid, qty: i.qty, type: c.payment === 'prepaid' ? 'prepaid' : 'regular' })), orders: [], ov: true }); continue; }
     if (!regularDay || !isOn(c, date) || pauseOn(c, date)) continue;
     const items = c.regular.filter(r => r.qty > 0 && r.days.includes(w) && onCycle(r, date));
-    if (items.length) map.set(c.id, { key: c.id, cust: c, items: items.map(r => ({ pid: r.productId, qty: r.qty, type: 'regular' })), orders: [] });
+    if (items.length) map.set(c.id, { key: c.id, cust: c, items: items.map(r => ({ pid: r.productId, qty: r.qty, type: c.payment === 'prepaid' ? 'prepaid' : 'regular' })), orders: [] });
   }
   for (const o of S.orders) {
     if (o.date !== date || o.status === 'cancelled') continue;
@@ -907,7 +922,8 @@ function orderedStops(date) {
 function demand(date) {
   const res = {};
   for (const st of stopsFor(date)) for (const it of st.items) {
-    const r = res[it.pid] || (res[it.pid] = { regular: 0, adhoc: 0, sample: 0, fredit: 0, rows: [] });
+    if (it.type === 'pickup') continue;
+    const r = res[it.pid] || (res[it.pid] = { ...Object.fromEntries(TYPES.map(t => [t, 0])), rows: [] });
     r[it.type] += it.qty; r.rows.push({ name: st.name, loc: st.loc, qty: it.qty, type: it.type });
   }
   return res;
@@ -915,7 +931,7 @@ function demand(date) {
 function sheetFor(date) {
   const d = demand(date), P = S.config.purchase;
   const rows = S.config.products.map(p => {
-    const r = d[p.id] || { regular: 0, adhoc: 0, sample: 0, fredit: 0, rows: [] };
+    const r = d[p.id] || { ...Object.fromEntries(TYPES.map(t => [t, 0])), rows: [] };
     const need = TYPES.reduce((s, t) => s + (P[t] ? r[t] : 0), 0);
     const stock = Math.max(0, +(S.config.stock[p.id] || 0));
     return { p, r, need, stock, buy: Math.max(0, need - stock), excl: TYPES.reduce((s, t) => s + (!P[t] ? r[t] : 0), 0) };
@@ -958,7 +974,7 @@ function buildAlerts() {
   const dd = routeDefaultDate();
   for (const d of [dd, nextDeliveryDay(dd)]) {
     const n = S.orders.filter(o => o.date === d && o.type === 'sample' && o.status === 'open');
-    if (n.length) out.push({ kind: 'info', html: `<b>지점에서 샘플 받아오기</b> ${fmt(d)} 배달분 ${n.length}건`, sub: n.map(o => o.items.map(i => `${pShort(i.productId)}×${i.qty}`).join(' ')).join(' / ') });
+    if (n.length) out.push({ kind: 'info', html: `<b>지점에서 견본 받아오기</b> ${fmt(d)} 배달분 ${n.length}건`, sub: n.map(o => o.items.map(i => `${pShort(i.productId)}×${i.qty}`).join(' ')).join(' / ') });
   }
   for (const d of [dd]) if (isHoliday(d)) out.push({ kind: 'info', html: `<b>${fmt(d)} ${esc(holidayName(d))}</b>`, sub: '정기 배달 없음' });
   const unpaid = S.customers.filter(c => inCollection(c) && c.payment === 'cash' && c.paidMonth !== MONTH());
@@ -1033,7 +1049,7 @@ function renderHome() {
       const c = o.customerId ? custById(o.customerId) : null; const nm = c ? c.name : o.name; const loc = c ? c.loc : o.loc;
       return `<div class="it"><span class="badge t-${o.type}">${TYPE_NAME[o.type]}</span><div class="t"><div><b>${esc(nm || '이름 없음')}</b> <span class="muted">${esc(locText(loc))}</span></div><div class="muted" style="font-size:13px">${fmt(o.date)} · ${o.items.map(i => `${esc(pShort(i.productId))}×${i.qty}`).join(' ')}${o.status === 'cancelled' ? ' · 취소됨' : ''}</div></div>
       ${o.status === 'cancelled' ? `<button class="btn sm" data-act="restoreOrder" data-id="${o.id}">되살리기</button>` : `<button class="btn sm ghost" data-act="cancelOrder" data-id="${o.id}">취소</button>`}</div>`;
-    }).join('')}</div>` : `<div class="card empty"><p>남은 주문이 없어요. 추가주문, 샘플, Fredit 주문을 넣으면 여기와 동선, 발주표에 바로 들어가요.</p></div>`}
+    }).join('')}</div>` : `<div class="card empty"><p>남은 주문이 없어요. 일반·견본·선불정기·추가·회수 주문을 넣으면 여기와 동선, 발주표에 바로 들어가요.</p></div>`}
     ${deliveredCount ? `<button class="btn sm ghost" style="justify-self:start" data-act="goDone">최근 7일 전달 완료 ${deliveredCount}건 · 배달 완료 기록 보기</button>` : ''}
   </div></div></div>`;
 }
@@ -1120,10 +1136,10 @@ function renderOrder() {
   else if (odFor < t) status = `<span class="badge warn">발주일 ${fmt(odFor)} 지남</span>`;
   else status = `<span class="badge">발주일 ${fmt(odFor)}</span>`;
   const resumes = S.customers.filter(c => isOn(c, date) && c.pauses.some(p => nextDeliveryDay(p.to) === date) && !pauseOn(c, date));
-  const samples = S.orders.filter(o => o.date === date && o.type === 'sample' && o.status === 'open');
-  const fredit = S.orders.filter(o => o.date === date && o.type === 'fredit' && o.status === 'open');
+  const exGroups = ORDER_TYPES.filter(t => t === 'pickup' || !P[t]).map(t => ({ t, list: S.orders.filter(o => o.date === date && o.type === t && o.status === 'open') })).filter(g => g.list.length);
+  const EX_TITLE = { sample: '견본 · 지점에서 받아오기', fredit: '일반(프레딧) · 자동 발주', prepaid: '선불정기 · 자동 발주', adhoc: '추가주문 · 발주 제외', pickup: '회수 · 받아올 것' };
   const totalBuy = show.reduce((s, r) => s + r.buy, 0);
-  const typesIn = TYPES.filter(x => P[x]).map(x => TYPE_NAME[x]).join('·');
+  const typesIn = TYPES.filter(x => P[x] && x !== 'pickup').map(x => TYPE_NAME[x]).join('·');
   return storageBanner() + `<div class="ohead">
     <div class="datenav"><button class="iconbtn" data-act="orderDate" data-d="-1" aria-label="이전 배달일">${ICON.left}</button>
       <div class="d">${fmt(date)} 배달분<small>${status}</small></div>
@@ -1140,7 +1156,7 @@ function renderOrder() {
       const catRow = (ri === 0 || (show[ri - 1].p.cat || '') !== (r.p.cat || '')) && r.p.cat ? `<tr class="cat"><td colspan="4">${esc(r.p.cat)}</td></tr>` : '';
       const open = UI.openP === r.p.id;
       const c = conf ? (+conf[r.p.id] || 0) : null; const d = c == null ? 0 : r.buy - c;
-      const parts = TYPES.filter(x => r.r[x]).map(x => `${TYPE_NAME[x]} ${r.r[x]}${P[x] ? '' : '(제외)'}`).join(' · ');
+      const parts = TYPES.filter(x => r.r[x] && x !== 'pickup').map(x => `${TYPE_NAME[x]} ${r.r[x]}${P[x] ? '' : '(제외)'}`).join(' · ');
       return catRow + `<tr class="prow" data-act="toggleP" data-id="${esc(r.p.id)}"><td><div class="pname"><span class="pdot" style="--h:${r.p.hue ?? 210}"></span><div><b>${esc(r.p.orderName || r.p.name)}</b>${r.p.orderName && r.p.orderName !== r.p.name ? `<small>배달표: ${esc(r.p.name)}</small>` : ''}<small>${parts || '주문 없음'}</small></div></div></td>
       <td>${r.need}</td><td><input type="number" inputmode="numeric" min="0" value="${r.stock}" data-chg="stock" data-id="${esc(r.p.id)}" aria-label="${esc(r.p.name)} 재고"></td>
       <td><span class="buy ${r.buy ? '' : 'zero'}" data-buy="${esc(r.p.id)}">${r.buy}</span>${d ? `<span class="diff ${d > 0 ? 'up' : 'dn'}">${d > 0 ? '+' : ''}${d}</span>` : ''}</td></tr>
@@ -1156,10 +1172,9 @@ function renderOrder() {
   ${conf ? `<p class="hint" style="text-align:right;margin-top:6px">확정: ${new Date(S.days[date].confirmedAt || 0).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · 그 뒤로 바뀐 수량은 빨간 +로 표시돼요</p>` : ''}`
     : `<div class="card empty"><h3>${fmt(date)}에 배달할 제품이 없어요</h3><p>정기 고객이 없거나 모두 중지된 날이에요.</p></div>`}
   </div><aside class="oside">
-  ${samples.length || fredit.length ? `<div class="sec" style="margin-top:22px"><div class="sec-h"><h2>발주에서 뺀 주문</h2></div>
-    ${samples.length ? `<div class="card" style="padding:12px"><div class="row" style="justify-content:space-between"><b>샘플 · 지점에서 받아오기</b><span class="badge t-sample">${samples.length}건</span></div><div class="brk" style="margin-top:8px">${samples.map(o => orderLine(o)).join('')}</div></div>` : ''}
-    ${fredit.length ? `<div class="card" style="padding:12px"><div class="row" style="justify-content:space-between"><b>Fredit · 자동 발주</b><span class="badge t-fredit">${fredit.length}건</span></div><div class="brk" style="margin-top:8px">${fredit.map(o => orderLine(o)).join('')}</div></div>` : ''}
-    <p class="hint">설정 &gt; 발주에 포함할 주문에서 바꿀 수 있어요.</p></div>` : `<div class="card empty oside-empty"><h3>발주에서 뺀 주문 없음</h3><p>샘플(지점 수령)과 Fredit(자동 발주) 주문은 여기에 따로 모여요. 행을 누르면 고객별 내역이 펼쳐져요.</p></div>`}
+  ${exGroups.length ? `<div class="sec" style="margin-top:22px"><div class="sec-h"><h2>발주에서 뺀 주문</h2></div>
+    ${exGroups.map(g => `<div class="card" style="padding:12px"><div class="row" style="justify-content:space-between"><b>${EX_TITLE[g.t]}</b><span class="badge t-${g.t}">${g.list.length}건</span></div><div class="brk" style="margin-top:8px">${g.list.map(o => orderLine(o)).join('')}</div></div>`).join('')}
+    <p class="hint">설정 &gt; 발주에 포함할 주문에서 바꿀 수 있어요.</p></div>` : `<div class="card empty oside-empty"><h3>발주에서 뺀 주문 없음</h3><p>견본(지점 수령), 일반·선불정기(프레딧 자동 발주), 추가주문, 회수는 여기에 따로 모여요. 행을 누르면 고객별 내역이 펼쳐져요.</p></div>`}
   </aside></div>`;
 }
 function orderLine(o) { const c = o.customerId ? custById(o.customerId) : null; return `<div><span>${o.items.map(i => `${esc(pShort(i.productId))}×${i.qty}`).join(' ')}</span><span>${esc(c ? c.name : o.name)} <span class="muted">${esc(locText(c ? c.loc : o.loc))}</span></span></div>`; }
@@ -1325,7 +1340,7 @@ function openStop(date, key) {
   const ov = c ? S.days[date]?.ov?.[c.id] : null;
   SF = {
     date, key, cid: c?.id || null, name: st.name, loc: st.loc, mode: 'day',
-    day: c ? (ov ? aggList((ov.items || []).map(i => ({ ...i }))) : aggList(st.items.filter(i => i.type === 'regular').map(i => ({ pid: i.pid, qty: i.qty })))) : [],
+    day: c ? (ov ? aggList((ov.items || []).map(i => ({ ...i }))) : aggList(st.items.filter(i => isSched(i.type)).map(i => ({ pid: i.pid, qty: i.qty })))) : [],
     week: c ? aggList(c.regular.filter(r => r.every !== 2 && r.days.includes(w)).map(r => ({ pid: r.productId, qty: r.qty }))) : [],
     bi: c ? c.regular.filter(r => r.every === 2 && r.days.includes(w)) : [],
     skip: !!ov?.skip, dayDirty: false, weekDirty: false, skipDirty: false,
@@ -1467,7 +1482,7 @@ async function routeImageBlob(date) {
     x.fillStyle = '#D9DFE8'; x.fillRect(P, y - 1, W - P * 2, 1);
   }
   x.fillStyle = '#8a93a5'; x.font = `400 16px ${FF}`; x.textBaseline = 'alphabetic';
-  x.fillText('헬리오 배달수첩 · 파란 줄 = 추가·Fredit·샘플 주문이 있는 곳', P, H - 22);
+  x.fillText('헬리오 배달수첩 · 파란 줄 = 정기 외 주문(일반·견본·선불정기·추가·회수)이 있는 곳', P, H - 22);
   return await new Promise(res => cv.toBlob(res, 'image/png'));
 }
 async function saveRouteImage(date) {
@@ -1532,10 +1547,10 @@ function custDiff(a, b) {
 }
 
 /* ================= performance (실적) ================= */
-const TY_CODE = { regular: 'r', adhoc: 'a', sample: 's', fredit: 'f' };
-const CODE_TY = { r: 'regular', a: 'adhoc', s: 'sample', f: 'fredit' };
+const TY_CODE = { regular: 'r', adhoc: 'a', sample: 's', fredit: 'f', prepaid: 'p', pickup: 'k' };
+const CODE_TY = { r: 'regular', a: 'adhoc', s: 'sample', f: 'fredit', p: 'prepaid', k: 'pickup' };
 function liveDay(date) {
-  return stopsFor(date).filter(s => !s.skipped).map(s => ({ key: s.key, name: s.name, loc: locShort(s.loc), items: s.items.map(i => ({ pid: i.pid, qty: i.qty, ty: i.type })) }));
+  return stopsFor(date).filter(s => !s.skipped).map(s => ({ key: s.key, name: s.name, loc: locShort(s.loc), items: s.items.filter(i => i.type !== 'pickup').map(i => ({ pid: i.pid, qty: i.qty, ty: i.type })) })).filter(e => e.items.length);
 }
 function encodeDay(date) {
   const day = { s: {}, n: {}, at: Date.now() };
@@ -1720,7 +1735,9 @@ function aiContext() {
 - 바꾸는 도구는 자동으로 변경 기록이 남으니 add_log를 또 부르지 마.
 - 고객이 애매하면 바꾸기 전에 물어봐. 동-호(예: 411-1501)로 찾아.
 - 질문에는 get_ 도구로 확인하고 답해. 모르는 건 지어내지 마.
-- 추가주문 채팅·알림톡으로 들어온 주문(추가·Fredit)은 자동 발주라 발주표에 안 들어가.
+- 주문 종류는 hy 앱 주문구분대로 나눠: 후불정기=고객 정기(regular), (선불)정기=prepaid, 일반=fredit, 견본=sample(0원, 지점에서 받아옴), hy 앱에 없는 포스트잇·전화 주문=adhoc, 반품·회수=pickup. 결제금액 0원이면 견본이야. 택배는 배달 대상이 아니야.
+- 매번 오는 (선불)정기 고객은 add_customer/update_customer로 payment=prepaid 고객으로 만들고 정기 품목으로 넣어.
+- 정기 외 주문(일반·선불정기·견본·추가)은 자동 발주나 지점 수령이라 발주표에 안 들어가. 회수는 발주·실적 모두 제외.
 제품 (id | 배달표 이름 | 출고신청 이름):
 ${S.config.products.map(p => `${p.id} | ${p.name} | ${p.orderName}`).join('\n')}
 고객 (id | 이름 | 동-호 | 상태 | 정기 | 중지):
@@ -1738,7 +1755,7 @@ function aiTools(changed, am) {
   const done = (txt, ...docs) => { docs.forEach(x => changed.add(x)); changed.add('log'); am.actions.push(txt); updateBubble(am); return { ok: true, done: txt }; };
   const L = (e) => logChange({ ...e, by: 'AI' });
   const tools = [
-    T('add_order', '추가·샘플·Fredit 주문 넣기. 고객 목록에 있으면 customer_id, 없으면 name·building·unit.', { customer_id: S_, name: S_, building: S_, unit: S_, date: S_, type: { type: 'string', enum: ['adhoc', 'sample', 'fredit'] }, items: ITEMS, note: S_ }, ['date', 'type', 'items'], i => {
+    T('add_order', '주문 넣기. type: fredit=hy 일반주문(프레딧 결제), sample=견본주문(0원), prepaid=(선불)정기배송 한 회차, adhoc=hy 앱에 없는 직접 받은 추가주문, pickup=반품·회수(받아올 것). 고객 목록에 있으면 customer_id, 없으면 name·building·unit.', { customer_id: S_, name: S_, building: S_, unit: S_, date: S_, type: { type: 'string', enum: ORDER_TYPES }, items: ITEMS, note: S_ }, ['date', 'type', 'items'], i => {
       const c = i.customer_id ? cust(i.customer_id) : null; const items = (i.items || []).map(x => ({ productId: pid(x.product_id), qty: Math.max(1, Math.round(+x.qty || 1)) }));
       const o = normOrder({ type: i.type, customerId: c?.id || null, name: c ? '' : (i.name || ''), loc: c ? null : { type: 'apt', building: String(i.building || ''), unit: String(i.unit || ''), label: '' }, date: day(i.date), items, note: i.note || '' });
       S.orders.push(o); L({ cid: o.customerId, name: c ? '' : o.name, loc: c ? '' : locShort(o.loc), from: o.date, kind: '주문', text: `${TYPE_NAME[o.type]} 주문 ${itemsText(o.items)}${o.note ? ' · ' + o.note : ''}` });
@@ -1793,10 +1810,10 @@ function aiTools(changed, am) {
       L({ cid: c.id, from: c.endDate || TODAY(), to: '', kind: '상태', text: `${STATUS_NAME[st]}${c.endDate ? ' · ' + fmt(c.endDate) + '부터' : ''}${i.note ? ' · ' + i.note : ''} (이전: ${prev})` });
       return done(`${c.name} ${STATUS_NAME[st]}${c.endDate ? ' ' + fmtShort(c.endDate) + '부터' : ''}`, 'customers');
     }),
-    T('update_customer', '고객 정보 고치기. 바꿀 것만 넣어: name, phone, building, unit, label, payment(card|account|cash), notes_append, notes_replace, paid_this_month(true/false).', { customer_id: S_, name: S_, phone: S_, building: S_, unit: S_, label: S_, payment: S_, notes_append: S_, notes_replace: S_, paid_this_month: B_ }, ['customer_id'], i => {
+    T('update_customer', '고객 정보 고치기. 바꿀 것만 넣어: name, phone, building, unit, label, payment(card|account|cash|prepaid), notes_append, notes_replace, paid_this_month(true/false).', { customer_id: S_, name: S_, phone: S_, building: S_, unit: S_, label: S_, payment: S_, notes_append: S_, notes_replace: S_, paid_this_month: B_ }, ['customer_id'], i => {
       const c = cust(i.customer_id); const a = clone(c);
       if (i.name) c.name = i.name; if (i.phone) c.phone = i.phone; if (i.building) c.loc.building = String(i.building); if (i.unit) c.loc.unit = String(i.unit); if (i.label != null) c.loc.label = i.label;
-      if (PAY[i.payment]) c.payment = i.payment;
+      if (PAY[i.payment]) c.payment = i.payment;  // card | account | cash | prepaid
       if (i.notes_replace != null) c.notes = i.notes_replace; else if (i.notes_append) c.notes = (c.notes ? c.notes + ' / ' : '') + i.notes_append;
       if (i.paid_this_month != null) { c.paidMonth = i.paid_this_month ? MONTH() : ''; L({ cid: c.id, from: TODAY(), kind: '수금', text: `${MONTH().slice(5)}월 현금 ${i.paid_this_month ? '수금 완료' : '미수'}` }); }
       custDiff(a, c).forEach(d => L({ cid: c.id, ...d }));
@@ -1927,7 +1944,7 @@ function dayStatus(date) {
   const timeOf = k => doneMap && doneMap[k] ? hm(doneMap[k]) : (frozen?.dt && frozen.dt[k] != null ? `${pad(Math.floor(frozen.dt[k] / 60))}:${pad(frozen.dt[k] % 60)}` : '');
   const n = entries.length, d = entries.filter(e => isDone(e.key)).length;
   const qty = entries.reduce((s, e) => s + e.items.reduce((a, i) => a + i.qty, 0), 0);
-  const orders = entries.filter(e => e.items.some(i => i.ty !== 'regular')).length;
+  const orders = entries.filter(e => e.items.some(i => !isSched(i.ty))).length;
   const at = S.days[date]?.completedAt || frozen?.cat || 0;
   const times = entries.map(e => timeOf(e.key)).filter(Boolean).sort();
   return { entries, n, d, qty, orders, at, isDone, timeOf, first: times[0] || '', last: times[times.length - 1] || '' };
@@ -1985,7 +2002,7 @@ function renderSettings() {
     <div class="field"><span class="lbl">같은 동 안에서</span><div class="seg"><button aria-pressed="${C.floorDir === 'desc'}" data-act="floorDir" data-m="desc">위층부터 내려오기</button><button aria-pressed="${C.floorDir === 'asc'}" data-act="floorDir" data-m="asc">아래층부터</button></div></div>
   </div></div>
   <div class="sec"><div class="sec-h"><h2>발주에 포함할 주문</h2></div><div class="card">
-    ${[['regular', '정기 배달', '정기(애음) 계약 수량'], ['adhoc', '추가주문', '끄면 자동 발주로 보고 동선에만 넣어요'], ['sample', '샘플', '끄면 발주에서 빠지고 “지점에서 받아오기” 목록에만 떠요'], ['fredit', 'Fredit 온라인 주문', '끄면 자동 발주로 보고 동선에만 넣어요']].map(([k, n, d]) => `<label class="chk"><input type="checkbox" data-chg="purchase" data-k="${k}" ${C.purchase[k] ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label>`).join('')}
+    ${[['regular', '후불정기 (고객 정기)', 'hy 정기(애음) 계약 수량. 보통 켜 둬요'], ['prepaid', '(선불)정기 · 프레딧', '프레딧 자동 발주라 보통 꺼 둬요'], ['fredit', '일반주문 · 프레딧', '프레딧 자동 발주라 보통 꺼 둬요'], ['sample', '견본주문', '끄면 “지점에서 견본 받아오기” 목록에만 떠요'], ['adhoc', '추가주문 (직접 받음)', '직접 발주할 거면 켜요']].map(([k, n, d]) => `<label class="chk"><input type="checkbox" data-chg="purchase" data-k="${k}" ${C.purchase[k] ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label>`).join('')}
   </div></div>
   <div class="sec"><div class="sec-h"><h2>휴무일</h2></div><div class="card">
     <div class="slist">${C.holidays.slice().sort((a, b) => a.date.localeCompare(b.date)).map(h => `<div class="it"><div class="t"><b>${fmt(h.date)}</b> ${esc(h.name)}</div><button class="btn sm ghost" data-act="delHoliday" data-date="${h.date}">삭제</button></div>`).join('') || '<div class="it muted">등록된 휴무일이 없어요. 공휴일을 넣으면 그날은 모든 정기 배달이 빠져요.</div>'}</div>
@@ -2042,7 +2059,7 @@ async function copyText(text) {
 let F = null;
 function defaultOrderDate() { return nextDeliveryDay(TODAY()); }
 function openOrderSheet(opts = {}) {
-  F = { type: opts.type || 'adhoc', ids: opts.customerIds ? [...opts.customerIds] : [], useNew: false, nl: { name: '', building: '', unit: '', label: '' }, date: opts.date || defaultOrderDate(), items: {}, note: '', q: '' };
+  F = { type: opts.type || 'fredit', ids: opts.customerIds ? [...opts.customerIds] : [], useNew: false, nl: { name: '', building: '', unit: '', label: '' }, date: opts.date || defaultOrderDate(), items: {}, note: '', q: '' };
   openSheet(`<div id="of" style="display:grid;gap:14px"></div>`, () => { F = null; });
   renderOF();
 }
@@ -2061,11 +2078,11 @@ function ofImpact() {
 }
 function renderOF() {
   const el = $('#of'); if (!el || !F) return;
-  const hint = { adhoc: '정기 외에 한 번만 배달하는 주문이에요.', sample: '지점에서 받아와서 배달하는 샘플이에요.', fredit: 'Fredit(프레딧) 온라인 몰 주문이에요.' }[F.type];
+  const hint = TYPE_HINT[F.type] || '';
   const quick = []; let d = TODAY(); for (let i = 0; i < 5; i++) { d = nextDeliveryDay(d); quick.push(d); }
   el.innerHTML = `${sheetHead('주문 추가')}
-  <div class="seg">${['adhoc', 'sample', 'fredit'].map(t => `<button aria-pressed="${F.type === t}" data-act="ofType" data-t="${t}">${t === 'adhoc' ? '추가주문' : TYPE_NAME[t]}</button>`).join('')}</div>
-  <p class="hint">${hint} ${S.config.purchase[F.type] ? '발주표에 포함돼요.' : '발주표에서는 빠져요.'}</p>
+  <div class="seg" style="flex-wrap:wrap">${ORDER_TYPES.map(t => `<button aria-pressed="${F.type === t}" data-act="ofType" data-t="${t}">${TYPE_NAME[t]}</button>`).join('')}</div>
+  <p class="hint"><b>${TYPE_LONG[F.type]}</b> · ${hint} ${F.type === 'pickup' ? '' : S.config.purchase[F.type] ? '발주표에 포함돼요.' : '발주표에서는 빠져요.'}</p>
   ${sampleFn ? `<button class="btn" data-act="aiImport" data-mode="orders">메시지·사진으로 주문 채우기 (Claude)</button>` : ''}
   <div class="field"><span class="lbl">받는 곳</span>
     ${F.ids.length ? `<div class="picked" style="margin-bottom:8px">${F.ids.map(id => { const c = custById(id); return c ? `<span class="chip">${esc(c.name)} ${esc(c.loc.building)}-${esc(c.loc.unit)}<button data-act="ofUnpick" data-id="${id}" aria-label="빼기">×</button></span>` : ''; }).join('')}</div>` : ''}
@@ -2310,7 +2327,7 @@ async function runAI() {
 규칙: "헬리오시티) 411-304" → building "411", unit "304", type "apt". "403동 지하3층 휴게실" → building "403", unit "B3", label "403동 지하3층 휴게실", type "office". 보안실은 security, 상가는 store, 주민센터·경로당은 community. 카드자동이체 → card, 계좌자동이체 → account, 현금 → cash. "회원" 표시는 member true, "비회원"은 false. "종이 청구서" → paper, "모바일 청구서" → mobile. 화면에서 잘린 고객은 빼.
 ${text ? `글:\n"""\n${text.slice(0, 12000)}\n"""` : '사진을 읽어.'}`
     : `hy(한국야쿠르트) 배달 매니저의 주문 메시지를 정리해. 오늘은 ${t}(${DL[dow(t)]}). 날짜가 없으면 "${dd}". "수요일"처럼 요일만 있으면 오늘 이후 가장 가까운 그 요일.
-주문 종류: adhoc(일반 추가주문), sample(샘플, 지점에서 받아오는 것), fredit(Fredit·프레딧 온라인 주문).
+주문 종류 (hy 앱 주문구분 기준): fredit(일반주문, 카드결제), sample(견본주문, 0원), prepaid((선불)정기배송), adhoc(hy 앱에 없는 직접 받은 추가주문), pickup(반품·회수). 결제금액 0원이면 sample.
 제품 목록 (id | 배달표 이름 | 출고신청 이름 | 줄임말):
 ${prodListText()}
 고객 목록 (id | 이름 | 동-호 | 장소):
@@ -2351,7 +2368,7 @@ function renderAIResults() {
     out.innerHTML = `<b>주문 ${R.length}건</b>` + R.map((o, i) => {
       const c = o.customerId ? custById(o.customerId) : null;
       const items = (o.items || []).filter(it => prodById(it.productId));
-      return `<label><input type="checkbox" data-ai="${i}" ${items.length ? 'checked' : ''}><span><span class="badge t-${TYPES.includes(o.type) ? o.type : 'adhoc'}">${TYPE_NAME[o.type] || '추가'}</span> <b>${esc(c ? c.name : (o.name || '이름 없음'))}</b> ${plate(c ? c.loc : { building: o.building, unit: o.unit })} ${c ? '' : '<span class="badge warn">새 배달지</span>'}<br><span class="muted">${fmt(o.date)} · ${items.map(it => `${esc(pName(it.productId))}×${+it.qty}`).join(', ') || '제품 확인 필요'}${o.note ? ' · ' + esc(o.note) : ''}</span></span></label>`;
+      return `<label><input type="checkbox" data-ai="${i}" ${items.length ? 'checked' : ''}><span><span class="badge t-${ORDER_TYPES.includes(o.type) ? o.type : 'adhoc'}">${TYPE_NAME[o.type] || '추가'}</span> <b>${esc(c ? c.name : (o.name || '이름 없음'))}</b> ${plate(c ? c.loc : { building: o.building, unit: o.unit })} ${c ? '' : '<span class="badge warn">새 배달지</span>'}<br><span class="muted">${fmt(o.date)} · ${items.map(it => `${esc(pName(it.productId))}×${+it.qty}`).join(', ') || '제품 확인 필요'}${o.note ? ' · ' + esc(o.note) : ''}</span></span></label>`;
     }).join('') + `<button class="btn pri" data-act="aiApply">선택한 주문 넣기</button>`;
   }
 }
