@@ -119,6 +119,9 @@ textarea{min-height:76px;resize:vertical}
 .hello{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
 .hello h1{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1.1}
 .alerts{display:grid;gap:8px}
+.todo{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.todo .t{flex:1;min-width:0} .todo .t b{font-weight:600;display:block} .todo .t small{color:var(--muted);font-size:12.5px}
+.todo-add{display:flex;gap:8px;padding:10px 14px} .todo-add input{flex:1;min-width:0}
 .alert{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--warn)}
 .alert.info{border-left-color:var(--accent)}
 .alert.bad{border-left-color:var(--bad)}
@@ -610,6 +613,7 @@ function normCust(c) {
     regular: (c.regular || []).filter(r => r && r.productId).map(r => ({ productId: r.productId, qty: Math.max(0, +r.qty || 0), days: (r.days && r.days.length ? r.days : [1, 2, 3, 4, 5]).map(Number), every: +r.every === 2 ? 2 : 1, anchor: r.anchor || '' })),
     payment: c.payment || 'card', member: !!c.member, bill: c.bill || 'mobile', ice: !!c.ice, bag: !!c.bag,
     notes: c.notes || '', pauses: (c.pauses || []).filter(p => p && p.from && p.to).map(p => ({ id: p.id || uid('p_'), from: p.from, to: p.to, reason: p.reason || '', ack: !!p.ack, days: Array.isArray(p.days) ? p.days.map(Number) : [] })),
+    holidayOff: typeof c.holidayOff === 'boolean' ? c.holidayOff : HOL_OFF_TYPES.includes(c.loc?.type),
     paidMonth: c.paidMonth || '', tags: Array.isArray(c.tags) ? c.tags : [], active: st === 'active', createdAt: c.createdAt || Date.now(),
   };
 }
@@ -630,6 +634,9 @@ function normConfig(b) {
   if (!Array.isArray(c.routeOrder) || !c.routeOrder.length) c.routeOrder = clone(DEFAULT_ROUTE);
   if (!Array.isArray(c.deliveryDays)) c.deliveryDays = [1, 2, 3, 4, 5];
   if (!Array.isArray(c.holidays)) c.holidays = [];
+  c.holidays = c.holidays.filter(h => h && h.date).map(h => ({ date: h.date, name: h.name || '휴무', mode: h.mode === 'partial' ? 'partial' : 'full' }));
+  if (!Array.isArray(c.todos)) c.todos = [];
+  c.todos = c.todos.filter(t => t && t.text).map(t => ({ id: t.id || uid('t_'), text: String(t.text), at: t.at || Date.now(), due: t.due || '', done: !!t.done, doneAt: t.doneAt || 0 }));
   c.entrances = b.entrances && typeof b.entrances === 'object' && !Array.isArray(b.entrances) ? { ...b.entrances } : {};
   return c;
 }
@@ -807,8 +814,11 @@ let renderQueued = false;
 function scheduleRender() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
 
 /* ================= calendar logic ================= */
-const isHoliday = d => S.config.holidays.some(h => h.date === d);
+// full = 모든 정기 배달 쉼 / partial = 공휴일: 아파트는 배달, 공휴일에 쉬는 곳(상가·주민센터·미화/관리)만 빠짐
+const isHoliday = d => S.config.holidays.some(h => h.date === d && h.mode !== 'partial');
+const isPartHol = d => S.config.holidays.some(h => h.date === d && h.mode === 'partial');
 const holidayName = d => S.config.holidays.find(h => h.date === d)?.name || '휴무';
+const HOL_OFF_TYPES = ['office', 'security', 'store'];
 const isWorkday = d => { const w = dow(d); return w >= 1 && w <= 5 && !isHoliday(d); };
 const isDeliveryDay = d => S.config.deliveryDays.includes(dow(d)) && !isHoliday(d);
 function nextDeliveryDay(d) { let x = d; for (let i = 0; i < 40; i++) { x = addDays(x, 1); if (isDeliveryDay(x)) return x; } return addDays(d, 1); }
@@ -893,12 +903,13 @@ function ensureRouteOrder() {
 /* ================= stops, demand ================= */
 function stopsFor(date) {
   const map = new Map(); const w = dow(date);
-  const regularDay = S.config.deliveryDays.includes(w) && !isHoliday(date);
+  const regularDay = S.config.deliveryDays.includes(w) && !isHoliday(date); const partHol = isPartHol(date);
   const ovs = S.days[date]?.ov || {};
   for (const c of S.customers) {
     const ov = ovs[c.id];
     if (ov) { map.set(c.id, { key: c.id, cust: c, items: ov.skip ? [] : (ov.items || []).filter(i => i.qty > 0).map(i => ({ pid: i.pid, qty: i.qty, type: c.payment === 'prepaid' ? 'prepaid' : 'regular' })), orders: [], ov: true }); continue; }
     if (!regularDay || !isOn(c, date) || pauseOn(c, date)) continue;
+    if (partHol && c.holidayOff) continue;
     const items = c.regular.filter(r => r.qty > 0 && r.days.includes(w) && onCycle(r, date));
     if (items.length) map.set(c.id, { key: c.id, cust: c, items: items.map(r => ({ pid: r.productId, qty: r.qty, type: c.payment === 'prepaid' ? 'prepaid' : 'regular' })), orders: [] });
   }
@@ -976,7 +987,10 @@ function buildAlerts() {
     const n = S.orders.filter(o => o.date === d && o.type === 'sample' && o.status === 'open');
     if (n.length) out.push({ kind: 'info', html: `<b>지점에서 견본 받아오기</b> ${fmt(d)} 배달분 ${n.length}건`, sub: n.map(o => o.items.map(i => `${pShort(i.productId)}×${i.qty}`).join(' ')).join(' / ') });
   }
-  for (const d of [dd]) if (isHoliday(d)) out.push({ kind: 'info', html: `<b>${fmt(d)} ${esc(holidayName(d))}</b>`, sub: '정기 배달 없음' });
+  for (const d of [...new Set([dd, orderTarget()])]) {
+    if (isHoliday(d)) out.push({ kind: 'info', html: `<b>${fmt(d)} ${esc(holidayName(d))}</b>`, sub: '정기 배달 없음' });
+    else if (isPartHol(d)) { const off = S.customers.filter(c => c.holidayOff && isOn(c, d)); out.push({ kind: 'info', html: `<b>${fmt(d)} ${esc(holidayName(d))}</b> · 공휴일`, sub: `아파트는 배달 · ${off.map(c => c.name).join(', ') || '쉬는 곳 없음'} 쉼` }); }
+  }
   const unpaid = S.customers.filter(c => inCollection(c) && c.payment === 'cash' && c.paidMonth !== MONTH());
   if (unpaid.length) out.push({ kind: 'warn', html: `<b>현금 수금 남은 고객 ${unpaid.length}명</b>`, sub: unpaid.slice(0, 6).map(c => esc(c.name)).join(', ') + (unpaid.length > 6 ? ' 외' : ''), act: `<button class="btn sm" data-act="filterCash">보기</button>` });
   return out;
@@ -1017,6 +1031,12 @@ function storageBanner() {
 }
 
 /* ================= render: home ================= */
+function todoSection() {
+  const open = S.config.todos.filter(t => !t.done).sort((a, b) => (a.due || '9').localeCompare(b.due || '9') || a.at - b.at);
+  return `<div class="sec"><div class="sec-h"><h2>확인할 것 <span class="muted num" style="font-size:14px">${open.length}건</span></h2></div>
+  <div class="card" style="padding:4px 0">${open.map(t => `<div class="todo"><div class="t"><b>${esc(t.text)}</b><small>${new Date(t.at).getMonth() + 1}/${new Date(t.at).getDate()} 적음${t.due ? ` · ${fmt(t.due)}까지` : ''}</small></div><button class="btn sm" data-act="todoDone" data-id="${t.id}">확인 완료</button></div>`).join('') || '<div class="todo muted">확인할 게 없어요.</div>'}
+  <div class="todo-add"><input type="text" id="todoIn" placeholder="예: 점장님께 ○○ 고객 확인" aria-label="확인할 것"><button class="btn sm" data-act="todoAdd">추가</button></div></div></div>`;
+}
 function renderHome() {
   const t = TODAY(); const dd = routeDefaultDate();
   const stops = orderedStops(dd); const done = stops.filter(s => S.days[dd]?.done?.[s.key]).length;
@@ -1042,6 +1062,7 @@ function renderHome() {
       <button class="card kpi" style="text-align:left" data-act="tab" data-tab="order"><span class="eyebrow">${od === t ? '오늘 발주' : '다음 발주 ' + fmtShort(od)}</span><span class="big num">${buy}<small>개</small></span><span class="muted" style="font-size:13px">${fmt(tgt)} 배달분 · ${kinds}종</span></button>
     </div>
   </div>
+  ${todoSection()}
   ${alerts.length ? `<div class="sec"><div class="sec-h"><h2>알림</h2><span class="muted num" style="font-size:13px">${alerts.length}건</span></div><div class="alerts">${alerts.map(a => `<div class="alert ${a.kind}"><div class="t">${a.html}<small>${a.sub || ''}</small></div>${a.act || ''}</div>`).join('')}</div></div>` : ''}
   </div><div>
   <div class="sec"><div class="sec-h"><h2>최근 들어온 주문 <span class="muted num" style="font-size:14px">${pending.filter(o => o.status === 'open').length}건 남음</span></h2><button class="btn sm" data-act="newOrder">+ 주문</button></div>
@@ -1104,7 +1125,7 @@ function custCard(c) {
       <div class="chead"><button class="cname" data-act="editCust" data-id="${c.id}">${esc(c.name || '이름 없음')}</button>${badges.join('')}</div>
       <div class="cloc">${plate(c.loc)}<span class="muted">${esc(c.loc.label || (c.loc.type !== 'apt' ? LOC_TYPES[c.loc.type] : ''))}</span>${c.course != null && c.course !== '' ? `<span class="muted">코스 ${esc(c.course)}</span>` : ''}</div>
       ${c.regular.length ? `<div class="ritems">${c.regular.map((r, i) => `<div class="ritem ${r.qty ? '' : 'zero'}"><span class="pdot" style="--h:${pHue(r.productId)}"></span><span class="pn">${esc(pName(r.productId))}</span><span class="dd">${r.every === 2 ? '격주 ' : ''}${daysText(r.days)}</span><span class="stepper"><button data-act="qty" data-id="${c.id}" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b>${r.qty}</b><button data-act="qty" data-id="${c.id}" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span></div>`).join('')}</div>` : `<div class="muted" style="font-size:13px">정기 품목 없음</div>`}
-      <div class="cmeta">${pay}${c.ice ? '<span class="badge">아이스팩</span>' : ''}${c.bag ? '<span class="badge">전달주머니</span>' : ''}${c.bill === 'paper' ? '<span class="badge">종이 청구서</span>' : ''}${c.member ? '<span class="badge">회원</span>' : ''}</div>
+      <div class="cmeta">${pay}${c.ice ? '<span class="badge">아이스팩</span>' : ''}${c.bag ? '<span class="badge">전달주머니</span>' : ''}${c.holidayOff ? '<span class="badge">공휴일 쉼</span>' : ''}${c.bill === 'paper' ? '<span class="badge">종이 청구서</span>' : ''}${c.member ? '<span class="badge">회원</span>' : ''}</div>
       ${c.notes ? `<div class="cnote">${esc(c.notes)}</div>` : ''}
     </div></article>`;
 }
@@ -1146,6 +1167,7 @@ function renderOrder() {
       <button class="iconbtn" data-act="orderDate" data-d="1" aria-label="다음 배달일">${ICON.right}</button></div>
     ${date !== tgt ? `<div class="row" style="justify-content:center"><button class="btn sm" data-act="orderDate" data-d="0">발주할 날짜(${fmt(tgt)})로</button></div>` : ''}
     ${isHoliday(date) ? `<div class="warnbox">${esc(holidayName(date))}: 정기 배달이 없는 날이에요. 이 날짜로 들어온 주문만 보여요.</div>` : ''}
+    ${isPartHol(date) ? `<div class="infobox">${esc(holidayName(date))} (공휴일): 아파트는 배달하고, 공휴일에 쉬는 곳(상가·주민센터·미화/관리)은 발주에서 빠졌어요.</div>` : ''}
     ${diff && diff.length ? `<div class="warnbox"><b>확정 후 바뀐 수량</b><br>${diff.map(x => `${esc(x.name)} ${x.d > 0 ? '+' : ''}${x.d}`).join(' · ')}${odFor < t ? '<br>이미 발주한 날짜예요. 남는 재고로 채우거나 지점에 추가 요청하세요.' : ''}</div>` : ''}
     ${resumes.length ? `<div class="infobox">중지 끝나고 다시 들어온 고객: ${resumes.map(c => esc(c.name)).join(', ')}</div>` : ''}
   </div>
@@ -1601,6 +1623,14 @@ function refreshPerfKey(date, key) {
   if (fresh.s[key] != null) { day.s[key] = fresh.s[key]; if (fresh.n[key]) day.n[key] = fresh.n[key]; } else delete day.s[key];
   return true;
 }
+// 지난 날짜의 휴무일을 넣거나 빼면 그날 실적도 다시 맞춰요
+function holPerf(d) {
+  if (!d || d >= TODAY() || !S.perf.days[d]) return;
+  const f = encodeDay(d); const day = S.perf.days[d];
+  if (isHoliday(d)) { day.s = f.s; day.n = f.n; }
+  else S.customers.filter(c => c.holidayOff).forEach(c => refreshPerfKey(d, c.id));
+  save('perf');
+}
 function refreshPerfFrom(key, from) {
   if (!from || from >= TODAY()) return false; let any = false;
   Object.keys(S.perf.days).forEach(d => { if (d >= from && refreshPerfKey(d, key)) any = true; });
@@ -1727,7 +1757,11 @@ function aiContext() {
   const up = S.orders.filter(o => o.status === 'open' && o.date >= t && o.date <= addDays(t, 14)).map(o => { const c = o.customerId ? custById(o.customerId) : null; return `${o.id} | ${o.date} | ${TYPE_NAME[o.type]} | ${c ? c.name + ' ' + locShort(c.loc) : o.name + ' ' + locShort(o.loc)} | ${itemsText(o.items)}${o.note ? ' | ' + o.note : ''}`; }).join('\n');
   return `너는 '헬리오 배달수첩' 앱 안의 도우미야. 사용자는 hy(한국야쿠르트) 송파 헬리오시티 배달 매니저야. 한국어로 짧고 분명하게 답해.
 오늘: ${t}(${DL[dow(t)]}). 다음 배달일: ${routeDefaultDate()}. 오늘 기준 발주할 배달일: ${tgt}. 배달 요일: ${S.config.deliveryDays.map(d => DL[d]).join('')}. 요일 번호: 1=월 2=화 3=수 4=목 5=금 6=토.
+휴무일: ${S.config.holidays.map(h => `${h.date} ${h.name}(${h.mode === 'partial' ? '공휴일: 아파트만 배달, 공휴일 쉼 고객 제외' : '전체 휴무'})`).join(', ') || '없음'}
+공휴일에 쉬는 고객: ${S.customers.filter(c => c.holidayOff).map(c => c.id + ' ' + c.name).join(', ') || '없음'}
+확인할 것 (id | 내용): ${S.config.todos.filter(t => !t.done).map(t => `${t.id} | ${t.text}`).join(' / ') || '없음'}
 규칙:
+- 사용자가 나중에 확인하거나 물어볼 게 있다고 하면 add_reminder로 홈 화면 "확인할 것"에 넣어.
 - 사용자가 변경·주문·중지·해지 같은 걸 말하면 도구로 바로 반영하고, 무엇을 바꿨는지 한두 줄로 알려 줘. 앱에서 되돌리기 버튼을 줄 거야.
 - "그날만/이번만/하루만"은 set_day_items 또는 skip_day. "앞으로/매주/계속"은 set_regular.
 - 기간 동안 쉬는 건 add_pause(끝나면 자동 재개). 해지·이사·중단은 set_status(명단에서 지우지 않아).
@@ -1810,10 +1844,11 @@ function aiTools(changed, am) {
       L({ cid: c.id, from: c.endDate || TODAY(), to: '', kind: '상태', text: `${STATUS_NAME[st]}${c.endDate ? ' · ' + fmt(c.endDate) + '부터' : ''}${i.note ? ' · ' + i.note : ''} (이전: ${prev})` });
       return done(`${c.name} ${STATUS_NAME[st]}${c.endDate ? ' ' + fmtShort(c.endDate) + '부터' : ''}`, 'customers');
     }),
-    T('update_customer', '고객 정보 고치기. 바꿀 것만 넣어: name, phone, building, unit, label, payment(card|account|cash|prepaid), notes_append, notes_replace, paid_this_month(true/false).', { customer_id: S_, name: S_, phone: S_, building: S_, unit: S_, label: S_, payment: S_, notes_append: S_, notes_replace: S_, paid_this_month: B_ }, ['customer_id'], i => {
+    T('update_customer', '고객 정보 고치기. 바꿀 것만 넣어: name, phone, building, unit, label, payment(card|account|cash|prepaid), notes_append, notes_replace, paid_this_month(true/false), holiday_off(공휴일에 쉬는 곳이면 true).', { customer_id: S_, name: S_, phone: S_, building: S_, unit: S_, label: S_, payment: S_, notes_append: S_, notes_replace: S_, paid_this_month: B_, holiday_off: B_ }, ['customer_id'], i => {
       const c = cust(i.customer_id); const a = clone(c);
       if (i.name) c.name = i.name; if (i.phone) c.phone = i.phone; if (i.building) c.loc.building = String(i.building); if (i.unit) c.loc.unit = String(i.unit); if (i.label != null) c.loc.label = i.label;
       if (PAY[i.payment]) c.payment = i.payment;  // card | account | cash | prepaid
+      if (typeof i.holiday_off === 'boolean') c.holidayOff = i.holiday_off;
       if (i.notes_replace != null) c.notes = i.notes_replace; else if (i.notes_append) c.notes = (c.notes ? c.notes + ' / ' : '') + i.notes_append;
       if (i.paid_this_month != null) { c.paidMonth = i.paid_this_month ? MONTH() : ''; L({ cid: c.id, from: TODAY(), kind: '수금', text: `${MONTH().slice(5)}월 현금 ${i.paid_this_month ? '수금 완료' : '미수'}` }); }
       custDiff(a, c).forEach(d => L({ cid: c.id, ...d }));
@@ -1824,6 +1859,15 @@ function aiTools(changed, am) {
       S.customers.push(c); ensureRouteOrder();
       L({ cid: c.id, from: TODAY(), to: '', kind: '고객 정보', text: `새 고객 · 정기 ${regularText(c)}` });
       return done(`새 고객 ${c.name} ${locShort(c.loc)}`, 'customers', 'config');
+    }),
+    T('add_reminder', '홈 화면 “확인할 것”에 넣기 (점장님께 물어볼 것, 나중에 확인할 것). due는 YYYY-MM-DD, 없으면 비워.', { text: S_, due: S_ }, ['text'], i => {
+      S.config.todos.push({ id: uid('t_'), text: String(i.text), at: Date.now(), due: i.due ? day(i.due) : '', done: false, doneAt: 0 });
+      return done(`확인할 것 추가: ${i.text}`, 'config');
+    }),
+    T('done_reminder', '“확인할 것” 하나를 확인 완료로', { id: S_ }, ['id'], i => {
+      const t = S.config.todos.find(x => x.id === i.id); if (!t) throw new Error('그 id가 없어요: ' + i.id);
+      t.done = true; t.doneAt = Date.now(); L({ kind: '메모', from: TODAY(), to: TODAY(), text: '확인 완료: ' + t.text });
+      return done(`확인 완료: ${t.text}`, 'config');
     }),
     T('add_log', '데이터는 그대로 두고 기록만 남기기 (지난 날짜 미전달, 고객 요청 메모 등). to 비우면 계속.', { customer_id: S_, name: S_, loc: S_, from: S_, to: S_, kind: { type: 'string', enum: LOG_KINDS }, text: S_ }, ['text'], i => {
       const c = i.customer_id ? cust(i.customer_id) : null;
@@ -2005,8 +2049,10 @@ function renderSettings() {
     ${[['regular', '후불정기 (고객 정기)', 'hy 정기(애음) 계약 수량. 보통 켜 둬요'], ['prepaid', '(선불)정기 · 프레딧', '프레딧 자동 발주라 보통 꺼 둬요'], ['fredit', '일반주문 · 프레딧', '프레딧 자동 발주라 보통 꺼 둬요'], ['sample', '견본주문', '끄면 “지점에서 견본 받아오기” 목록에만 떠요'], ['adhoc', '추가주문 (직접 받음)', '직접 발주할 거면 켜요']].map(([k, n, d]) => `<label class="chk"><input type="checkbox" data-chg="purchase" data-k="${k}" ${C.purchase[k] ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label>`).join('')}
   </div></div>
   <div class="sec"><div class="sec-h"><h2>휴무일</h2></div><div class="card">
-    <div class="slist">${C.holidays.slice().sort((a, b) => a.date.localeCompare(b.date)).map(h => `<div class="it"><div class="t"><b>${fmt(h.date)}</b> ${esc(h.name)}</div><button class="btn sm ghost" data-act="delHoliday" data-date="${h.date}">삭제</button></div>`).join('') || '<div class="it muted">등록된 휴무일이 없어요. 공휴일을 넣으면 그날은 모든 정기 배달이 빠져요.</div>'}</div>
-    <div style="padding:10px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr auto;gap:8px"><input type="date" id="hDate" aria-label="날짜"><input type="text" id="hName" placeholder="이름 (예: 한글날)" aria-label="이름"><button class="btn" data-act="addHoliday">추가</button></div>
+    <div class="slist">${C.holidays.slice().sort((a, b) => a.date.localeCompare(b.date)).map(h => `<div class="it"><div class="t"><b>${fmt(h.date)}</b> ${esc(h.name)} <span class="badge xs">${h.mode === 'partial' ? '공휴일 · 일부만 쉼' : '전체 휴무'}</span></div><button class="btn sm ghost" data-act="delHoliday" data-date="${h.date}">삭제</button></div>`).join('') || '<div class="it muted">등록된 휴무일이 없어요.</div>'}</div>
+    <div style="padding:10px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="date" id="hDate" aria-label="날짜"><input type="text" id="hName" placeholder="이름 (예: 한글날)" aria-label="이름">
+      <select id="hMode" aria-label="종류"><option value="partial">공휴일 · 상가·주민센터·미화/관리만 쉼</option><option value="full">전체 휴무 · 모두 쉼</option></select><button class="btn" data-act="addHoliday">추가</button></div>
+    <p class="hint" style="padding:0 12px 10px">공휴일에는 고객 정보에서 “공휴일엔 쉼”이 켜진 곳(상가·주민센터·미화/관리)만 빠져요.</p>
   </div></div>
   <div class="sec"><div class="sec-h"><h2>기본 동선 순서</h2><span class="muted" style="font-size:12.5px">위에서부터 돌아요</span></div><div class="card">
     <div class="slist">${C.routeOrder.map((b, i) => `<div class="it"><span class="seq" style="display:grid;place-items:center">${i + 1}</span><div class="t"><b>${esc(bldName(b))}</b>${isNumB(b) ? '' : ` <span class="muted" style="font-size:12px">${esc(b)}</span>`}</div><button class="btn sm ghost" data-act="rMove" data-i="${i}" data-d="-1" aria-label="위로" ${i ? '' : 'disabled'}>▲</button><button class="btn sm ghost" data-act="rMove" data-i="${i}" data-d="1" aria-label="아래로" ${i < C.routeOrder.length - 1 ? '' : 'disabled'}>▼</button><button class="btn sm ghost" data-act="rDel" data-i="${i}" aria-label="삭제">✕</button></div>`).join('')}</div>
@@ -2139,7 +2185,7 @@ function readCF() {
   CF.loc.type = v('cfType') || 'apt'; CF.loc.building = v('cfB').trim(); CF.loc.unit = v('cfU').trim(); CF.loc.label = v('cfLabel').trim();
   const course = v('cfCourse').trim(); CF.course = course === '' ? null : (isNaN(+course) ? course : +course);
   CF.payment = v('cfPay') || 'card'; CF.bill = v('cfBill') || 'mobile';
-  CF.member = !!$('#cfMember')?.checked; CF.ice = !!$('#cfIce')?.checked; CF.bag = !!$('#cfBag')?.checked;
+  CF.member = !!$('#cfMember')?.checked; CF.ice = !!$('#cfIce')?.checked; CF.bag = !!$('#cfBag')?.checked; if ($('#cfHol')) CF.holidayOff = $('#cfHol').checked;
   CF.status = v('cfStatus') || 'active'; CF.endDate = CF.status === 'active' ? '' : v('cfEnd'); CF.statusNote = v('cfStatusNote').trim(); CF.active = CF.status === 'active';
   CF.notes = v('cfNotes');
 }
@@ -2164,7 +2210,7 @@ function renderCF() {
     <button class="btn sm" style="justify-self:start" data-act="cfAddReg">+ 품목 추가</button></div></div>
   <div class="grid2"><div class="field"><label class="lbl" for="cfPay">수금 구분</label><select id="cfPay">${Object.entries(PAY).map(([k, n]) => `<option value="${k}" ${CF.payment === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
   <div class="field"><label class="lbl" for="cfBill">청구서</label><select id="cfBill"><option value="mobile" ${CF.bill === 'mobile' ? 'selected' : ''}>모바일</option><option value="paper" ${CF.bill === 'paper' ? 'selected' : ''}>종이</option></select></div></div>
-  <div class="row" style="gap:16px">${[['cfIce', 'ice', '아이스팩'], ['cfBag', 'bag', '전달주머니'], ['cfMember', 'member', '회원']].map(([id, k, n]) => `<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="${id}" ${CF[k] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)">${n}</label>`).join('')}</div>
+  <div class="row" style="gap:16px">${[['cfIce', 'ice', '아이스팩'], ['cfBag', 'bag', '전달주머니'], ['cfMember', 'member', '회원'], ['cfHol', 'holidayOff', '공휴일엔 쉼']].map(([id, k, n]) => `<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="${id}" ${CF[k] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)">${n}</label>`).join('')}</div>
   <div class="field"><label class="lbl" for="cfNotes">메모 (배달할 때 보여요)</label><textarea id="cfNotes">${esc(CF.notes)}</textarea></div>
   <div class="field"><span class="lbl">계약 상태</span><div class="grid3"><select id="cfStatus" aria-label="계약 상태">${Object.entries(STATUS_NAME).map(([k, n]) => `<option value="${k}" ${CF.status === k ? 'selected' : ''}>${n}</option>`).join('')}</select><input type="date" id="cfEnd" value="${esc(CF.endDate)}" aria-label="적용 날짜"><input type="text" id="cfStatusNote" value="${esc(CF.statusNote)}" placeholder="사유" aria-label="상태 사유"></div>
     <p class="hint" style="margin-top:6px">해지·중단·이사로 바꿔도 명단과 실적, 수금에는 남아요. 날짜를 넣으면 그 전날까지 배달해요.</p></div>
@@ -2484,6 +2530,8 @@ document.addEventListener('pointercancel', endDrag);
 
 /* ================= action router ================= */
 const ACT = {
+  todoAdd: () => { const v = ($('#todoIn')?.value || '').trim(); if (!v) { toast('내용을 적어 주세요.'); return; } S.config.todos.push({ id: uid('t_'), text: v, at: Date.now(), due: '', done: false, doneAt: 0 }); save('config'); render(); },
+  todoDone: a => { const t = S.config.todos.find(x => x.id === a.dataset.id); if (!t) return; t.done = true; t.doneAt = Date.now(); const keep = S.config.todos.filter(x => x.done).sort((x, y) => y.doneAt - x.doneAt).slice(0, 30).map(x => x.id); S.config.todos = S.config.todos.filter(x => !x.done || keep.includes(x.id)); logChange({ kind: '메모', from: TODAY(), to: TODAY(), text: '확인 완료: ' + t.text }); save('config'); save('log'); render(); toast('확인 완료로 옮겼어요'); },
   tab: a => { UI.tab = a.dataset.tab; if (UI.tab !== 'customers') UI.selected.clear(); saveUI(); render(); window.scrollTo(0, 0); },
   closeSheet: () => closeSheet(),
   recMode: a => { UI.recMode = a.dataset.m; saveUI(); render(); },
@@ -2586,8 +2634,8 @@ const ACT = {
   leadMode: a => { S.config.leadMode = a.dataset.m; save('config'); render(); },
   floorDir: a => { S.config.floorDir = a.dataset.m; save('config'); render(); },
   delivDay: a => { const d = +a.dataset.d; const L = S.config.deliveryDays; S.config.deliveryDays = L.includes(d) ? L.filter(x => x !== d) : [...L, d].sort(); save('config'); render(); },
-  addHoliday: () => { const d = $('#hDate').value; if (!d) { toast('날짜를 골라 주세요.'); return; } S.config.holidays = S.config.holidays.filter(h => h.date !== d); S.config.holidays.push({ date: d, name: $('#hName').value.trim() || '휴무' }); save('config'); render(); toast(`${fmt(d)} 휴무: 정기 배달과 발주에서 빠져요`); },
-  delHoliday: a => { S.config.holidays = S.config.holidays.filter(h => h.date !== a.dataset.date); save('config'); render(); },
+  addHoliday: () => { const d = $('#hDate').value; if (!d) { toast('날짜를 골라 주세요.'); return; } S.config.holidays = S.config.holidays.filter(h => h.date !== d); const mode = $('#hMode')?.value === 'full' ? 'full' : 'partial'; S.config.holidays.push({ date: d, name: $('#hName').value.trim() || (mode === 'full' ? '휴무' : '공휴일'), mode }); save('config'); holPerf(d); render(); toast(mode === 'full' ? `${fmt(d)} 전체 휴무: 정기 배달과 발주에서 빠져요` : `${fmt(d)} 공휴일: 상가·주민센터·미화/관리만 빠져요`); },
+  delHoliday: a => { S.config.holidays = S.config.holidays.filter(h => h.date !== a.dataset.date); save('config'); holPerf(a.dataset.date); render(); },
   rMove: a => { const i = +a.dataset.i, d = +a.dataset.d, L = S.config.routeOrder; const j = i + d; if (j < 0 || j >= L.length) return; [L[i], L[j]] = [L[j], L[i]]; save('config'); render(); },
   rDel: a => { S.config.routeOrder.splice(+a.dataset.i, 1); save('config'); render(); },
   rAdd: () => { const v = $('#rNew').value.trim().replace(/동$/, ''); if (!v) return; if (!S.config.routeOrder.includes(v)) S.config.routeOrder.push(v); save('config'); render(); },
