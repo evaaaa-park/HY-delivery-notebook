@@ -119,6 +119,7 @@ textarea{min-height:76px;resize:vertical}
 .hello{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
 .hello h1{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1.1}
 .alerts{display:grid;gap:8px}
+.xrow{display:flex;align-items:center;gap:8px;margin-bottom:6px} .xrow input{flex:1;min-width:0}
 .todo{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
 .todo .t{flex:1;min-width:0} .todo .t b{font-weight:600;display:block} .todo .t small{color:var(--muted);font-size:12.5px}
 .todo-add{display:flex;gap:8px;padding:10px 14px} .todo-add input{flex:1;min-width:0}
@@ -622,7 +623,7 @@ function normOrder(o) {
     id: o.id || uid('o_'), type: TYPES.includes(o.type) && o.type !== 'regular' ? o.type : 'adhoc',
     customerId: o.customerId || null, name: o.name || '', loc: o.loc ? { type: o.loc.type || 'apt', building: String(o.loc.building ?? ''), unit: String(o.loc.unit ?? ''), label: o.loc.label || '' } : null,
     date: o.date, items: (o.items || []).filter(i => i && i.productId && +i.qty > 0).map(i => ({ productId: i.productId, qty: +i.qty })),
-    note: o.note || '', status: o.status === 'cancelled' ? 'cancelled' : 'open', createdAt: o.createdAt || Date.now(), tags: Array.isArray(o.tags) ? o.tags : [],
+    note: o.note || '', noBuy: !!o.noBuy, status: o.status === 'cancelled' ? 'cancelled' : 'open', createdAt: o.createdAt || Date.now(), tags: Array.isArray(o.tags) ? o.tags : [],
   };
 }
 function normConfig(b) {
@@ -642,9 +643,13 @@ function normConfig(b) {
 }
 const custById = id => S.customers.find(c => c.id === id);
 const prodById = id => S.config.products.find(p => p.id === id);
-const pName = id => prodById(id)?.name || id;
-const pShort = id => prodById(id)?.short || prodById(id)?.name || id;
-const pHue = id => prodById(id)?.hue ?? 210;
+// 목록에 없는 제품은 productId를 'x:제품명'으로 저장해요. 동선·실적에는 뜨고 발주표에는 절대 안 들어가요.
+const isX = id => typeof id === 'string' && id.startsWith('x:');
+const xId = name => 'x:' + String(name || '').replace(/[*;|]/g, ' ').replace(/\s+/g, ' ').trim();
+const pName = id => isX(id) ? id.slice(2) : (prodById(id)?.name || id);
+const pShort = id => isX(id) ? id.slice(2) : (prodById(id)?.short || prodById(id)?.name || id);
+const pHue = id => isX(id) ? 30 : (prodById(id)?.hue ?? 210);
+const noBuyOrder = o => !!o.noBuy || o.items.some(i => isX(i.productId));
 
 /* ================= persistence ================= */
 const LS_META = 'helio-delivery-meta';
@@ -920,7 +925,7 @@ function stopsFor(date) {
     let st = map.get(key);
     if (!st) { st = { key, cust: c, items: [], orders: [] }; map.set(key, st); }
     st.orders.push(o);
-    o.items.forEach(it => st.items.push({ pid: it.productId, qty: it.qty, type: o.type }));
+    o.items.forEach(it => st.items.push({ pid: it.productId, qty: it.qty, type: o.type, nb: !!o.noBuy || isX(it.productId) }));
   }
   return [...map.values()].map(st => ({ ...st, skipped: st.items.length === 0, loc: st.cust ? st.cust.loc : (st.orders[0]?.loc || { building: '', unit: '' }), name: st.cust ? st.cust.name : (st.orders[0]?.name || '이름 없음') }));
 }
@@ -933,7 +938,7 @@ function orderedStops(date) {
 function demand(date) {
   const res = {};
   for (const st of stopsFor(date)) for (const it of st.items) {
-    if (it.type === 'pickup') continue;
+    if (it.type === 'pickup' || it.nb) continue;
     const r = res[it.pid] || (res[it.pid] = { ...Object.fromEntries(TYPES.map(t => [t, 0])), rows: [] });
     r[it.type] += it.qty; r.rows.push({ name: st.name, loc: st.loc, qty: it.qty, type: it.type });
   }
@@ -1158,7 +1163,9 @@ function renderOrder() {
   else status = `<span class="badge">발주일 ${fmt(odFor)}</span>`;
   const resumes = S.customers.filter(c => isOn(c, date) && c.pauses.some(p => nextDeliveryDay(p.to) === date) && !pauseOn(c, date));
   const exGroups = ORDER_TYPES.filter(t => t === 'pickup' || !P[t]).map(t => ({ t, list: S.orders.filter(o => o.date === date && o.type === t && o.status === 'open') })).filter(g => g.list.length);
-  const EX_TITLE = { sample: '견본 · 지점에서 받아오기', fredit: '일반(프레딧) · 자동 발주', prepaid: '선불정기 · 자동 발주', adhoc: '추가주문 · 발주 제외', pickup: '회수 · 받아올 것' };
+  const nbList = S.orders.filter(o => o.date === date && o.status === 'open' && o.type !== 'pickup' && P[o.type] && noBuyOrder(o));
+  if (nbList.length) exGroups.push({ t: 'nobuy', list: nbList });
+  const EX_TITLE = { nobuy: '따로 결제 · 발주 안 함', sample: '견본 · 지점에서 받아오기', fredit: '일반(프레딧) · 자동 발주', prepaid: '선불정기 · 자동 발주', adhoc: '추가주문 · 발주 제외', pickup: '회수 · 받아올 것' };
   const totalBuy = show.reduce((s, r) => s + r.buy, 0);
   const typesIn = TYPES.filter(x => P[x] && x !== 'pickup').map(x => TYPE_NAME[x]).join('·');
   return storageBanner() + `<div class="ohead">
@@ -1784,14 +1791,14 @@ function aiTools(changed, am) {
   const S_ = { type: 'string' }, N_ = { type: 'number' }, B_ = { type: 'boolean' };
   const ITEMS = { type: 'array', items: { type: 'object', properties: { product_id: S_, qty: N_ }, required: ['product_id', 'qty'] } };
   const cust = id => { const c = custById(String(id || '')); if (!c) throw new Error('그 id의 고객이 없어요: ' + id); return c; };
-  const pid = p => { if (!prodById(String(p))) throw new Error('제품 id가 없어요: ' + p); return String(p); };
+  const pid = p => { p = String(p || ''); if (isX(p)) { const id = xId(p.slice(2)); if (id.length > 2) return id; } if (!prodById(p)) throw new Error('제품 id가 없어요: ' + p + ' (목록에 없는 제품이면 x:제품명)'); return p; };
   const day = d => { d = String(d || ''); if (!/^\d{4}-\d\d-\d\d$/.test(d)) throw new Error('날짜는 YYYY-MM-DD 형식이어야 해요: ' + d); return d; };
   const done = (txt, ...docs) => { docs.forEach(x => changed.add(x)); changed.add('log'); am.actions.push(txt); updateBubble(am); return { ok: true, done: txt }; };
   const L = (e) => logChange({ ...e, by: 'AI' });
   const tools = [
-    T('add_order', '주문 넣기. type: fredit=hy 일반주문(프레딧 결제), sample=견본주문(0원), prepaid=(선불)정기배송 한 회차, adhoc=hy 앱에 없는 직접 받은 추가주문, pickup=반품·회수(받아올 것). 고객 목록에 있으면 customer_id, 없으면 name·building·unit.', { customer_id: S_, name: S_, building: S_, unit: S_, date: S_, type: { type: 'string', enum: ORDER_TYPES }, items: ITEMS, note: S_ }, ['date', 'type', 'items'], i => {
+    T('add_order', '주문 넣기. type: fredit=hy 일반주문(프레딧 결제), sample=견본주문(0원), prepaid=(선불)정기배송 한 회차, adhoc=hy 앱에 없는 직접 받은 추가주문, pickup=반품·회수(받아올 것). 제품 목록에 없는 제품(펫쿠르트 등)은 product_id를 "x:원래 제품명"으로 넣어 (발주 안 함). no_buy=true는 따로 결제돼서 발주가 필요 없는 주문. 고객 목록에 있으면 customer_id, 없으면 name·building·unit.', { customer_id: S_, name: S_, building: S_, unit: S_, date: S_, type: { type: 'string', enum: ORDER_TYPES }, items: ITEMS, note: S_, no_buy: B_ }, ['date', 'type', 'items'], i => {
       const c = i.customer_id ? cust(i.customer_id) : null; const items = (i.items || []).map(x => ({ productId: pid(x.product_id), qty: Math.max(1, Math.round(+x.qty || 1)) }));
-      const o = normOrder({ type: i.type, customerId: c?.id || null, name: c ? '' : (i.name || ''), loc: c ? null : { type: 'apt', building: String(i.building || ''), unit: String(i.unit || ''), label: '' }, date: day(i.date), items, note: i.note || '' });
+      const o = normOrder({ type: i.type, customerId: c?.id || null, name: c ? '' : (i.name || ''), loc: c ? null : { type: 'apt', building: String(i.building || ''), unit: String(i.unit || ''), label: '' }, date: day(i.date), items, note: i.note || '', noBuy: !!i.no_buy });
       S.orders.push(o); L({ cid: o.customerId, name: c ? '' : o.name, loc: c ? '' : locShort(o.loc), from: o.date, kind: '주문', text: `${TYPE_NAME[o.type]} 주문 ${itemsText(o.items)}${o.note ? ' · ' + o.note : ''}` });
       if (o.date < TODAY()) refreshPerfKey(o.date, c ? c.id : 'o:' + o.id) && changed.add('perf');
       return done(`${fmt(o.date)} ${c ? c.name : o.name} ${TYPE_NAME[o.type]} 주문 ${itemsText(o.items)}`, 'orders');
@@ -2105,14 +2112,16 @@ async function copyText(text) {
 let F = null;
 function defaultOrderDate() { return nextDeliveryDay(TODAY()); }
 function openOrderSheet(opts = {}) {
-  F = { type: opts.type || 'fredit', ids: opts.customerIds ? [...opts.customerIds] : [], useNew: false, nl: { name: '', building: '', unit: '', label: '' }, date: opts.date || defaultOrderDate(), items: {}, note: '', q: '' };
+  F = { type: opts.type || 'fredit', ids: opts.customerIds ? [...opts.customerIds] : [], useNew: false, nl: { name: '', building: '', unit: '', label: '' }, date: opts.date || defaultOrderDate(), items: {}, extra: [], noBuy: false, note: '', q: '' };
   openSheet(`<div id="of" style="display:grid;gap:14px"></div>`, () => { F = null; });
   renderOF();
 }
 function ofImpact() {
-  const qty = Object.values(F.items).reduce((s, q) => s + q, 0);
+  const xq = F.extra.filter(x => x.name.trim()).reduce((s, x) => s + x.qty, 0);
+  const qty = F.noBuy ? 0 : Object.values(F.items).reduce((s, q) => s + q, 0);
   const n = F.ids.length + (F.useNew ? 1 : 0);
-  if (!qty || !n) return '';
+  if (!(qty + xq) || !n) return '';
+  if (!qty) return `<div class="infobox">${fmt(F.date)} 동선에 ${n}곳 추가 · 따로 결제된 거라 발주표에는 안 들어가요</div>`;
   const counted = S.config.purchase[F.type]; const tgt = orderTarget(); const od = orderDayFor(F.date);
   let msg = `${fmt(F.date)} 동선에 ${n}곳 추가`;
   if (!counted) msg += F.type === 'sample' ? ` · 발주표 대신 “지점에서 받아오기”에 떠요` : ` · 자동 발주라 발주표에는 안 들어가요`;
@@ -2140,6 +2149,10 @@ function renderOF() {
   <div class="field"><label class="lbl" for="ofdate">배달일</label><input type="date" id="ofdate" value="${F.date}" data-chg="ofdate">
     <div class="chips" style="margin-top:6px">${quick.map(q => `<button class="chip" aria-pressed="${F.date === q}" data-act="ofDate" data-date="${q}">${fmt(q)}</button>`).join('')}</div></div>
   <div class="field"><span class="lbl">제품 · 수량</span><div class="pgrid">${S.config.products.map(p => { const q = F.items[p.id] || 0; return `<div class="pcell ${q ? 'on' : ''}"><span class="pdot" style="--h:${p.hue ?? 210}"></span><span class="n">${esc(p.name)}</span><span class="stepper"><button data-act="ofQty" data-id="${p.id}" data-d="-1" aria-label="${esc(p.name)} 줄이기">−</button><b>${q}</b><button data-act="ofQty" data-id="${p.id}" data-d="1" aria-label="${esc(p.name)} 늘리기">+</button></span></div>`; }).join('')}</div></div>
+  <div class="field"><span class="lbl">목록에 없는 제품 <span class="muted" style="font-weight:400">· 동선에만 넣고 발주는 안 해요</span></span>
+    ${F.extra.map((x, i) => `<div class="xrow"><span class="pdot" style="--h:30"></span><input type="text" value="${esc(x.name)}" placeholder="제품 이름 (예: 펫쿠르트 영양트릿 치킨)" data-inp="ofx" data-i="${i}" aria-label="제품 이름"><span class="stepper"><button data-act="ofXQty" data-i="${i}" data-d="-1" aria-label="줄이기">−</button><b class="num">${x.qty}</b><button data-act="ofXQty" data-i="${i}" data-d="1" aria-label="늘리기">+</button></span><button class="btn sm ghost" data-act="ofXDel" data-i="${i}" aria-label="빼기">✕</button></div>`).join('')}
+    <button class="btn sm ghost" style="justify-self:start" data-act="ofXAdd">+ 제품 이름으로 추가</button></div>
+  ${F.type !== 'pickup' && S.config.purchase[F.type] ? `<label class="chk"><input type="checkbox" data-chg="ofNoBuy" ${F.noBuy ? 'checked' : ''}><span><b>따로 결제됨 · 발주 안 함</b><small>앱이나 다른 곳에서 결제돼서 물건이 따로 오는 주문이면 켜요. 동선에만 들어가요.</small></span></label>` : ''}
   <div class="field"><label class="lbl" for="ofnote">메모</label><textarea id="ofnote" placeholder="예: 경비실에 맡기기, 오전 중" data-inp="ofnote">${esc(F.note)}</textarea></div>
   <div id="ofimp">${ofImpact()}</div>
   <div class="sact"><button class="btn" data-act="closeSheet">취소</button><button class="btn pri" data-act="ofSave">저장</button></div>`;
@@ -2154,12 +2167,14 @@ function renderOFRes() {
 }
 function saveOF() {
   const items = Object.entries(F.items).filter(([, q]) => q > 0).map(([productId, qty]) => ({ productId, qty }));
+  F.extra.forEach(x => { const id = xId(x.name); if (id.length > 2 && x.qty > 0) items.push({ productId: id, qty: x.qty }); });
   if (!items.length) { toast('제품 수량을 하나 이상 넣어 주세요.'); return; }
   if (!F.ids.length && !(F.useNew && (F.nl.name || F.nl.building))) { toast('받는 고객을 고르거나 새 배달지를 입력해 주세요.'); return; }
   if (!F.date) { toast('배달일을 골라 주세요.'); return; }
   const made = [];
-  F.ids.forEach(id => made.push(normOrder({ type: F.type, customerId: id, date: F.date, items: clone(items), note: F.note })));
-  if (F.useNew) made.push(normOrder({ type: F.type, customerId: null, name: F.nl.name, loc: { type: isNumB(F.nl.building) ? 'apt' : 'store', ...F.nl }, date: F.date, items: clone(items), note: F.note }));
+  const nb = F.noBuy && S.config.purchase[F.type];
+  F.ids.forEach(id => made.push(normOrder({ type: F.type, customerId: id, date: F.date, items: clone(items), note: F.note, noBuy: nb })));
+  if (F.useNew) made.push(normOrder({ type: F.type, customerId: null, name: F.nl.name, loc: { type: isNumB(F.nl.building) ? 'apt' : 'store', ...F.nl }, date: F.date, items: clone(items), note: F.note, noBuy: nb }));
   const mark = logMark();
   S.orders.push(...made);
   made.forEach(o => { const c = o.customerId ? custById(o.customerId) : null; logChange({ cid: o.customerId, name: c ? '' : o.name, loc: c ? '' : locShort(o.loc), from: o.date, kind: '주문', text: `${TYPE_NAME[o.type]} 주문 ${itemsText(o.items)}${o.note ? ' · ' + o.note : ''}` }); if (o.date < TODAY() && refreshPerfKey(o.date, c ? c.id : 'o:' + o.id)) save('perf'); });
@@ -2378,8 +2393,8 @@ ${text ? `글:\n"""\n${text.slice(0, 12000)}\n"""` : '사진을 읽어.'}`
 ${prodListText()}
 고객 목록 (id | 이름 | 동-호 | 장소):
 ${custListText().slice(0, 30000)}
-JSON 배열로만 답해. 각 항목: {"type":"adhoc|sample|fredit","customerId":"고객 id 또는 null","name":"이름","building":"동","unit":"호","date":"YYYY-MM-DD","items":[{"productId":"제품 id","qty":숫자}],"note":"요청사항"}
-같은 사람이나 같은 동-호가 고객 목록에 있으면 customerId를 넣어. 제품을 확실히 모르겠으면 items에서 빼고 note에 원문을 남겨.
+JSON 배열로만 답해. 각 항목: {"type":"fredit|sample|prepaid|adhoc|pickup","customerId":"고객 id 또는 null","name":"이름","building":"동","unit":"호","date":"YYYY-MM-DD","items":[{"productId":"제품 id","qty":숫자}],"note":"요청사항"}
+같은 사람이나 같은 동-호가 고객 목록에 있으면 customerId를 넣어. 제품 목록에 없는 제품(펫쿠르트 등)은 productId를 "x:원문 제품명"으로 넣어. 그래도 애매하면 items에서 빼고 note에 원문을 남겨.
 ${text ? `메시지:\n"""\n${text.slice(0, 12000)}\n"""` : '사진을 읽어.'}`;
   try {
     const opts = { modelTier: 'default' }; if (files && files.length && sampleImages) opts.images = files;
@@ -2413,7 +2428,7 @@ function renderAIResults() {
   } else {
     out.innerHTML = `<b>주문 ${R.length}건</b>` + R.map((o, i) => {
       const c = o.customerId ? custById(o.customerId) : null;
-      const items = (o.items || []).filter(it => prodById(it.productId));
+      const items = (o.items || []).filter(it => prodById(it.productId) || isX(it.productId));
       return `<label><input type="checkbox" data-ai="${i}" ${items.length ? 'checked' : ''}><span><span class="badge t-${ORDER_TYPES.includes(o.type) ? o.type : 'adhoc'}">${TYPE_NAME[o.type] || '추가'}</span> <b>${esc(c ? c.name : (o.name || '이름 없음'))}</b> ${plate(c ? c.loc : { building: o.building, unit: o.unit })} ${c ? '' : '<span class="badge warn">새 배달지</span>'}<br><span class="muted">${fmt(o.date)} · ${items.map(it => `${esc(pName(it.productId))}×${+it.qty}`).join(', ') || '제품 확인 필요'}${o.note ? ' · ' + esc(o.note) : ''}</span></span></label>`;
     }).join('') + `<button class="btn pri" data-act="aiApply">선택한 주문 넣기</button>`;
   }
@@ -2435,7 +2450,7 @@ function applyAI() {
   } else {
     const made = picks.map(o => {
       const c = o.customerId ? custById(o.customerId) : null;
-      return normOrder({ type: o.type, customerId: c ? c.id : null, name: c ? '' : o.name, loc: c ? null : { type: isNumB(o.building) ? 'apt' : 'store', building: String(o.building || ''), unit: String(o.unit || ''), label: '' }, date: /^\d{4}-\d\d-\d\d$/.test(o.date || '') ? o.date : defaultOrderDate(), items: (o.items || []).filter(it => prodById(it.productId)).map(it => ({ productId: it.productId, qty: Math.max(1, Math.round(+it.qty || 1)) })), note: o.note || '' });
+      return normOrder({ type: o.type, customerId: c ? c.id : null, name: c ? '' : o.name, loc: c ? null : { type: isNumB(o.building) ? 'apt' : 'store', building: String(o.building || ''), unit: String(o.unit || ''), label: '' }, date: /^\d{4}-\d\d-\d\d$/.test(o.date || '') ? o.date : defaultOrderDate(), items: (o.items || []).filter(it => prodById(it.productId) || isX(it.productId)).map(it => ({ productId: isX(it.productId) ? xId(it.productId.slice(2)) : it.productId, qty: Math.max(1, Math.round(+it.qty || 1)) })), note: o.note || '' });
     }).filter(o => o.items.length);
     if (!made.length) { toast('제품이 확인된 주문이 없어요. 주문 추가 양식으로 넣어 주세요.'); return; }
     S.orders.push(...made); ensureRouteOrder(); save('orders', 'config'); closeSheet(); render();
@@ -2615,6 +2630,9 @@ const ACT = {
   ofUnpick: a => { F.ids = F.ids.filter(x => x !== a.dataset.id); renderOF(); },
   ofNew: () => { F.useNew = !F.useNew; renderOF(); },
   ofDate: a => { F.date = a.dataset.date; renderOF(); },
+  ofXAdd: () => { F.extra.push({ name: '', qty: 1 }); renderOF(); const ins = $$('[data-inp=ofx]'); ins[ins.length - 1]?.focus(); },
+  ofXDel: a => { F.extra.splice(+a.dataset.i, 1); renderOF(); },
+  ofXQty: a => { const x = F.extra[+a.dataset.i]; x.qty = Math.max(1, x.qty + (+a.dataset.d)); renderOF(); },
   ofQty: a => { const id = a.dataset.id; F.items[id] = Math.max(0, (F.items[id] || 0) + (+a.dataset.d)); renderOF(); },
   ofSave: () => saveOF(),
   aiImport: a => openAI(a.dataset.mode),
@@ -2669,6 +2687,7 @@ const CHG = {
   selAll: el => { const vis = filteredCustomers().map(c => c.id); vis.forEach(id => el.checked ? UI.selected.add(id) : UI.selected.delete(id)); render(); },
   stock: el => { const v = Math.max(0, Math.round(+el.value || 0)); if (v) S.config.stock[el.dataset.id] = v; else delete S.config.stock[el.dataset.id]; save('config'); updateOrderNumbers(); },
   ofdate: el => { if (el.value) { F.date = el.value; renderOF(); } },
+  ofNoBuy: el => { F.noBuy = el.checked; const i = $('#ofimp'); if (i) i.innerHTML = ofImpact(); },
   cfProd: el => { readCF(); CF.regular[+el.dataset.i].productId = el.value; renderCF(); },
   cfEvery: el => { readCF(); const r = CF.regular[+el.dataset.i]; r.every = el.checked ? 2 : 1; if (el.checked && !r.anchor) { let x = TODAY(); for (let k = 0; k < 14 && !r.days.includes(dow(x)); k++) x = addDays(x, 1); r.anchor = x; } renderCF(); },
   cfAnchor: el => { if (CF) CF.regular[+el.dataset.i].anchor = el.value; },
@@ -2697,6 +2716,7 @@ const INP = {
   custq: el => { UI.custQ = el.value; renderCustList(); },
   ofq: el => { F.q = el.value; renderOFRes(); },
   ofnote: el => { F.note = el.value; },
+  ofx: el => { const x = F?.extra[+el.dataset.i]; if (x) { x.name = el.value; const i = $('#ofimp'); if (i) i.innerHTML = ofImpact(); } },
   sfONote: el => { if (SF) SF.orders[+el.dataset.o].note = el.value; },
   logq: el => { UI.logQ = el.value; renderLogList(); },
   perfq: el => { UI.perfQ = el.value; const keep = el.selectionStart; render(); const n = $('#perfq'); if (n) { n.focus(); try { n.setSelectionRange(keep, keep); } catch (e) { } } },
