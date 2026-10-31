@@ -122,7 +122,9 @@ textarea{min-height:76px;resize:vertical}
 .billic{display:inline-flex;align-items:center;gap:3px;padding:2px 7px 2px 5px;border-radius:999px;background:color-mix(in srgb,#D9480F 14%,var(--surface));color:color-mix(in srgb,#D9480F 85%,var(--ink));font-size:12px;font-weight:700;white-space:nowrap;flex:none}
 .billic svg{width:15px;height:15px}
 .rlist.dense .billic{padding:2px 4px}
-.rrow.done .billic{opacity:.55}
+.billic{border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:700;min-height:24px}
+.billic.given{background:var(--ok-soft,color-mix(in srgb,#2b8a3e 14%,var(--surface)));color:var(--ok,#2b8a3e)}
+.billic.given svg{width:13px;height:13px}
 .xrow{display:flex;align-items:center;gap:8px;margin-bottom:6px} .xrow input{flex:1;min-width:0}
 .todo{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
 .todo .t{flex:1;min-width:0} .todo .t b{font-weight:600;display:block} .todo .t small{color:var(--muted);font-size:12.5px}
@@ -831,12 +833,11 @@ const isPartHol = d => S.config.holidays.some(h => h.date === d && h.mode === 'p
 const holidayName = d => S.config.holidays.find(h => h.date === d)?.name || '휴무';
 const HOL_OFF_TYPES = ['office', 'security', 'store'];
 const isWorkday = d => { const w = dow(d); return w >= 1 && w <= 5 && !isHoliday(d); };
-// 종이 청구서: config.bills = { label, since, ids, given:{cid:date} }. 그 고객 배달을 since 이후에 체크하면 전달한 걸로 봐요.
+// 종이 청구서: config.bills = { label, since, ids, given:{cid:date} }.
+// 배달 체크와는 따로, 동선의 청구서 아이콘을 눌러야만 전달한 걸로 바뀌어요.
 function billDate(cid) {
   const B = S.config.bills; if (!B || !B.ids.includes(cid)) return null;
-  if (B.given[cid]) return B.given[cid];
-  const ds = Object.keys(S.days).filter(d => d >= B.since && S.days[d].done?.[cid]).sort();
-  return ds[0] || '';
+  return B.given[cid] || '';
 }
 const billShow = (st, date) => { if (!st.cust || !S.config.bills || date < S.config.bills.since) return false; const g = billDate(st.cust.id); return g !== null && (!g || g === date); };
 function billStatus() {
@@ -850,7 +851,7 @@ function billStatus() {
 function openBills() {
   const st = billStatus(); if (!st) return;
   openSheet(`<div style="display:grid;gap:12px">${sheetHead(esc(st.B.label))}
-    <p class="hint">${st.rows.length - st.left.length}/${st.rows.length}명 전달 · 동선에서 그 고객을 체크하면 자동으로 전달한 걸로 바뀌어요. 배달이 없는 고객은 여기서 직접 표시해요.</p>
+    <p class="hint">${st.rows.length - st.left.length}/${st.rows.length}명 전달 · 청구서를 주고 나서 동선의 청구서 아이콘을 누르거나, 여기서 “전달함”을 눌러요. 배달 체크만으로는 바뀌지 않아요.</p>
     <div class="card" style="padding:4px 0">${st.rows.map(r => `<div class="todo"><span class="plate sm">${esc(locShort(r.c.loc))}</span><div class="t"><b>${esc(r.c.name)}</b><small>${r.given ? `${fmt(r.given)} 전달함` : r.next ? `${fmt(r.next)} 배달 때 전달` : `배달 없음${r.c.status !== 'active' ? ' · ' + STATUS_NAME[r.c.status] : ''} · 따로 전달`}</small></div>${r.given ? (st.B.given[r.id] ? `<button class="btn sm ghost" data-act="billUndo" data-id="${r.id}">취소</button>` : '<span class="badge xs ok">완료</span>') : `<button class="btn sm" data-act="billGive" data-id="${r.id}">전달함</button>`}</div>`).join('')}</div>
     <div class="sact"><button class="btn" data-act="billEnd">목록 끝내기</button><button class="btn pri" data-act="closeSheet">닫기</button></div></div>`);
 }
@@ -1334,7 +1335,7 @@ function renderRoute() {
       <button class="handle" aria-label="끌어서 순서 바꾸기">${ICON.grip}</button>
       <button class="seq" data-act="moveTo" data-key="${esc(st.key)}" data-date="${date}" aria-label="${num.get(st.key) || ''}번, 순서 옮기기">${num.get(st.key) || '–'}</button>
       <div class="rmain" data-act="openStop" data-key="${esc(st.key)}" data-date="${date}" data-b="${esc(st.loc.building)}" role="button" tabindex="0" aria-label="${esc(st.name)} 수량·메모 고치기">
-        <span class="who"><span class="plate sm">${esc(st.loc.building || '—')}${st.loc.unit ? '<i>-</i>' + esc(st.loc.unit) : ''}</span>${billShow(st, date) ? `<span class="billic" title="종이 청구서 같이 전달">${ICON.bill}${dense ? '' : '청구서'}</span>` : ''}${!dense && entName(st.loc.building, ei) ? `<span class="ent">${entName(st.loc.building, ei)}</span>` : ''}<span class="nm">${esc(st.name)}</span>${tags}${dense && notes ? '<span class="mk" title="메모 있음"></span>' : ''}</span>
+        <span class="who"><span class="plate sm">${esc(st.loc.building || '—')}${st.loc.unit ? '<i>-</i>' + esc(st.loc.unit) : ''}</span>${billShow(st, date) ? (billDate(st.cust.id) ? `<button class="billic given" data-act="billToggle" data-id="${st.cust.id}" data-date="${date}" aria-label="청구서 전달함, 누르면 취소">${ICON.check}${dense ? '' : '청구서'}</button>` : `<button class="billic" data-act="billToggle" data-id="${st.cust.id}" data-date="${date}" aria-label="종이 청구서 같이 전달, 주고 나서 누르기">${ICON.bill}${dense ? '' : '청구서'}</button>`) : ''}${!dense && entName(st.loc.building, ei) ? `<span class="ent">${entName(st.loc.building, ei)}</span>` : ''}<span class="nm">${esc(st.name)}</span>${tags}${dense && notes ? '<span class="mk" title="메모 있음"></span>' : ''}</span>
         <span class="its">${its || '<span class="muted">제품 없음</span>'}</span>
         ${!dense && (flags || st.loc.label) ? `<span class="rflags">${st.loc.label ? `<span class="muted" style="font-size:12.5px">${esc(st.loc.label)}</span>` : ''}${flags}</span>` : ''}
         ${!dense && notes ? `<span class="rnote">${esc(notes)}</span>` : ''}
@@ -2579,6 +2580,10 @@ document.addEventListener('pointercancel', endDrag);
 const ACT = {
   openBills: () => openBills(),
   billGive: a => { const B = S.config.bills; const c = custById(a.dataset.id); B.given[a.dataset.id] = TODAY(); logChange({ cid: c?.id, kind: '메모', from: TODAY(), to: TODAY(), text: B.label + ' 따로 전달' }); save('config', 'log'); openBills(); render(); },
+  billToggle: a => { const B = S.config.bills; if (!B) return; const id = a.dataset.id; const c = custById(id);
+    if (B.given[id]) { delete B.given[id]; save('config'); render(); toast(`${c?.name || ''} 청구서 전달 취소`); return; }
+    B.given[id] = a.dataset.date || TODAY(); logChange({ cid: id, kind: '메모', from: B.given[id], to: B.given[id], text: B.label + ' 전달' }); save('config', 'log'); render();
+    toast(`${c?.name || ''} 청구서 전달함`, () => { delete B.given[id]; save('config'); render(); }); },
   billUndo: a => { delete S.config.bills.given[a.dataset.id]; save('config'); openBills(); render(); },
   billEnd: a => { const st = billStatus(); if (st && st.left.length && a.dataset.sure !== '1') { a.dataset.sure = '1'; a.textContent = `${st.left.length}명 남았어요 · 한 번 더 누르면 끝내기`; return; } S.config.bills = null; save('config'); closeSheet(); render(); toast('청구서 목록을 끝냈어요'); },
   todoAdd: () => { const v = ($('#todoIn')?.value || '').trim(); if (!v) { toast('내용을 적어 주세요.'); return; } S.config.todos.push({ id: uid('t_'), text: v, at: Date.now(), due: '', done: false, doneAt: 0 }); save('config'); render(); },
