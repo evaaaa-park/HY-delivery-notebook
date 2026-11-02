@@ -273,6 +273,8 @@ export default function RouteView() {
 }
 
 /* ---------- complex map (단지 지도) ---------- */
+// Every building is a tile with its number and the unit numbers to deliver, grouped by entrance
+// (one box per entrance as set in 설정 > 출입구 나누기; basement and other units are listed above).
 function RouteMap({ date, stops, doneMap, autoSel }) {
   const byB = {}
   stops.filter(s => !s.skipped).forEach(s => { (byB[s.loc.building] = byB[s.loc.building] || []).push(s) })
@@ -280,6 +282,7 @@ function RouteMap({ date, stops, doneMap, autoSel }) {
   const groups = {}; order.forEach(b => { const g = seriesOf(b); (groups[g] = groups[g] || []).push(b) })
   const gnames = Object.keys(groups).sort((a, b) => (a === '상가·기타' ? 1 : 0) - (b === '상가·기타' ? 1 : 0))
   const sel = UI.mapB && byB[UI.mapB] ? UI.mapB : (autoSel && byB[autoSel] ? autoSel : null)
+  const nextKey = stops.find(s => !s.skipped && !doneMap[s.key])?.key
   const pick = b => { const next = UI.mapB === b ? null : b; setUI({ mapB: next, scrollB: next }) }
   return (
     <>
@@ -287,37 +290,59 @@ function RouteMap({ date, stops, doneMap, autoSel }) {
         <div className="mapsec" key={g}>
           <h3>{g} <span className="num">{groups[g].reduce((s, b) => s + (byB[b]?.length || 0), 0)}곳</span></h3>
           <div className="tiles">
-            {groups[g].map(b => {
-              const l = byB[b] || []; const dn = l.filter(s => doneMap[s.key]).length
-              const cls = !l.length ? 'none' : dn === l.length ? 'full' : 'pend'
-              let inner
-              if (isNumB(b) && !singleEnt(b)) {
-                const buckets = new Map()
-                l.forEach(s => { const u = parseUnit(s.loc.unit); const key = (u.floor != null && u.floor < 0) || !u.line ? 'B' : entIndex(b, u.line); if (!buckets.has(key)) buckets.set(key, []); buckets.get(key).push(s) })
-                const cells = entrancesOf(b).map((_, i) => ({ key: i, label: entLines(b, i).join('·') }))
-                if (buckets.has('B')) cells.unshift({ key: 'B', label: 'B' })
-                inner = (
-                  <span className="ents">
-                    {cells.map(cl => {
-                      const ls = buckets.get(cl.key) || []; const d = ls.filter(s => doneMap[s.key]).length
-                      return <i key={cl.key} className={!ls.length ? '' : d === ls.length ? 'full' : 'pend'}>{cl.label}<b>{ls.length ? d + '/' + ls.length : '·'}</b></i>
-                    })}
-                  </span>
-                )
-              } else inner = <span className="cnt">{l.length ? `${dn}/${l.length}` : '—'}</span>
-              return (
-                <button type="button" key={b} className={`tile ${cls}`} aria-pressed={sel === b} tabIndex={l.length ? undefined : -1} onClick={() => pick(b)}>
-                  <span className={cn('bn', !isNumB(b) && 'txt')}>{b}</span>{inner}
-                </button>
-              )
-            })}
+            {groups[g].map(b => <BuildingTile key={b} b={b} list={byB[b] || []} doneMap={doneMap} nextKey={nextKey} selected={sel === b} onPick={() => pick(b)} />)}
           </div>
         </div>
       ))}
       {sel
         ? <FloorPlan b={sel} list={byB[sel]} doneMap={doneMap} date={date} />
-        : <p className="hint">칸마다 왼쪽은 1·2호, 오른쪽은 3·4호(5호까지 있으면 3·4·5호) 입구예요. 파란 칸을 누르면 층별 배치가 보여요.</p>}
+        : <p className="hint">동마다 오늘 배달할 호수가 입구별로 보여요. 동을 누르면 층별 배치가 나오고, 목록이 그 동으로 이동해요.</p>}
     </>
+  )
+}
+
+function BuildingTile({ b, list, doneMap, nextKey, selected, onPick }) {
+  const dn = list.filter(s => doneMap[s.key]).length
+  const cls = !list.length ? 'none' : dn === list.length ? 'full' : 'pend'
+  const unit = s => (
+    <span key={s.key} className={cn('un', doneMap[s.key] && 'done', s.key === nextKey && 'next')}>{s.loc.unit || s.name}</span>
+  )
+  let body = null
+  if (list.length) {
+    if (!isNumB(b) || singleEnt(b)) body = <span className="units">{list.map(unit)}</span>
+    else {
+      const loose = [], byEnt = new Map()
+      list.forEach(s => {
+        const u = parseUnit(s.loc.unit)
+        if ((u.floor != null && u.floor < 0) || !u.line) { loose.push(s); return }
+        const e = entIndex(b, u.line); byEnt.set(e, [...(byEnt.get(e) || []), s])
+      })
+      const ents = entrancesOf(b).map((_, i) => i)
+      body = (
+        <>
+          {loose.length > 0 && <span className="units">{loose.map(unit)}</span>}
+          <span className="entboxes" style={{ '--n': ents.length }}>
+            {ents.map(i => {
+              const ls = byEnt.get(i) || []
+              return (
+                <span key={i} className={cn('entbox', !ls.length && 'empty')}>
+                  <span className="el">{entLines(b, i).join('·')}</span>
+                  {ls.length ? ls.map(unit) : <span className="un none">–</span>}
+                </span>
+              )
+            })}
+          </span>
+        </>
+      )
+    }
+  }
+  return (
+    <button type="button" className={cn('tile', cls)} aria-pressed={selected} tabIndex={list.length ? undefined : -1} onClick={onPick}
+      aria-label={`${bldName(b)} ${list.length ? `${dn}/${list.length} 완료` : '배달 없음'}`}>
+      <span className={cn('bn', !isNumB(b) && 'txt')}>{b}</span>
+      {list.length > 0 && <span className="cnt num">{dn}/{list.length}</span>}
+      {body}
+    </button>
   )
 }
 
