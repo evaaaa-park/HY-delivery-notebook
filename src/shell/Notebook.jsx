@@ -124,6 +124,11 @@ export default function Notebook() {
     maybeFreeze()
   }, [ready])
   useEffect(() => () => closeSheet(), [])
+  // the iPad side rail takes the left edge; sign-in/waiting screens have no rail and stay centred
+  useEffect(() => {
+    document.body.classList.add('with-rail')
+    return () => document.body.classList.remove('with-rail')
+  }, [])
   if (!ready) return <Splash text="수첩 불러오는 중" />
   const View = VIEWS[UI.tab] || HomeView
   const fabHidden = UI.tab === 'settings' || (UI.tab === 'customers' && UI.selected.size > 0)

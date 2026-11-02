@@ -478,7 +478,7 @@
   /* tablet (iPad portrait and up): side rail, inspector-style sheets */
   @media (min-width: 744px) {
     :root { --rail: 88px; }
-    body { padding-left: calc(var(--rail) + env(safe-area-inset-left, 0px)); }
+    body.with-rail { padding-left: calc(var(--rail) + env(safe-area-inset-left, 0px)); } /* only while the side rail is shown, not on sign-in screens */
     .wrap { max-width: 1240px; }
     .phone-only { display: none !important; }
     .rail-only { display: flex !important; }

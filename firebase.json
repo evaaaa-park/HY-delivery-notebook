@@ -1,4 +1,16 @@
 {
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "헬리오 배달수첩",
+        "supportEmail": "goochoi913@gmail.com",
+        "authorizedRedirectUris": [
+          "https://hy-delivery-notebook.web.app/__/auth/handler",
+          "https://hy-delivery-notebook.firebaseapp.com/__/auth/handler"
+        ]
+      }
+    }
+  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
