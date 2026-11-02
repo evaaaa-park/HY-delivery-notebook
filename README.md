@@ -41,12 +41,15 @@ When something slipped, a customer got the wrong item, or I ordered too much or 
 
 ## How it is built
 
-- **One HTML file, plain JavaScript, no framework and no build step.** It is added to the iPad Home Screen like an app. The layout works on iPad (split view: list and building map side by side) and on iPhone, in light and dark mode.
-- **Storage.** It runs as a published claude.ai page. Data lives in that page's database with an owner-only read/write rule, so only my account can read it.
-  - Every write is mirrored to `localStorage`, so the app opens and works offline.
-  - Each document has a timestamp, and the newer edit wins.
-  - Failed writes wait in a queue and retry. Data is also saved when the page goes to the background.
-- **Data model** (simplified):
+Version 2 keeps every feature and rule of the original and moves it onto a normal project setup (see [docs/CHANGELOG.md](docs/CHANGELOG.md)).
+
+- **An installable web app (PWA) that works without internet.** Added to the iPad and iPhone Home Screen from Safari. The app, the product photos and the fonts are stored on the device, so it opens and works in basements and stairwells with no signal.
+- **Data in Firebase, a copy on the device.** Every change is saved on the device first and sent to the server as soon as there is a connection, even if the app was closed in between. The iPad and the iPhone see each other's changes live. Records are stored one per customer, order and day, so two devices editing different things never overwrite each other. Nothing is pruned: past orders, logs and monthly performance stay on the server, and the server is backed up every day.
+- **Google sign-in with approval.** A new account waits until an approved user lets it in (Settings > 사용자).
+- **Product photos instead of names.** On the route, each stop shows its products as big photos with the count ("[photo] ×4"), so items are recognised at a glance. The ordering sheet, order form, customer cards and records use the same photos.
+- **AI assistant through a small server function.** The AI key stays on the server. The assistant gets the same context as before (today, the products, every customer with regular items and pauses, the next two weeks of orders) plus tools that change the data exactly like the buttons do, and each AI turn can be undone. The conversation is shared between iPad and iPhone.
+- **Stack:** Vite + React (JavaScript), shadcn/ui, react-icons, Firebase (Auth, Firestore, Cloud Functions, Hosting). The original logic lives in `src/domain/` almost line for line. Developer notes are in [CLAUDE.md](CLAUDE.md).
+- **Data model** (simplified, unchanged from version 1):
   ```
   customer  { id, name, loc{building, unit, type}, regular[{productId, qty, days[], every, anchor}],
               pauses[{from, to, days[]}], status, endDate, payment, holidayOff, … }
@@ -56,18 +59,18 @@ When something slipped, a customer got the wrong item, or I ordered too much or 
   ```
 - **Route order** = building rank → entrance group → floor (high to low), then my saved base order, then that day's drag changes.
 - **Product names** keep two names, the short one on my delivery sheet and the exact name in hy's ordering app, so the ordering list can be copied as-is. Items not in the catalog (pet products, gift sets) can be typed in by name. They go on the route but never into the ordering sheet.
-- **AI** uses the page's Claude access with a fixed set of tools and a context summary of today's data. The assistant cannot do anything the buttons cannot.
 
 ## Privacy
 
 - This repository contains **only code**. No names, phone numbers, addresses, orders, or logs.
-- Real data stays in the owner-only database of my private claude.ai page. Someone else who opens the page sees an empty notebook.
-- `.gitignore` blocks data exports (`*.json`, `*.csv`, `*.xlsx`, phone screenshots) as a second safety net.
-- Screenshots in `docs/` were made with fictional customers.
+- Real data lives in Firebase behind security rules: only signed-in, approved accounts can read or write it.
+- `.gitignore` blocks data exports (`*.json` backups, `*.csv`, `*.xlsx`, phone screenshots), local keys (`.env.local`) and the source photo folders.
+- Screenshots in `docs/` use made-up demo customers (Settings > 데이터 > 예시 데이터 넣기).
 
 ## Running it
 
-Open `index.html` in a browser. Outside claude.ai it runs in **local mode**: data stays only in that browser, and sync and the AI assistant are turned off. Inside claude.ai it syncs across devices and the assistant works.
+- **Use it:** open https://hy-delivery-notebook.web.app in Safari → Share → **Add to Home Screen**, then sign in with Google once.
+- **Develop:** `npm install`, copy `.env.example` to `.env.local`, then `npm run dev`. `npm run emulators` + `npm run dev:emu` run everything locally against the Firebase emulators. Details in [CLAUDE.md](CLAUDE.md).
 
 ## How I made it
 
@@ -81,4 +84,4 @@ The commit history shows how it grew, one real problem at a time. The full list 
 
 ### 한국어 요약
 
-송파 헬리오시티에서 hy 배달 매니저로 일하면서 매일 쓰는 배달 관리 앱이에요. 정기 고객 관리, 2영업일 전(T-2) 발주표, 입구·층 순서로 정렬되는 배달 동선, 알림톡 주문 입력(일반·견본·선불정기·추가·회수), 중지와 자동 재개, 공휴일, 변경 기록, 월별 실적, 종이 청구서 전달 표시, AI 도우미가 한 화면에 있어요. 이 저장소에는 코드만 있고 고객 정보는 없어요.
+송파 헬리오시티에서 hy 배달 매니저로 일하면서 매일 쓰는 배달 관리 앱이에요. 정기 고객 관리, 2영업일 전(T-2) 발주표, 입구·층 순서로 정렬되는 배달 동선, 알림톡 주문 입력(일반·견본·선불정기·추가·회수), 중지와 자동 재개, 공휴일, 변경 기록, 월별 실적, 종이 청구서 전달 표시, AI 도우미가 한 화면에 있어요. 제품은 이름 대신 사진과 개수로 보여요. iPad·iPhone 홈 화면에 추가해서 인터넷이 없어도 쓰고, 연결되면 서버(Firebase)에 자동으로 저장돼요. 이 저장소에는 코드만 있고 고객 정보는 없어요.
