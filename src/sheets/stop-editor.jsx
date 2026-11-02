@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
-import { Field, Plate, ProductImage, Seg, Stepper, TypeBadge } from '@/components/common'
+import { Field, Plate, PDot, Seg, Stepper, TypeBadge } from '@/components/common'
 import { isSched } from '@/domain/constants'
 import { normOrder } from '@/domain/normalize'
 import { custById, pName, pShort, locShort, itemsText } from '@/domain/model'
@@ -117,7 +117,7 @@ function StopEditor({ init }) {
                 <div className="ritems" style={{ marginTop: 8 }}>
                   {list.map((it, i) => (
                     <div key={it.pid} className={'ritem ' + (it.qty ? '' : 'zero')}>
-                      <ProductImage pid={it.pid} size={30} />
+                      <PDot pid={it.pid} />
                       <span className="pn">{pName(it.pid)}</span>
                       <Stepper value={it.qty} label={pName(it.pid)} onDec={() => changeQty(i, -1)} onInc={() => changeQty(i, 1)} />
                     </div>
@@ -148,7 +148,7 @@ function StopEditor({ init }) {
                 </div>
                 {o.items.map((it, ii) => (
                   <div key={it.productId + ii} className="ritem">
-                    <ProductImage pid={it.productId} size={30} />
+                    <PDot pid={it.productId} />
                     <span className="pn">{pName(it.productId)}</span>
                     <Stepper value={it.qty} label={pName(it.productId)} onDec={() => { it.qty = Math.max(0, it.qty - 1); refresh() }} onInc={() => { it.qty = it.qty + 1; refresh() }} />
                   </div>

@@ -9,7 +9,7 @@ import { useDraft } from '@/lib/hooks'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ProductImage, Plate, Stepper, Seg, Chip, Field, CheckRow } from '@/components/common'
+import { ProductImage, PDot, Plate, Stepper, Seg, Chip, Field, CheckRow } from '@/components/common'
 import { ORDER_TYPES, TYPE_NAME, TYPE_LONG, TYPE_HINT } from '@/domain/constants'
 import { normOrder } from '@/domain/normalize'
 import { custById, xId, locShort, itemsText } from '@/domain/model'
@@ -191,7 +191,7 @@ function OrderForm({ opts }) {
         <span className="lbl">목록에 없는 제품 <span className="muted" style={{ fontWeight: 400 }}>· 동선에만 넣고 발주는 안 해요</span></span>
         {F.extra.map((x, i) => (
           <div className="xrow" key={i}>
-            <ProductImage pid={xId(x.name)} size={32} />
+            <PDot hue={30} />
             <Input data-xname value={x.name} placeholder="제품 이름 (예: 펫쿠르트 영양트릿 치킨)" onChange={e => { x.name = e.target.value; refresh() }} aria-label="제품 이름" />
             <Stepper value={x.qty} label="" onDec={() => { x.qty = Math.max(1, x.qty - 1); refresh() }} onInc={() => { x.qty = Math.max(1, x.qty + 1); refresh() }} />
             <Button size="sm" variant="ghost" aria-label="빼기" onClick={() => { F.extra.splice(i, 1); refresh() }}>✕</Button>

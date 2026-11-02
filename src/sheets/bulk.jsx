@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
-import { ProductImage, Seg, Chip, DayPick, Field, CheckLine } from '@/components/common'
+import { PDot, Seg, Chip, DayPick, Field, CheckLine } from '@/components/common'
 import { PAY, STATUS_NAME } from '@/domain/constants'
 import { normCust, normOrder } from '@/domain/normalize'
 import { pName } from '@/domain/model'
@@ -141,7 +141,7 @@ function BulkQty() {
       <SheetHead title={`${UI.selected.size}명 정기 수량 변경`} />
       <Field label="제품" htmlFor="bqP">
         <div className="row" style={{ flexWrap: 'nowrap' }}>
-          <ProductImage pid={pid} size={40} />
+          <PDot pid={pid} />
           <NativeSelect id="bqP" value={pid} onChange={e => setPid(e.target.value)} className="min-w-0 flex-1">
             {S.config.products.map(p => <NativeSelectOption key={p.id} value={p.id}>{p.name}</NativeSelectOption>)}
           </NativeSelect>

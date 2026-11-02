@@ -6,7 +6,7 @@ import { S } from '@/store/state'
 import { save } from '@/store/sync'
 import { PAY, LOC_TYPES, ORDER_TYPES, TYPE_NAME } from '@/domain/constants'
 import { normCust, normOrder } from '@/domain/normalize'
-import { custById, prodById, isX, xId, pName, locShort, itemsText } from '@/domain/model'
+import { custById, prodById, isX, xId, locShort, itemsText } from '@/domain/model'
 import { isNumB, ensureRouteOrder } from '@/domain/location'
 import { defaultOrderDate } from '@/domain/calendar'
 import { logChange, logMark, dropLogsSince } from '@/domain/log'
@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
-import { Plate, ProductQty } from '@/components/common'
+import { Plate, ProductName } from '@/components/common'
 import { IconImage } from '@/components/icons'
 import { extract, prepareImages, aiErrorText } from './client'
 
@@ -157,8 +157,7 @@ function ImportSheet({ mode, onBack }) {
                     {!c && <Badge variant="warn">새 배달지</Badge>}
                   </span>
                   <span className="muted">{fmt(r.date)}{r.note ? ' · ' + r.note : ''}</span>
-                  <span className="its">{items.length ? items.map((it, k) => <ProductQty key={k} pid={isX(it.productId) ? xId(it.productId.slice(2)) : it.productId} qty={Math.max(1, Math.round(+it.qty || 1))} size={30} />) : <span className="muted">제품 확인 필요</span>}</span>
-                  {items.length > 0 && <span className="hint" style={{ fontSize: 12 }}>{items.map(it => `${pName(it.productId)}×${it.qty}`).join(', ')}</span>}
+                  <span className="its">{items.length ? items.map((it, k) => <ProductName key={k} full pid={isX(it.productId) ? xId(it.productId.slice(2)) : it.productId} qty={Math.max(1, Math.round(+it.qty || 1))} />) : <span className="muted">제품 확인 필요</span>}</span>
                 </span>
               </label>
             )

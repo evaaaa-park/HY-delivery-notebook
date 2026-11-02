@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
-import { ProductImage, Stepper, DayPick, Field, CheckLine } from '@/components/common'
+import { PDot, Stepper, DayPick, Field, CheckLine } from '@/components/common'
 import { IconClose } from '@/components/icons'
 import { PAY, LOC_TYPES, STATUS_NAME } from '@/domain/constants'
 import { normCust, normOrder } from '@/domain/normalize'
@@ -130,7 +130,7 @@ function CustomerSheet({ id }) {
           {cf.regular.map((r, i) => (
             <div className="regrow" key={i}>
               <div className="row" style={{ flexWrap: 'nowrap', minWidth: 0 }}>
-                <ProductImage pid={r.productId} size={30} />
+                <PDot pid={r.productId} />
                 <NativeSelect value={r.productId} onChange={e => { r.productId = e.target.value; refresh() }} aria-label="제품" className="min-w-0 flex-1">
                   {S.config.products.map(p => <NativeSelectOption key={p.id} value={p.id}>{p.name}</NativeSelectOption>)}
                   {!prodById(r.productId) && <NativeSelectOption value={r.productId}>{r.productId}</NativeSelectOption>}

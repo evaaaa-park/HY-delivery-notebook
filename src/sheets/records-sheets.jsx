@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
-import { ProductImage, ProductQty, Field } from '@/components/common'
+import { PDot, ProductName, Field } from '@/components/common'
 import { LOG_KINDS, TYPE_NAME } from '@/domain/constants'
 import { custById, pName, statusBadge, locShort } from '@/domain/model'
 import { perfData, prodOrderIdx, dayStatus } from '@/domain/perf'
@@ -19,11 +19,11 @@ import { logChange } from '@/domain/log'
 import { gotoRoute } from '@/shell/nav'
 import { openCustSheet } from '@/sheets/customer-form'
 
-// photo × qty, plus the order type in words for anything that is not a regular delivery
-function TypedQty({ pid, qty, ty, size = 24 }) {
+// name × qty, plus the order type in words for anything that is not a regular delivery
+function TypedQty({ pid, qty, ty }) {
   return (
     <span className="inline-flex items-center gap-0.5">
-      <ProductQty pid={pid} qty={qty} type={ty} size={size} />
+      <ProductName pid={pid} qty={qty} type={ty} />
       {ty !== 'regular' && <small className="muted">{TYPE_NAME[ty]}</small>}
     </span>
   )
@@ -54,7 +54,7 @@ function PerfSheet({ stopKey }) {
       </div>
       <div className="card perfbig">
         {rows.map(([p, n]) => (
-          <div className="pb" key={p}><ProductImage pid={p} size={36} /><span className="pn">{pName(p)}</span><b className="num">{n}</b></div>
+          <div className="pb" key={p}><PDot pid={p} /><span className="pn">{pName(p)}</span><b className="num">{n}</b></div>
         ))}
         <div className="pb tot"><span /><span className="pn">합계</span><b className="num">{r.total}</b></div>
       </div>

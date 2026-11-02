@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ProductImage, ProductQty, TypeBadge, EmptyCard } from '@/components/common'
+import { PDot, ProductName, TypeBadge, EmptyCard } from '@/components/common'
 import { IconLeft, IconRight, IconCopy } from '@/components/icons'
 import { TYPES, ORDER_TYPES, TYPE_NAME } from '@/domain/constants'
 import { isOn, noBuyOrder, orderWho } from '@/domain/model'
@@ -67,7 +67,7 @@ function OrderLine({ o }) {
   const { name, loc } = orderWho(o)
   return (
     <div>
-      <span className="its">{o.items.map((i, k) => <ProductQty key={k} pid={i.productId} qty={i.qty} type={o.type} size={26} />)}</span>
+      <span className="its">{o.items.map((i, k) => <ProductName key={k} pid={i.productId} qty={i.qty} type={o.type} />)}</span>
       <span>{name} <span className="muted">{locText(loc)}</span></span>
     </div>
   )
@@ -136,7 +136,7 @@ export default function OrderView() {
                           <tr className="prow" onClick={e => { if (e.target.closest('input')) return; toggleOrderRow(r.p.id) }}>
                             <td>
                               <div className="pname">
-                                <ProductImage pid={r.p.id} size={36} />
+                                <PDot pid={r.p.id} hue={r.p.hue} />
                                 <div>
                                   <b>{r.p.orderName || r.p.name}</b>
                                   {r.p.orderName && r.p.orderName !== r.p.name && <small>배달표: {r.p.name}</small>}

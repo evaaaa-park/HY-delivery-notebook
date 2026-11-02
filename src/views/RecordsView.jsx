@@ -8,7 +8,7 @@ import { toast } from '@/lib/toast'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { ProductImage, ProductQty, Seg, Chip } from '@/components/common'
+import { PDot, ProductName, Seg, Chip } from '@/components/common'
 import { IconLeft, IconRight } from '@/components/icons'
 import { pName } from '@/domain/model'
 import { isDeliveryDay } from '@/domain/calendar'
@@ -86,7 +86,7 @@ function PerfPanel() {
             <div className="tblwrap">
               <table className="ot"><tbody>
                 {Object.entries(totals).sort(byProduct).map(([p, n]) => (
-                  <tr key={p}><td><div className="pname"><ProductImage pid={p} size={28} />{pName(p)}</div></td><td><b className="num">{n}</b></td></tr>
+                  <tr key={p}><td><div className="pname"><PDot pid={p} />{pName(p)}</div></td><td><b className="num">{n}</b></td></tr>
                 ))}
               </tbody></table>
             </div>
@@ -96,7 +96,7 @@ function PerfPanel() {
               <button type="button" className="pr" key={r.key} onClick={() => openPerfSheet(r.key)}>
                 <span className="plate sm">{r.loc || '—'}</span>
                 <span className="nm">{r.name}</span>
-                <span className="its">{Object.entries(r.prod).sort(byProduct).map(([p, n]) => <ProductQty key={p} pid={p} qty={n} size={26} />)}</span>
+                <span className="its">{Object.entries(r.prod).sort(byProduct).map(([p, n]) => <ProductName key={p} pid={p} qty={n} />)}</span>
                 <span className="tot num">{r.dates.length}회 · <b>{r.total}</b>개</span>
               </button>
             )) : <div className="empty"><p>이 달 실적이 없어요.</p></div>}

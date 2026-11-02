@@ -4,7 +4,7 @@ import { S, useStore } from '@/store/state'
 import { TODAY, addDays, fmt, fmtShort, dayOf } from '@/lib/dates'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ProductQty, TypeBadge, EmptyCard } from '@/components/common'
+import { ProductName, TypeBadge, EmptyCard } from '@/components/common'
 import { custById } from '@/domain/model'
 import { locText } from '@/domain/location'
 import { routeDefaultDate, orderingDay, targetFrom } from '@/domain/calendar'
@@ -46,12 +46,6 @@ function TodoSection() {
   )
 }
 
-// one photo chip per product with the total to pick up (sample orders)
-function aggItems(items) {
-  const m = new Map(); items.forEach(i => m.set(i.productId, (m.get(i.productId) || 0) + i.qty))
-  return [...m]
-}
-
 function AlertAction({ action }) {
   const run = () => {
     if (action.act === 'ackPause') ackPause(action.id, action.p)
@@ -74,11 +68,6 @@ function Alerts() {
             <div className="t">
               <b>{a.who}</b>{a.title ? ' ' + a.title : ''}
               <small>{a.sub || ''}</small>
-              {a.items?.length > 0 && (
-                <div className="row" style={{ gap: '4px 10px', marginTop: 6 }}>
-                  {aggItems(a.items).map(([pid, q]) => <ProductQty key={pid} pid={pid} qty={q} size={26} />)}
-                </div>
-              )}
             </div>
             {a.action && <AlertAction action={a.action} />}
           </div>
@@ -111,7 +100,7 @@ function RecentOrders() {
                   <div><b>{nm || '이름 없음'}</b> <span className="muted">{locText(loc)}</span></div>
                   <div className="row" style={{ gap: '4px 10px', marginTop: 3, fontSize: 13, opacity: cancelled ? 0.55 : 1 }}>
                     <span className="muted">{fmt(o.date)}</span>
-                    {o.items.map((i, k) => <ProductQty key={k} pid={i.productId} qty={i.qty} size={28} />)}
+                    {o.items.map((i, k) => <ProductName key={k} pid={i.productId} qty={i.qty} />)}
                     {cancelled && <span className="muted">· 취소됨</span>}
                   </div>
                 </div>

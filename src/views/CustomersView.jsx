@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ProductImage, Plate, Stepper, Chip, EmptyCard } from '@/components/common'
+import { PDot, Plate, Stepper, Chip, EmptyCard } from '@/components/common'
 import { IconClose } from '@/components/icons'
 import { PAY, LOC_TYPES } from '@/domain/constants'
 import { pName, isOn, statusBadge, cashUnpaid } from '@/domain/model'
@@ -75,7 +75,7 @@ function CustCard({ c }) {
           <div className="ritems">
             {c.regular.map((r, i) => (
               <div className={'ritem' + (r.qty ? '' : ' zero')} key={i}>
-                <ProductImage pid={r.productId} size={30} />
+                <PDot pid={r.productId} />
                 <span className="pn">{pName(r.productId)}</span>
                 <span className="dd">{r.every === 2 ? '격주 ' : ''}{daysText(r.days)}</span>
                 <Stepper value={r.qty} label={pName(r.productId)} onDec={() => changeQty(c.id, i, -1)} onInc={() => changeQty(c.id, i, 1)} />

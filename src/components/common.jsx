@@ -59,6 +59,18 @@ export function ProductQty({ pid, qty, type = 'regular', size = 34, name = 'auto
   )
 }
 
+// Product as text: colour dot + short name + count (the original notebook's style).
+// Photos are for the route and for picking products; lists, records and sheets use names.
+export function ProductName({ pid, qty, type = 'regular', full = false, className }) {
+  return (
+    <span className={cn('ic', type !== 'regular' && type, className)}>
+      <span className="pdot" style={{ '--h': pHue(pid) }} />
+      {full ? pName(pid) : pShort(pid)}
+      {qty != null && <b className="num">{qty}</b>}
+    </span>
+  )
+}
+
 export function Plate({ loc, sm = false }) {
   return (
     <span className={cn('plate', sm && 'sm')}>
