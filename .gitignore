@@ -1,6 +1,6 @@
 # 실제 고객 데이터는 절대 올리지 않아요 (Never commit real customer data)
+# Data exports and backups (the app's backup files are .json)
 *.json
-!package.json
 data/
 backup/
 exports/
@@ -8,4 +8,44 @@ exports/
 *.csv
 *.heic
 *.HEIC
+
+# ...but these JSON files are project config, not data
+!package.json
+!package-lock.json
+!jsconfig.json
+!components.json
+!firebase.json
+!firestore.indexes.json
+!.firebaserc
+!functions/package.json
+!functions/package-lock.json
+
+# Secrets: API keys, tokens, service accounts, local env
+.env
+.env.*
+!.env.example
+*.local
+functions/.secret.local
+functions/.env*
+.runtimeconfig.json
+*-firebase-adminsdk-*
+service-account*
+
+# Build output, dependencies, tool caches
+node_modules/
+dist/
+dev-dist/
+.firebase/
+firebase-debug*.log
+firestore-debug*.log
+ui-debug*.log
+pglite-debug*.log
+.vite/
+coverage/
+
+# Source photos and working files kept only on the developer's machine
+hyFredit_누끼_80개/
+product-images-found/
+*.webloc
+
 .DS_Store

@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// 헬리오 배달수첩
+// - Sign-in with Google. Every account starts as "pending" and must be approved by an approved user.
+// - The owner below is always approved (cannot be locked out).
+// - Approved users all have the same role: they read and write every notebook record and decide on
+//   other users' access.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    // Keep in sync with src/store/auth.js (OWNER_EMAILS) and functions/index.js (OWNERS).
+    function isOwner() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() in ['goochoi913@gmail.com'];
+    }
+    function isApproved() {
+      return isOwner()
+        || (signedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved');
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isApproved());
+      // first sign-in: create your own profile as pending (the owner may create it as approved)
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.email == request.auth.token.email.lower()
+        && (request.resource.data.status == 'pending'
+            || (isOwner() && request.resource.data.status == 'approved'));
+      // approved users decide on others; anyone may refresh their own profile without changing status/email
+      allow update: if isApproved()
+        || (signedIn() && request.auth.uid == uid
+            && request.resource.data.status == resource.data.status
+            && request.resource.data.email == resource.data.email);
+      allow delete: if isApproved();
+    }
+
+    // notebook records
+    match /customers/{id} { allow read, write: if isApproved(); }
+    match /orders/{id}    { allow read, write: if isApproved(); }
+    match /days/{id}      { allow read, write: if isApproved(); }
+    match /log/{id}       { allow read, write: if isApproved(); }
+    match /perf/{id}      { allow read, write: if isApproved(); }
+    match /settings/{id}  { allow read, write: if isApproved(); }
+    match /chat/{id}      { allow read, write: if isApproved(); }
+  }
+}
