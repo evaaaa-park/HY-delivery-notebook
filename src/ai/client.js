@@ -1,6 +1,9 @@
 // Talking to the `ai` Cloud Function. The app never names the AI model or provider: it is always "AI".
 import { httpsCallable } from 'firebase/functions'
 import { functions } from '@/firebase'
+import { S } from '@/store/state'
+
+const tier = () => S.config.aiTier || 'best'
 
 const call = httpsCallable(functions, 'ai', { timeout: 540_000 })
 
@@ -27,7 +30,7 @@ export function aiErrorText(e) {
 
 // One assistant step. onText receives the reply text as it is written.
 export async function chatStep({ system, messages, tools }, { onText, signal } = {}) {
-  const res = await call.stream({ mode: 'chat', system, messages, tools }, { signal })
+  const res = await call.stream({ mode: 'chat', tier: tier(), system, messages, tools }, { signal })
   res.data.catch(() => {}) // if the stream fails first, the same error is thrown below; avoid an unhandled rejection
   for await (const chunk of res.stream) { if (chunk?.text) onText?.(chunk.text) }
   return await res.data
@@ -35,7 +38,7 @@ export async function chatStep({ system, messages, tools }, { onText, signal } =
 
 // Structured read of customers/orders from text and screenshots.
 export async function extract({ kind, prompt, images }) {
-  const res = await call({ mode: 'extract', kind, prompt, images })
+  const res = await call({ mode: 'extract', tier: tier(), kind, prompt, images })
   return res.data?.json
 }
 

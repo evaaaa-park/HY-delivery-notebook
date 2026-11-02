@@ -23,7 +23,16 @@ setGlobalOptions({ region: 'asia-northeast3', maxInstances: 5 })
 const AI_KEY = defineSecret('ANTHROPIC_API_KEY')
 // Keep in sync with firestore.rules (isOwner) and src/store/auth.js (OWNER_EMAILS).
 const OWNERS = ['goochoi913@gmail.com']
-const MODEL = 'claude-opus-5-5'
+// AI level chosen in the app (설정 > AI). The app only shows the level, never the model.
+//   fast      cheapest and quickest; fine for questions and simple changes
+//   balanced  most changes done right at about half the cost of best
+//   best      most reliable with ambiguous customers/dates and messy screenshots (default)
+const TIERS = {
+  fast: { model: 'claude-haiku-5-5', fallback: false }, // no server-side fallback exists for this model
+  balanced: { model: 'claude-sonnet-5-5', fallback: true },
+  best: { model: 'claude-opus-5-5', fallback: true },
+}
+const tierOf = t => TIERS[t] || TIERS.best
 const CHAT_EFFORT = 'medium' // thinking depth for the assistant; 'low' is faster/cheaper, 'high' more careful
 const FALLBACK = { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' } // a declined request is retried on another model
 
@@ -50,10 +59,11 @@ async function chatStep(client, d, request, response) {
   const { system, messages, tools } = d
   if (typeof system !== 'string' || !system.trim()) throw new HttpsError('invalid-argument', 'system required')
   if (!Array.isArray(messages) || !messages.length) throw new HttpsError('invalid-argument', 'messages required')
+  const T = tierOf(d.tier)
   const stream = client.beta.messages.stream({
-    model: MODEL,
+    model: T.model,
     max_tokens: 16000,
-    ...FALLBACK,
+    ...(T.fallback ? FALLBACK : {}),
     thinking: { type: 'adaptive' },
     output_config: { effort: CHAT_EFFORT },
     // static instructions are cached; the conversation prefix is cached automatically within a step loop
@@ -66,7 +76,7 @@ async function chatStep(client, d, request, response) {
   stream.on('text', delta => { chain = chain.then(() => response?.sendChunk({ text: delta })).catch(() => {}) })
   const msg = await stream.finalMessage()
   await chain
-  logger.info('ai chat step', { uid: request.auth?.uid, stop: msg.stop_reason, usage: msg.usage })
+  logger.info('ai chat step', { uid: request.auth?.uid, model: T.model, stop: msg.stop_reason, usage: msg.usage })
   return { content: msg.content, stop_reason: msg.stop_reason, usage: msg.usage }
 }
 
@@ -126,15 +136,16 @@ async function extract(client, d, request) {
     ...images.map(img => ({ type: 'image', source: { type: 'base64', media_type: img.type, data: img.data } })),
     { type: 'text', text: d.prompt },
   ]
+  const T = tierOf(d.tier)
   const msg = await client.beta.messages.create({
-    model: MODEL,
+    model: T.model,
     max_tokens: 16000,
-    ...FALLBACK,
+    ...(T.fallback ? FALLBACK : {}),
     thinking: { type: 'adaptive' },
     output_config: { effort: 'low', format: { type: 'json_schema', schema } },
     messages: [{ role: 'user', content }],
   })
-  logger.info('ai extract', { uid: request.auth?.uid, kind: d.kind, stop: msg.stop_reason, usage: msg.usage })
+  logger.info('ai extract', { uid: request.auth?.uid, model: T.model, kind: d.kind, stop: msg.stop_reason, usage: msg.usage })
   if (msg.stop_reason === 'refusal') throw new HttpsError('failed-precondition', 'refused')
   if (msg.stop_reason === 'max_tokens') throw new HttpsError('out-of-range', 'too-long')
   const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('')

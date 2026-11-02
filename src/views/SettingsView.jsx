@@ -48,6 +48,23 @@ function Install() {
   )
 }
 
+// The app shows only the level, never the model (the server maps level -> model).
+const AI_LEVELS = [
+  ['fast', '빠름·저렴', '답이 가장 빠르고 비용이 가장 적어요. 간단한 질문이나 짧은 변경에는 충분하지만, 복잡한 카톡 캡처나 비슷한 고객이 여럿일 때는 가끔 틀릴 수 있어요.'],
+  ['balanced', '균형', '대부분의 변경을 정확하게 해요. 비용은 “가장 정확”의 절반쯤이에요.'],
+  ['best', '가장 정확', '애매한 고객·날짜나 복잡한 캡처도 가장 잘 처리해요. 조금 느리고 비용이 가장 많아요.'],
+]
+function AiLevel() {
+  const cur = S.config.aiTier || 'best'
+  return (
+    <Sec title="AI"><div className="card" style={{ padding: 12, display: 'grid', gap: 10 }}>
+      <Seg value={cur} onChange={v => { S.config.aiTier = v; save('config'); toast(`AI: ${AI_LEVELS.find(l => l[0] === v)[1]}`) }} options={AI_LEVELS.map(([v, n]) => [v, n])} />
+      <p className="hint">{AI_LEVELS.find(l => l[0] === cur)?.[2]}</p>
+      <p className="hint">다음 메시지부터 바뀌고, 함께 쓰는 모든 기기에 똑같이 적용돼요. AI가 바꾼 내용은 대화에서 언제든 되돌릴 수 있어요.</p>
+    </div></Sec>
+  )
+}
+
 function OrderRules() {
   const C = S.config
   const set = (k, v) => { C[k] = v; save('config') }
@@ -309,6 +326,7 @@ export default function SettingsView() {
       <div className="sec-h" style={{ marginBottom: 14 }}><h2 className="page-h">설정</h2><Button size="sm" onClick={() => setTab('home')}>닫기</Button></div>
       <Screen />
       <Install />
+      <AiLevel />
       <OrderRules />
       <Holidays />
       <RouteOrder />

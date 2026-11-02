@@ -1,6 +1,6 @@
 // Every record goes through these on the way in (Firestore, backup import, forms), so older or partial
 // data always comes out in the current shape.
-import { DEFAULT_CONFIG, DEFAULT_PRODUCTS, DEFAULT_ROUTE, HOL_OFF_TYPES, STATUS_NAME, TYPES } from './constants'
+import { DEFAULT_CONFIG, DEFAULT_PRODUCTS, DEFAULT_ROUTE, HOL_OFF_TYPES, STATUS_NAME, TYPES, AI_TIERS } from './constants'
 import { clone, uid } from '@/lib/util'
 
 export function normCust(c) {
@@ -53,6 +53,7 @@ export function normConfig(b) {
     }
   }
   if (!Array.isArray(c.baseSeq)) c.baseSeq = null
+  c.aiTier = AI_TIERS.includes(b.aiTier) ? b.aiTier : 'best'
   return c
 }
 

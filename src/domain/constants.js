@@ -68,3 +68,5 @@ export const TY_CODE = { regular: 'r', adhoc: 'a', sample: 's', fredit: 'f', pre
 export const CODE_TY = { r: 'regular', a: 'adhoc', s: 'sample', f: 'fredit', p: 'prepaid', k: 'pickup' }
 export const DOC_NAME = { customers: '고객', orders: '주문', config: '설정·재고', days: '배달 체크·순서', log: '변경 기록', perf: '실적' }
 export const DOCS = ['customers', 'orders', 'config', 'days', 'log', 'perf']
+// AI level chosen in 설정 > AI (the server maps each level to a model; the app never names it)
+export const AI_TIERS = ['fast', 'balanced', 'best']
