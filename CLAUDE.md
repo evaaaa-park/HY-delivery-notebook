@@ -4,6 +4,10 @@ Route, ordering and customer notebook for one hy (Korea Yakult) delivery manager
 She uses it every working day as a home-screen app on iPad and iPhone, often without a connection.
 It is an offline-first PWA: Vite + React (JavaScript) + shadcn/ui + Firebase (Auth, Firestore, Functions, Hosting).
 
+She built version 1 (a single `index.html`) with Claude chat. This repo is version 2 and keeps all of its behaviour.
+She owns the app and the GitHub repo (`evaaaa-park/HY-delivery-notebook`) and now develops it herself with Claude Code while studying computer science; `goochoi913` also contributes.
+With her: say in plain words what you changed and why, and teach when she asks how something works. She knows the delivery work better than anyone, so ask her about real-world behaviour instead of guessing.
+
 ## Strict rules
 
 - **AI naming (permanent rule):** the app never names the AI model or provider in labels, settings, messages, or errors; it is always "AI."
@@ -12,8 +16,20 @@ It is an offline-first PWA: Vite + React (JavaScript) + shadcn/ui + Firebase (Au
 - **Commits carry no attribution trailers.** No co-authored-by line, no session line, and no "generated with" footer—in commit messages or pull request bodies. Every commit is authored solely as the git user is configured.
 - **Conventional Commits v1.0.0:** `<type>[(scope)][!]: <imperative description>`, blank line, body, blank line, footers. Types: feat, fix, docs, refactor, test, chore, perf, build, ci, style.
 - **Commit far less often:** one commit per meaningful, self-contained piece of work—a feature, a fix, a refactor, or a runbook. Small things join the commit they belong to. Never commit to one file, per review round, or per step of a session. A day's work is a handful of commits split by type and scope, not by when the edits were made.
-- **Git identity:** only the personal GitHub account `goochoi913` (never the work account `goo913`). The repo's own git config sets `user.name goochoi913`, `user.email goochoi913@gmail.com` and a credential helper that pushes with `gh auth token --user goochoi913`.
+- **Git identity:** each clone commits and pushes only as the personal GitHub account of the person who works in it, set in the repo's own (local) git config, never a global, work, or other person's account:
+  - her computer: `evaaaa-park` (repo owner), `user.email` = that account's GitHub noreply address (`<id>+evaaaa-park@users.noreply.github.com`, from `gh api user`);
+  - his computer: `goochoi913`, `goochoi913@gmail.com`, never the work account `goo913`.
+
+  Pushes go over HTTPS through a credential helper in the same local config that runs `gh auth token --user <account>`, so no other logged-in account can push here. When setting up a new clone, ask whose computer it is.
 - **Real customer data never goes into the repo** (the repo is public). `.gitignore` blocks data exports; demo data is generated in code and tagged `예시`.
+
+## Every session
+
+- **Start from the latest code.** Two computers push straight to `main` (no pull requests). Before changing anything, run `git status`; if it is clean, `git pull --rebase`. If there are uncommitted changes from an earlier session, say what they are and ask whether to commit them first.
+- **Check before calling it done** (see "Checking a change"). Show the result; a screenshot beats a description.
+- **Save:** when a piece of work is done and checked, offer to commit and push it (rules above). Never leave finished work only on one computer.
+- **Deploy only when asked.** The live app is her working tool and holds her real customers.
+- Keep "Current state" below and `docs/CHANGELOG.md` up to date when they change.
 
 ## Product rules that are easy to break
 
@@ -52,15 +68,42 @@ scripts/       build-images.mjs: product photos (public/products/*.webp) and ico
 
 ```bash
 npm install && (cd functions && npm install)
-cp .env.example .env.local     # Firebase web config (gitignored)
-npm run dev                    # against the real Firebase project
+cp .env.example .env.local     # Firebase web config (gitignored); values: firebase apps:sdkconfig web --project hy-delivery-notebook
+npm run dev                    # against the real Firebase project (her real data)
 npm run emulators              # Auth + Firestore + Functions emulators (needs Java 21+)
 npm run dev:emu                # app against the emulators; sign in from the console: __devSignIn('you@example.com')
 npm run lint
 npm run build
-npm run images                 # rebuild product photos/icons after adding source images
+npm run images                 # rebuild product photos/icons (see "Product photos")
 npm run deploy                 # hosting + Firestore rules
 npm run deploy:functions       # the AI function (needs the ANTHROPIC_API_KEY secret)
 ```
 
 Firebase project: `hy-delivery-notebook` (Firestore in `asia-northeast3`, daily backups kept 14 days). Hosting: https://hy-delivery-notebook.web.app
+
+## Setting up a new computer
+
+1. Tools: Git, Node.js 22+, GitHub CLI (`gh`), Firebase CLI (`npm install -g firebase-tools`), and Java 21+ for the emulators.
+2. Logins are interactive, so the person runs them: `gh auth login` (their own GitHub account) and `firebase login` (their Google account that is a member of the Firebase project). Tell them exactly what to type and wait.
+3. `npm install && (cd functions && npm install)`.
+4. `.env.local`: copy `.env.example` and fill in the values from `firebase apps:sdkconfig web --project hy-delivery-notebook`.
+5. Local git config: identity and credential helper as in "Git identity".
+6. Check: `npm run lint && npm run build`, then open the app against the emulators (below).
+
+## Checking a change
+
+- `npm run lint` and `npm run build` pass.
+- Look at UI changes against the emulators with demo data, never against her real data: `npm run emulators` + `npm run dev:emu`, sign in from the browser console with `__devSignIn('you@example.com')`, then 설정 > 데이터 > 예시 데이터 넣기.
+- Check phone width (about 390px) and iPad width (about 1024px), light and dark; when saving is involved, also offline and back online.
+- `npm run dev` uses the real project and her real customers: use it to look, not to try out changes that write data.
+- After `npm run deploy`, open devices show "새 버전이 있어요"; tapping 새로고침 loads the new version.
+
+## Product photos
+
+The app uses `public/products/<productId>.webp` (256px, in git) and the list in `src/generated/product-photos.js`. The source photos (`hyFredit_누끼_80개/`, `product-images-found/`) are gitignored and exist only on his computer; `npm run images` keeps every photo that is already built when its source is missing. To add or replace one photo on any computer: save a background-removed PNG as `product-images-found/cutout/<productId>.png`, then run `npm run images`.
+
+## Current state (keep this up to date)
+
+- Live at https://hy-delivery-notebook.web.app with the `ai` function deployed. The `ANTHROPIC_API_KEY` secret is goochoi913's key, so AI usage is billed to his account.
+- Her real data is not imported yet. She does it in the app: 설정 > 데이터 > 백업 불러오기 with the backup JSON from her old single-file app. It replaces everything on the server, demo data included. The per-building entrances (출입구 나누기) arrive with that backup.
+- Product photos to check against the real packages: 하루야채 라이트 (`haru_lt`), 이츠온 폴드포크 샐러드 (`eo_salad`, a food photo), 이츠온 하루연두부 (`eo_tofu`).
