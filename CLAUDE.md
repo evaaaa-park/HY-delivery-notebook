@@ -13,10 +13,9 @@ With her: say in plain words what you changed and why, and teach when she asks h
 If `.env.local` is missing, this computer is not set up yet; it is her Mac (his computer has one). Before anything else, without being asked:
 
 1. Do "Setting up a new computer" (below) with her accounts: GitHub `evaaaa-park`, and her Google account that was invited to the Firebase project. When she has to act herself (logins, her Mac password), tell her exactly what to type or click, then wait.
-2. Add a `helio` shortcut to `~/.zshrc` that opens this folder and starts Claude Code: `alias helio='cd "<this folder>" && claude'`.
-3. Check that it all works: `npm run lint && npm run build`, the app starts against the emulators, and `firebase projects:list` shows `hy-delivery-notebook`.
-4. Delete this section, then commit and push (that also proves pushing works).
-5. Tell her in a few sentences that setup is done, that from now on she opens Claude by typing `helio` in Terminal, and what is still open ("Current state"). Then do her request, if she made one.
+2. Check that it all works: `npm run lint && npm run build`, the app starts against the emulators, and `firebase projects:list` shows `hy-delivery-notebook`.
+3. Delete this section, then commit and push (that also proves pushing works).
+4. Tell her in a few sentences that setup is done and what is still open ("Current state"). Then do her request, if she made one.
 
 ## Strict rules
 
