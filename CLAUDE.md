@@ -8,6 +8,16 @@ She built version 1 (a single `index.html`) with Claude chat. This repo is versi
 She owns the app and the GitHub repo (`evaaaa-park/HY-delivery-notebook`) and now develops it herself with Claude Code while studying computer science; `goochoi913` also contributes.
 With her: say in plain words what you changed and why, and teach when she asks how something works. She knows the delivery work better than anyone, so ask her about real-world behaviour instead of guessing.
 
+## First run on her Mac (delete this section once it's done)
+
+If `.env.local` is missing, this computer is not set up yet; it is her Mac (his computer has one). Before anything else, without being asked:
+
+1. Do "Setting up a new computer" (below) with her accounts: GitHub `evaaaa-park`, and her Google account that was invited to the Firebase project. When she has to act herself (logins, her Mac password), tell her exactly what to type or click, then wait.
+2. Add a `helio` shortcut to `~/.zshrc` that opens this folder and starts Claude Code: `alias helio='cd "<this folder>" && claude'`.
+3. Check that it all works: `npm run lint && npm run build`, the app starts against the emulators, and `firebase projects:list` shows `hy-delivery-notebook`.
+4. Delete this section, then commit and push (that also proves pushing works).
+5. Tell her in a few sentences that setup is done, that from now on she opens Claude by typing `helio` in Terminal, and what is still open ("Current state"). Then do her request, if she made one.
+
 ## Strict rules
 
 - **AI naming (permanent rule):** the app never names the AI model or provider in labels, settings, messages, or errors; it is always "AI."
