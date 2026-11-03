@@ -23,13 +23,19 @@ With her: say in plain words what you changed and why, and teach when she asks h
   Pushes go over HTTPS through a credential helper in the same local config that runs `gh auth token --user <account>`, so no other logged-in account can push here. When setting up a new clone, ask whose computer it is.
 - **Real customer data never goes into the repo** (the repo is public). `.gitignore` blocks data exports; demo data is generated in code and tagged `예시`.
 
-## Every session
+## Every request: finish the whole job
 
-- **Start from the latest code.** Two computers push straight to `main` (no pull requests). Before changing anything, run `git status`; if it is clean, `git pull --rebase`. If there are uncommitted changes from an earlier session, say what they are and ask whether to commit them first.
-- **Check before calling it done** (see "Checking a change"). Show the result; a screenshot beats a description.
-- **Save:** when a piece of work is done and checked, offer to commit and push it (rules above). Never leave finished work only on one computer.
-- **Deploy only when asked.** The live app is her working tool and holds her real customers.
-- Keep "Current state" below and `docs/CHANGELOG.md` up to date when they change.
+She is on the $20 Pro plan, which has usage limits, so one request must finish everything without back-and-forth. She checks the result on her iPad or iPhone afterwards. When she asks for a change:
+
+1. **Latest code:** run `git status`; if it is clean, `git pull --rebase` (two computers push straight to `main`). If there are uncommitted changes from an earlier session, say what they are and ask before going on.
+2. **Change** what she asked for, following the rules in this file.
+3. **Check** it (see "Checking a change") and fix what you find, without asking.
+4. **Save:** commit and push to `main` (rules above).
+5. **Ship:** `npm run deploy` (also `npm run deploy:functions` when `functions/` changed). If the check still fails, don't ship; say what is wrong.
+6. **Report** in a few plain sentences: what changed, and what to look at on her iPad or iPhone after tapping 새로고침.
+
+Ask before starting only when the request is unclear, or when it would delete or rewrite real data, change sign-in or security rules, or cost money. Keep exploration and reports short: don't spend her usage on things she didn't ask for.
+Keep "Current state" below and `docs/CHANGELOG.md` up to date when they change.
 
 ## Product rules that are easy to break
 
